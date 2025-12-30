@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { 
   User as FirebaseUser, 
   GoogleAuthProvider, 
@@ -102,7 +102,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await syncUser(result.user, 'google');
   };
 
-  const setupRecaptcha = (elementId: string) => {
+  const setupRecaptcha = useCallback((elementId: string) => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
     // Always clear existing verifier to avoid stale DOM references
     if (window.recaptchaVerifier) {
       try {
@@ -116,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.recaptchaVerifier = new RecaptchaVerifier(auth, elementId, {
       'size': 'invisible',
     });
-  };
+  }, []);
 
   const sendOtp = async (phoneNumber: string) => {
     if (!window.recaptchaVerifier) throw new Error("Recaptcha not initialized");

@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Home, Trophy, Wallet, User, Bell, BarChart2, Menu } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { AIAssistant } from './AIAssistant';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { userProfile } = useAuth();
@@ -57,6 +58,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <main className="pt-20 px-4 relative z-10 animate-fade-in">
         {children}
       </main>
+
+      {/* AI Assistant */}
+      <AIAssistant />
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-4 left-4 right-4 h-16 glass-nav rounded-2xl z-50 shadow-2xl flex items-center justify-around px-2 border border-white/5">

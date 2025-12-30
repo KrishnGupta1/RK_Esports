@@ -1,19 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Card, Button } from '../components/UI';
 import { useAuth } from '../contexts/AuthContext';
 import { History, TrendingUp, TrendingDown, AlertCircle, Plus, ArrowDownLeft, X, Headset } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useAnimation } from 'framer-motion';
+import { Transaction } from '../types';
 
 const Wallet: React.FC = () => {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<'add' | 'withdraw' | null>(null);
+  
+  // Animation logic
+  const controls = useAnimation();
+  const [prevCoins, setPrevCoins] = useState<number | undefined>(undefined);
 
-  // Mock Transactions
-  const transactions = [
-    { id: '1', type: 'credit', amount: 100, desc: 'Welcome Bonus', date: '2023-10-25' },
-    // { id: '2', type: 'debit', amount: 50, desc: 'Joined Match #42', date: '2023-10-26' }
+  useEffect(() => {
+    if (userProfile?.coins !== undefined) {
+      if (prevCoins === undefined) {
+        setPrevCoins(userProfile.coins);
+      } else if (userProfile.coins !== prevCoins) {
+        controls.start({
+          scale: [1, 1.25, 1],
+          textShadow: [
+            "0px 0px 0px rgba(255,215,0,0)", 
+            "0px 0px 30px rgba(255,215,0,0.6)", 
+            "0px 0px 0px rgba(255,215,0,0)"
+          ],
+          color: ["#ffd700", "#ffffff", "#ffd700"],
+          transition: { duration: 0.5, ease: "backOut" }
+        });
+        setPrevCoins(userProfile.coins);
+      }
+    }
+  }, [userProfile?.coins, prevCoins, controls]);
+
+  // Mock Transactions Data
+  const transactions: Partial<Transaction>[] = [
+    { 
+      id: 'tx_1', 
+      type: 'credit', 
+      amount: 2000, 
+      description: 'Won: Grand Battle Royale #01', 
+      date: 'Today, 9:30 PM' 
+    },
+    { 
+      id: 'tx_2', 
+      type: 'debit', 
+      amount: 100, 
+      description: 'Entry: Grand Battle Royale #01', 
+      date: 'Today, 7:00 PM' 
+    },
+    { 
+      id: 'tx_3', 
+      type: 'credit', 
+      amount: 500, 
+      description: 'Deposit (UPI: 987***210)', 
+      date: 'Yesterday, 10:45 AM' 
+    },
+    { 
+      id: 'tx_4', 
+      type: 'debit', 
+      amount: 50, 
+      description: 'Entry: Duo Sniper Challenge', 
+      date: '28 Oct, 6:00 PM' 
+    },
+    { 
+      id: 'tx_5', 
+      type: 'credit', 
+      amount: 100, 
+      description: 'Referral Bonus: User_XYZ', 
+      date: '26 Oct, 2:15 PM' 
+    },
+    {
+      id: 'tx_6',
+      type: 'debit',
+      amount: 200,
+      description: 'Withdrawal Request #8821',
+      date: '25 Oct, 11:00 AM'
+    }
   ];
 
   const handleContactSupport = () => {
@@ -78,9 +144,12 @@ const Wallet: React.FC = () => {
 
           <div className="text-center py-6 relative z-10">
             <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Total Balance</p>
-            <h1 className="text-5xl font-black text-brand-gold tracking-tighter drop-shadow-sm flex items-center justify-center gap-1">
+            <motion.h1 
+              animate={controls}
+              className="text-5xl font-black text-brand-gold tracking-tighter drop-shadow-sm flex items-center justify-center gap-1"
+            >
               <span className="text-3xl opacity-50">₹</span>{userProfile?.coins || 0}
-            </h1>
+            </motion.h1>
             <p className="text-gray-500 text-xs mt-2 font-medium">Available to play</p>
           </div>
         </Card>
@@ -148,7 +217,7 @@ const Wallet: React.FC = () => {
                         {tx.type === 'credit' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white group-hover:text-brand-gold transition-colors">{tx.desc}</p>
+                        <p className="text-sm font-bold text-white group-hover:text-brand-gold transition-colors">{tx.description}</p>
                         <p className="text-xs text-gray-500 font-medium mt-0.5">{tx.date}</p>
                       </div>
                    </div>

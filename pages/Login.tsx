@@ -24,6 +24,21 @@ const Login: React.FC = () => {
     }
   }, [userProfile, navigate]);
 
+  // Initialize Recaptcha when switching to phone mode
+  useEffect(() => {
+    if (method === 'phone') {
+      // Small timeout to allow AnimatePresence to render the DOM element
+      const timer = setTimeout(() => {
+        try {
+          setupRecaptcha('recaptcha-container');
+        } catch (e) {
+          console.error("Failed to init recaptcha", e);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [method, setupRecaptcha]);
+
   const handleGoogleLogin = async () => {
     try {
       setError('');
@@ -49,13 +64,17 @@ const Login: React.FC = () => {
     }
 
     try {
-      setupRecaptcha('recaptcha-container');
+      // setupRecaptcha is handled in useEffect now to ensure DOM is ready
       const formattedPhone = `+91${phoneNumber}`; 
       await sendOtp(formattedPhone);
       setMethod('otp');
     } catch (err: any) {
       console.error(err);
-      setError("Failed to send OTP. Try again.");
+      if (err.code === 'auth/internal-error') {
+        setError("Configuration Error. Please refresh and try again.");
+      } else {
+        setError("Failed to send OTP. Try again.");
+      }
     } finally {
       setLoading(false);
     }
