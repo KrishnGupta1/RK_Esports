@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard';
 import Tournaments from './pages/Tournaments';
 import Wallet from './pages/Wallet';
 import Support from './pages/Support';
+import Notifications from './pages/Notifications';
+import Leaderboard from './pages/Leaderboard';
 
 // Protect routes that require login
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -66,6 +68,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Wallet />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/notifications" 
+        element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/leaderboard" 
+        element={
+          <ProtectedRoute>
+            <Leaderboard />
           </ProtectedRoute>
         } 
       />

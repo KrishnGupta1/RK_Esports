@@ -24,6 +24,13 @@ export interface Tournament {
   status: 'open' | 'ongoing' | 'completed';
   joined: number;
   slots: number;
+  // Advanced fields
+  perKill: number;
+  rules: string[];
+  prizeDistribution: { rank: number; amount: number }[];
+  roomId?: string;
+  roomPassword?: string;
+  isJoined?: boolean; // Virtual field for UI
 }
 
 export interface Transaction {
@@ -32,4 +39,22 @@ export interface Transaction {
   amount: number;
   description: string;
   date: any;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+  type: 'info' | 'success' | 'warning';
+}
+
+export interface LeaderboardEntry {
+  uid: string;
+  name: string;
+  photoURL?: string;
+  earnings: number;
+  matches: number;
+  wins: number;
 }
