@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SplashScreen } from './components/SplashScreen';
 import Login from './pages/Login';
 import ProfileSetup from './pages/ProfileSetup';
 import Dashboard from './pages/Dashboard';
@@ -100,11 +101,17 @@ const AppRoutes = () => {
 };
 
 const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <AuthProvider>
-      <HashRouter>
-        <AppRoutes />
-      </HashRouter>
+      {showSplash ? (
+        <SplashScreen onComplete={() => setShowSplash(false)} />
+      ) : (
+        <HashRouter>
+          <AppRoutes />
+        </HashRouter>
+      )}
     </AuthProvider>
   );
 };

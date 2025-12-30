@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>RK Esports</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -12,17 +13,26 @@
           extend: {
             colors: {
               brand: {
-                900: '#1a1a1a', // Dark Background
-                800: '#2d2d2d', // Card Background
-                500: '#ff4757', // Primary Red/Pink
-                400: '#ff6b81', // Secondary
-                accent: '#2ed573', // Success/Green
-                gold: '#ffa502'  // Coins
+                950: '#050505', // Void Black
+                900: '#0f0f11', // Deep Background
+                800: '#18181b', // Card Background
+                700: '#27272a', // Lighter Card
+                500: '#ff2e4d', // Cyber Red
+                400: '#ff4766', // Lighter Red
+                accent: '#00ffa3', // Cyber Green
+                gold: '#ffd700',  // Pure Gold
+                purple: '#8b5cf6' // Cyber Purple
               }
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
+              display: ['Rajdhani', 'sans-serif'],
               roboto: ['Roboto', 'sans-serif'],
+            },
+            backgroundImage: {
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+              'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #ff2e4d33 0deg, #00000000 360deg)',
+              'glass': 'linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.00) 100%)',
             }
           }
         }
@@ -30,26 +40,64 @@
     </script>
     <style>
       body {
-        background-color: #1a1a1a;
+        background-color: #050505;
         color: #ffffff;
         -webkit-tap-highlight-color: transparent;
+        font-family: 'Inter', sans-serif;
       }
-      /* Custom Scrollbar for desktop feeling on web */
+      
+      h1, h2, h3, h4, .font-display {
+        font-family: 'Rajdhani', sans-serif;
+      }
+
+      /* Premium Scrollbar */
       ::-webkit-scrollbar {
-        width: 6px;
+        width: 4px;
       }
       ::-webkit-scrollbar-track {
-        background: #1a1a1a;
+        background: #050505;
       }
       ::-webkit-scrollbar-thumb {
-        background: #ff4757;
-        border-radius: 3px;
+        background: #333;
+        border-radius: 10px;
       }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #ff2e4d;
+      }
+
+      /* Glassmorphism Utilities */
+      .glass-panel {
+        background: rgba(24, 24, 27, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      
+      .glass-nav {
+        background: rgba(5, 5, 5, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeInUp 0.4s ease-out forwards;
+      }
+
       .google-btn-shadow {
         box-shadow: 0 2px 4px 0 rgba(0,0,0,.25);
       }
       .google-btn-shadow:active {
         box-shadow: 0 1px 2px 0 rgba(0,0,0,.25);
+      }
+      
+      .neon-shadow {
+        box-shadow: 0 0 15px rgba(255, 46, 77, 0.4);
       }
     </style>
   <script type="importmap">
