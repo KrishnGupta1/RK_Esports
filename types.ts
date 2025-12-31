@@ -1,3 +1,4 @@
+
 export interface UserProfile {
   uid: string;
   name: string;
@@ -64,6 +65,13 @@ export interface LeaderboardEntry {
   earnings: number;
   matches: number;
   wins: number;
+  // New Features
+  clan?: string;
+  kdRatio: number;
+  headshotRate: number;
+  trend: 'up' | 'down' | 'same';
+  isVip?: boolean;
+  isAdmin?: boolean;
 }
 
 export interface AppSettings {
