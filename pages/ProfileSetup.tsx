@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button, Input, Card } from '../components/UI';
 import { useNavigate } from 'react-router-dom';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 import { ShieldAlert, Info } from 'lucide-react';
+import { AIAssistant } from '../components/AIAssistant';
 
 const ProfileSetup: React.FC = () => {
-  const { userProfile, currentUser, refreshProfile } = useAuth();
+  const { userProfile, currentUser, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const [ffUid, setFfUid] = useState('');
   const [ffName, setFfName] = useState('');
@@ -21,33 +20,34 @@ const ProfileSetup: React.FC = () => {
     e.preventDefault();
     if (!currentUser) return;
 
-    if (!ffUid.match(/^\d+$/)) {
+    // Sanitize inputs
+    const cleanUid = ffUid.replace(/\s/g, ''); // Remove spaces
+    const cleanName = ffName.trim();
+
+    if (!cleanUid.match(/^\d+$/)) {
       setError('Free Fire UID must contain numbers only.');
       return;
     }
     
-    if (ffName.length < 3) {
+    if (cleanName.length < 3) {
       setError('In-Game Name must be at least 3 characters.');
       return;
     }
 
-    if (confirm("WARNING: You cannot change these details later. Are you sure your FF UID and Name are correct?")) {
-      setLoading(true);
-      setError('');
-      try {
-        const userRef = doc(db, 'users', currentUser.uid);
-        await updateDoc(userRef, {
-          ffUid: ffUid,
-          ffName: ffName
-        });
-        await refreshProfile();
-        navigate('/dashboard');
-      } catch (err) {
-        console.error(err);
-        setError('Failed to update profile. Please try again.');
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    setError('');
+    
+    try {
+      await updateUserProfile({
+        ffUid: cleanUid,
+        ffName: cleanName
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to update profile. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,6 +85,7 @@ const ProfileSetup: React.FC = () => {
                 onChange={(e) => setFfUid(e.target.value)}
                 placeholder="e.g. 1234567890"
                 inputMode="numeric"
+                type="text" 
                 required
               />
             </div>
@@ -101,12 +102,15 @@ const ProfileSetup: React.FC = () => {
 
             <div className="pt-2">
               <Button type="submit" disabled={loading}>
-                {loading ? 'Locking Profile...' : 'Save & Lock Profile'}
+                {loading ? 'SAVING PROFILE...' : 'SAVE & LOCK PROFILE'}
               </Button>
             </div>
           </form>
         </Card>
       </div>
+      
+      {/* AI Assistant available on setup screen */}
+      <AIAssistant />
     </div>
   );
 };

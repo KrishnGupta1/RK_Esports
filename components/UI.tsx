@@ -35,7 +35,19 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ c
     <div className="relative group">
       <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-brand-purple opacity-0 group-focus-within:opacity-50 transition duration-500 blur rounded-xl"></div>
       <input 
-        className={`relative w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50 focus:text-white transition-all ${className}`}
+        className={`relative w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50 focus:text-white transition-all font-display tracking-wide ${className}`}
+        {...props} 
+      />
+    </div>
+  );
+};
+
+export const TextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({ className = '', ...props }) => {
+  return (
+    <div className="relative group">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-brand-purple opacity-0 group-focus-within:opacity-50 transition duration-500 blur rounded-xl"></div>
+      <textarea 
+        className={`relative w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50 focus:text-white transition-all font-display tracking-wide min-h-[120px] resize-none ${className}`}
         {...props} 
       />
     </div>

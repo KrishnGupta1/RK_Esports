@@ -1,87 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
-import { Card, Badge, Button, Input } from '../components/UI';
-import { Users, Clock, Trophy, Map, ChevronRight, X, Lock, Copy, Sword, Flame, Search, Filter, Crosshair } from 'lucide-react';
+import { Card, Badge, Button } from '../components/UI';
+import { Users, Clock, Trophy, Map, ChevronRight, X, Lock, Copy, Sword, Search, Crosshair, AlertTriangle, Eye, Filter, ShieldAlert } from 'lucide-react';
 import { Tournament } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Tournaments: React.FC = () => {
+  const { tournaments, joinTournament, userProfile } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'live' | 'completed'>('upcoming');
   const [selectedMatch, setSelectedMatch] = useState<Tournament | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterMode, setFilterMode] = useState<'All' | 'Solo' | 'Duo' | 'Squad'>('All');
+  const [filterType, setFilterType] = useState<string>('All');
+  const [joining, setJoining] = useState(false);
 
-  // Mock Data
-  const tournaments: Tournament[] = [
-    {
-      id: '1',
-      title: 'Grand Battle Royale #01',
-      map: 'Bermuda',
-      type: 'Squad',
-      entryFee: 100,
-      prizePool: 2000,
-      startTime: 'Today, 8:00 PM',
-      status: 'open',
-      joined: 8,
-      slots: 48,
-      perKill: 20,
-      rules: ['No Hacking/Scripting', 'Teaming not allowed', 'Emulator not allowed', 'Wait for Room ID'],
-      prizeDistribution: [{ rank: 1, amount: 1000 }, { rank: 2, amount: 600 }, { rank: 3, amount: 400 }],
-      isJoined: true
-    },
-    {
-      id: '2',
-      title: 'Solo Rush Hour',
-      map: 'Purgatory',
-      type: 'Solo',
-      entryFee: 20,
-      prizePool: 500,
-      startTime: 'Today, 10:00 PM',
-      status: 'ongoing',
-      joined: 48,
-      slots: 48,
-      perKill: 10,
-      rules: ['Standard BR Rules', 'Mobile Only'],
-      prizeDistribution: [{ rank: 1, amount: 300 }, { rank: 2, amount: 150 }, { rank: 3, amount: 50 }],
-      roomId: '12345678',
-      roomPassword: '123',
-      isJoined: true
-    },
-    {
-      id: '3',
-      title: 'Duo Sniper Challenge',
-      map: 'Kalahari',
-      type: 'Duo',
-      entryFee: 50,
-      prizePool: 800,
-      startTime: 'Tomorrow, 6:00 PM',
-      status: 'open',
-      joined: 5,
-      slots: 24,
-      perKill: 15,
-      rules: ['Snipers Only', 'No Grenades'],
-      prizeDistribution: [{ rank: 1, amount: 500 }, { rank: 2, amount: 300 }],
-      isJoined: false
-    },
-    {
-      id: '4',
-      title: 'Squad Scrims Night',
-      map: 'Alpine',
-      type: 'Squad',
-      entryFee: 150,
-      prizePool: 3000,
-      startTime: 'Tomorrow, 9:00 PM',
-      status: 'open',
-      joined: 45,
-      slots: 48,
-      perKill: 25,
-      rules: ['Full Map', 'No Revive'],
-      prizeDistribution: [{ rank: 1, amount: 1500 }, { rank: 2, amount: 1000 }],
-      isJoined: false
-    }
-  ];
+  // Filters
+  const filters = ['All', 'Solo', 'Duo', 'Squad', 'Solo vs Squad', 'Classic', 'CS-Ranked', 'Custom Lobby'];
 
-  // Advanced Filter Logic
+  // Filter Logic
   const filteredTournaments = tournaments.filter(t => {
     const matchesTab = 
       (activeTab === 'upcoming' && t.status === 'open') ||
@@ -89,10 +27,39 @@ const Tournaments: React.FC = () => {
       (activeTab === 'completed' && t.status === 'completed');
     
     const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || t.map.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesMode = filterMode === 'All' || t.type === filterMode;
+    
+    let matchesMode = true;
+    if (filterType !== 'All') {
+        // Check if filter matches 'type' OR 'gameMode'
+        matchesMode = t.type === filterType || t.gameMode === filterType;
+    }
 
     return matchesTab && matchesSearch && matchesMode;
   });
+
+  const handleJoin = async () => {
+    if (!selectedMatch) return;
+    
+    if (userProfile && userProfile.coins < selectedMatch.entryFee) {
+        if(confirm("Low Balance! Add money to wallet?")) {
+            navigate('/wallet');
+        }
+        return;
+    }
+
+    if (!confirm(`Join ${selectedMatch.title} for ₹${selectedMatch.entryFee}?`)) return;
+
+    setJoining(true);
+    const result = await joinTournament(selectedMatch.id);
+    setJoining(false);
+
+    if (result.success) {
+      alert("Success! You have joined the match.");
+      setSelectedMatch(null); // Close modal
+    } else {
+      alert(result.message);
+    }
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -128,7 +95,7 @@ const Tournaments: React.FC = () => {
              </div>
              <input 
                type="text" 
-               placeholder="Search map or match..." 
+               placeholder="Search map, mode or match..." 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
                className="w-full bg-brand-900/80 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50 transition-all backdrop-blur-md"
@@ -138,12 +105,12 @@ const Tournaments: React.FC = () => {
 
         {/* Filter Chips */}
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {['All', 'Solo', 'Duo', 'Squad'].map(mode => (
+          {filters.map(mode => (
             <button
               key={mode}
-              onClick={() => setFilterMode(mode as any)}
+              onClick={() => setFilterType(mode)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap border transition-all ${
-                filterMode === mode 
+                filterType === mode 
                   ? 'bg-white text-black border-white' 
                   : 'bg-transparent text-gray-500 border-gray-700 hover:border-gray-500'
               }`}
@@ -177,32 +144,14 @@ const Tournaments: React.FC = () => {
           ))}
         </div>
 
-        {/* Kill Feed (Visible only on Live Tab) */}
-        {activeTab === 'live' && (
-          <div className="w-full bg-brand-950/50 border border-white/5 rounded-lg p-2 overflow-hidden flex items-center gap-2">
-            <span className="text-[10px] font-bold text-red-500 whitespace-nowrap px-2 border-r border-white/10">KILL FEED</span>
-            <div className="whitespace-nowrap overflow-hidden w-full relative">
-              <motion.div 
-                animate={{ x: ["100%", "-100%"] }}
-                transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                className="text-xs text-gray-400 font-mono flex gap-8"
-              >
-                <span>RK_KILLER ︻デ═一 Hydra_X</span>
-                <span>Ninja_007 💣 Slayer_OP</span>
-                <span>Venom 🚗💨 Player99</span>
-              </motion.div>
-            </div>
-          </div>
-        )}
-
         {/* List */}
         <div className="space-y-4 min-h-[50vh]">
           {filteredTournaments.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-gray-500 space-y-4">
               <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center">
-                 <Sword size={24} className="opacity-20" />
+                 <Filter size={24} className="opacity-20" />
               </div>
-              <p>No matches found.</p>
+              <p>No matches found matching your filters.</p>
             </div>
           )}
 
@@ -221,8 +170,8 @@ const Tournaments: React.FC = () => {
 
                   <div className="flex gap-4 relative z-10">
                     {/* Image Thumbnail */}
-                    <div className="w-24 h-24 bg-gray-900 rounded-xl flex-shrink-0 overflow-hidden relative shadow-inner">
-                      <img src={`https://picsum.photos/seed/${t.id}/200`} alt="Map" className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-500" />
+                    <div className="w-24 h-24 bg-gray-900 rounded-xl flex-shrink-0 overflow-hidden relative shadow-lg border border-white/10">
+                      <img src={t.image} alt="Map" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       
                       {/* Live Badge Overlay */}
                       {t.status === 'ongoing' && (
@@ -231,9 +180,9 @@ const Tournaments: React.FC = () => {
                         </div>
                       )}
 
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                          <div className="bg-black/60 p-1.5 rounded-lg backdrop-blur-sm border border-white/10">
-                           <Map size={16} className="text-white" />
+                           <Eye size={16} className="text-white" />
                          </div>
                       </div>
                     </div>
@@ -241,22 +190,24 @@ const Tournaments: React.FC = () => {
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                       <div>
                         <div className="flex justify-between items-start">
-                          <h3 className="font-display font-bold text-lg text-white truncate pr-2">{t.title}</h3>
+                          <h3 className="font-display font-bold text-lg text-white truncate pr-2 leading-tight">{t.title}</h3>
                           {t.status === 'ongoing' ? (
                              <span className="text-[10px] font-bold text-red-400 flex items-center gap-1"><Crosshair size={10}/> SPECTATING</span>
                           ) : (
                             t.isJoined && <Badge color="green">JOINED</Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-400 mt-1.5">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400 mt-2">
                           <span className="flex items-center gap-1"><Clock size={12} className="text-brand-500"/> {t.startTime}</span>
                           <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
-                          <span className="flex items-center gap-1 uppercase text-gray-300"><Users size={12}/> {t.type}</span>
+                          <span className="flex items-center gap-1 uppercase text-gray-300"><Map size={12}/> {t.map}</span>
+                          <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                          <Badge color="blue">{t.type}</Badge>
                         </div>
                       </div>
                       
                       {/* Stats Row */}
-                      <div className="flex items-end justify-between mt-2">
+                      <div className="flex items-end justify-between mt-3">
                          <div className="flex items-center gap-3">
                            <div>
                              <p className="text-[10px] text-gray-500 uppercase font-bold">Prize</p>
@@ -286,7 +237,6 @@ const Tournaments: React.FC = () => {
                          className={`absolute top-0 left-0 h-full transition-all duration-500 ${getSlotColor(t.joined, t.slots)}`} 
                          style={{ width: `${(t.joined / t.slots) * 100}%` }}
                        ></div>
-                       {/* Striped overlay for effect */}
                        <div className="absolute inset-0 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==')] opacity-20"></div>
                      </div>
                      <span className="text-[10px] font-bold text-gray-400 font-mono whitespace-nowrap">{t.joined}/{t.slots}</span>
@@ -326,6 +276,17 @@ const Tournaments: React.FC = () => {
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
                 
+                {/* Hero Image */}
+                <div className="w-full h-40 rounded-2xl overflow-hidden relative border border-white/10 shadow-2xl">
+                    <img src={selectedMatch.image} alt="Banner" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/20 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 flex gap-2">
+                        <Badge color="yellow">{selectedMatch.map}</Badge>
+                        <Badge color="purple">{selectedMatch.type}</Badge>
+                        <Badge color="blue">{selectedMatch.gameMode}</Badge>
+                    </div>
+                </div>
+
                 {/* Room ID Section */}
                 {selectedMatch.isJoined && (
                   <div className="bg-gradient-to-r from-blue-900/20 to-blue-800/20 border border-blue-500/30 rounded-2xl p-5 relative overflow-hidden group">
@@ -373,14 +334,14 @@ const Tournaments: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center gap-2">
                     <Trophy size={24} className="text-brand-gold drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" />
                     <div>
-                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Prize Pool</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">PRIZE POOL</p>
                       <p className="text-xl font-display font-bold text-white">₹{selectedMatch.prizePool}</p>
                     </div>
                   </div>
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center gap-2">
                     <Sword size={24} className="text-brand-500 drop-shadow-[0_0_10px_rgba(255,46,77,0.5)]" />
                     <div>
-                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Per Kill</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">PER KILL</p>
                       <p className="text-xl font-display font-bold text-white">₹{selectedMatch.perKill}</p>
                     </div>
                   </div>
@@ -388,7 +349,12 @@ const Tournaments: React.FC = () => {
 
                 {/* Prize Breakdown */}
                 <div>
-                   <h3 className="font-display font-bold text-white mb-3 text-sm tracking-widest uppercase text-gray-400">Prize Distribution</h3>
+                   <div className="flex items-center gap-2 mb-4">
+                      <div className="p-1.5 bg-brand-gold/10 rounded-lg text-brand-gold">
+                         <Trophy size={18} />
+                      </div>
+                      <h3 className="font-display font-bold text-white text-md tracking-widest uppercase">Prize Distribution</h3>
+                   </div>
                    <div className="bg-brand-900/50 rounded-2xl border border-white/5 overflow-hidden">
                       {selectedMatch.prizeDistribution.map((prize, idx) => (
                         <div key={idx} className="flex justify-between items-center px-5 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
@@ -407,8 +373,13 @@ const Tournaments: React.FC = () => {
                 </div>
 
                 {/* Rules */}
-                <div>
-                   <h3 className="font-display font-bold text-white mb-3 text-sm tracking-widest uppercase text-gray-400">Match Rules</h3>
+                <div className="mt-6">
+                   <div className="flex items-center gap-2 mb-4">
+                      <div className="p-1.5 bg-brand-500/10 rounded-lg text-brand-500">
+                         <ShieldAlert size={18} />
+                      </div>
+                      <h3 className="font-display font-bold text-white text-md tracking-widest uppercase">Match Rules</h3>
+                   </div>
                    <div className="bg-brand-900/50 rounded-2xl border border-white/5 p-5">
                       <ul className="space-y-3">
                         {selectedMatch.rules.map((rule, idx) => (
@@ -431,9 +402,20 @@ const Tournaments: React.FC = () => {
                        JOINED SUCCESSFULLY
                     </Button>
                  ) : (
-                    <Button className="neon-shadow">
-                       JOIN MATCH • ₹{selectedMatch.entryFee}
-                    </Button>
+                    <div className="space-y-2">
+                       {userProfile && userProfile.coins < selectedMatch.entryFee && (
+                          <div className="flex items-center justify-center gap-2 text-xs text-red-400 font-bold animate-pulse">
+                             <AlertTriangle size={12}/> Low Balance: ₹{userProfile.coins}
+                          </div>
+                       )}
+                       <Button 
+                          onClick={handleJoin}
+                          disabled={joining || (userProfile ? userProfile.coins < selectedMatch.entryFee : true)}
+                          className={userProfile && userProfile.coins >= selectedMatch.entryFee ? "neon-shadow" : "opacity-50"}
+                       >
+                          {joining ? 'JOINING...' : `JOIN MATCH - ₹${selectedMatch.entryFee}`}
+                       </Button>
+                    </div>
                  )}
               </div>
             </motion.div>

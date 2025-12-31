@@ -10,6 +10,7 @@ import Wallet from './pages/Wallet';
 import Support from './pages/Support';
 import Notifications from './pages/Notifications';
 import Leaderboard from './pages/Leaderboard';
+import Settings from './pages/Settings';
 
 // Protect routes that require login
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -93,6 +94,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Support />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute>
+            <Settings />
           </ProtectedRoute>
         } 
       />

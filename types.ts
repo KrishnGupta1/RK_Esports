@@ -2,6 +2,7 @@ export interface UserProfile {
   uid: string;
   name: string;
   phone?: string | null;
+  email?: string;
   provider: 'google' | 'phone';
   ffUid?: string;
   ffName?: string;
@@ -11,16 +12,19 @@ export interface UserProfile {
   createdAt: any; // Firestore Timestamp
   lastLogin: any; // Firestore Timestamp
   photoURL?: string | null;
+  referralCode?: string;
 }
 
 export interface Tournament {
   id: string;
   title: string;
+  image: string; // New field for custom images
   map: string;
-  type: 'Solo' | 'Duo' | 'Squad';
+  type: string; // e.g., 'Solo', 'Duo', 'Squad', 'Solo vs Squad'
+  gameMode: 'Classic' | 'CS-Ranked' | 'Custom Lobby' | 'Lone Wolf'; // New field for game modes
   entryFee: number;
   prizePool: number;
-  startTime: any;
+  startTime: string;
   status: 'open' | 'ongoing' | 'completed';
   joined: number;
   slots: number;
@@ -36,9 +40,12 @@ export interface Tournament {
 export interface Transaction {
   id: string;
   type: 'credit' | 'debit';
+  status: 'success' | 'pending' | 'failed';
   amount: number;
   description: string;
-  date: any;
+  date: string;
+  method?: string; // e.g., 'UPI', 'Bonus'
+  utr?: string; // For manual UPI verification
 }
 
 export interface Notification {
@@ -57,4 +64,14 @@ export interface LeaderboardEntry {
   earnings: number;
   matches: number;
   wins: number;
+}
+
+export interface AppSettings {
+  pushNotifs: boolean;
+  emailNotifs: boolean;
+  soundEffects: boolean;
+  haptic: boolean;
+  darkMode: boolean;
+  showStats: boolean;
+  twoFactor: boolean;
 }

@@ -116,21 +116,21 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Featured Tournament Banner */}
-        <div className="relative rounded-2xl overflow-hidden h-44 group cursor-pointer border border-white/5" onClick={() => navigate('/tournaments')}>
+        <div className="relative rounded-2xl overflow-hidden h-44 group cursor-pointer border border-white/5 shadow-2xl" onClick={() => navigate('/tournaments')}>
           <div className="absolute inset-0 bg-brand-900">
              <img 
-               src="https://picsum.photos/800/400" 
+               src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80" 
                alt="Tournament" 
-               className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700 ease-out" 
+               className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700 ease-out" 
              />
-             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
           </div>
           <div className="absolute bottom-5 left-5 right-5 z-20">
             <div className="flex items-center gap-2 mb-2">
               <Badge color="red">LIVE NOW</Badge>
               <span className="text-[10px] bg-black/50 backdrop-blur px-2 py-0.5 rounded text-gray-300 border border-white/10">SQUAD</span>
             </div>
-            <h3 className="text-2xl font-display font-bold text-white mb-1">Daily Scrims #42</h3>
+            <h3 className="text-2xl font-display font-bold text-white mb-1">Grand Battle Royale #01</h3>
             <div className="flex items-center justify-between">
               <p className="text-gray-300 text-xs flex items-center gap-1"><Target size={12}/> Bermuda</p>
               <span className="text-brand-gold font-bold text-sm">Prize: ₹2000</span>

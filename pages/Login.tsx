@@ -4,30 +4,31 @@ import { Button, Input, Card } from '../components/UI';
 import { useNavigate } from 'react-router-dom';
 import { Smartphone, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AIAssistant } from '../components/AIAssistant';
 
 const Login: React.FC = () => {
-  const { loginWithGoogle, userProfile, setupRecaptcha, sendOtp, verifyOtp } = useAuth();
+  const { loginWithGoogle, userProfile, setupRecaptcha, sendOtp, verifyOtp, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [method, setMethod] = useState<'selection' | 'phone' | 'otp'>('selection');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
+  // Redirect if already logged in
   useEffect(() => {
-    if (userProfile) {
+    if (!localLoading && userProfile) {
       if (userProfile.ffUid) {
         navigate('/dashboard');
       } else {
         navigate('/setup');
       }
     }
-  }, [userProfile, navigate]);
+  }, [userProfile, navigate, localLoading]);
 
   // Initialize Recaptcha when switching to phone mode
   useEffect(() => {
     if (method === 'phone') {
-      // Small timeout to allow AnimatePresence to render the DOM element
       const timer = setTimeout(() => {
         try {
           setupRecaptcha('recaptcha-container');
@@ -42,54 +43,51 @@ const Login: React.FC = () => {
   const handleGoogleLogin = async () => {
     try {
       setError('');
-      setLoading(true);
+      setLocalLoading(true);
       await loginWithGoogle();
-      // Navigation handled by useEffect
+      // Navigation handled by useEffect, but we also explicitly check here
+      // to make it feel snappier if the effect is slow
+      setLocalLoading(false);
     } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
+      setError(err.message || "Failed to login");
+      setLocalLoading(false);
     }
   };
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setLocalLoading(true);
     
-    // Basic validation
     if (phoneNumber.length < 10) {
       setError("Please enter a valid 10-digit phone number");
-      setLoading(false);
+      setLocalLoading(false);
       return;
     }
 
     try {
-      // setupRecaptcha is handled in useEffect now to ensure DOM is ready
       const formattedPhone = `+91${phoneNumber}`; 
       await sendOtp(formattedPhone);
       setMethod('otp');
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/internal-error') {
-        setError("Configuration Error. Please refresh and try again.");
-      } else {
-        setError("Failed to send OTP. Try again.");
-      }
+      setError("Failed to send OTP. Try again.");
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
   const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setLocalLoading(true);
     try {
       await verifyOtp(otp);
-      // Navigation handled by useEffect
+      setLocalLoading(false);
+      // Navigation happens via useEffect
     } catch (err: any) {
       setError("Invalid OTP. Please check and try again.");
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -102,6 +100,8 @@ const Login: React.FC = () => {
       <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
     </svg>
   );
+
+  const isLoading = localLoading || authLoading;
 
   return (
     <div className="min-h-screen bg-brand-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -159,10 +159,10 @@ const Login: React.FC = () => {
                 {/* Real Google Button */}
                 <button 
                   onClick={handleGoogleLogin} 
-                  disabled={loading}
-                  className="w-full bg-white hover:bg-gray-50 text-gray-700 font-roboto font-medium h-12 px-4 rounded-lg transition-all duration-200 flex items-center justify-center google-btn-shadow active:scale-[0.98]"
+                  disabled={isLoading}
+                  className="w-full bg-white hover:bg-gray-50 text-gray-700 font-roboto font-medium h-12 px-4 rounded-lg transition-all duration-200 flex items-center justify-center google-btn-shadow active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? (
+                  {isLoading ? (
                     <Loader2 className="animate-spin text-gray-600" />
                   ) : (
                     <>
@@ -184,6 +184,7 @@ const Login: React.FC = () => {
                 <Button 
                   onClick={() => setMethod('phone')} 
                   variant="secondary" 
+                  disabled={isLoading}
                   className="flex items-center justify-center gap-3 h-12 font-medium bg-gray-700 hover:bg-gray-600 border-0"
                 >
                   <Smartphone size={20} />
@@ -238,8 +239,8 @@ const Login: React.FC = () => {
                   
                   <div id="recaptcha-container" className="flex justify-center"></div>
                   
-                  <Button type="submit" disabled={loading || phoneNumber.length < 10} className="h-12 text-lg">
-                    {loading ? <Loader2 className="animate-spin mx-auto" /> : 'Get OTP'}
+                  <Button type="submit" disabled={isLoading || phoneNumber.length < 10} className="h-12 text-lg">
+                    {isLoading ? <Loader2 className="animate-spin mx-auto" /> : 'Get OTP'}
                   </Button>
                 </form>
               </motion.div>
@@ -290,8 +291,8 @@ const Login: React.FC = () => {
                       autoFocus
                     />
                   </div>
-                  <Button type="submit" disabled={loading || otp.length < 6} className="h-12 text-lg">
-                    {loading ? <Loader2 className="animate-spin mx-auto" /> : 'Verify & Login'}
+                  <Button type="submit" disabled={isLoading || otp.length < 6} className="h-12 text-lg">
+                    {isLoading ? <Loader2 className="animate-spin mx-auto" /> : 'Verify & Login'}
                   </Button>
                   
                   <div className="text-center">
@@ -306,6 +307,9 @@ const Login: React.FC = () => {
           </AnimatePresence>
         </Card>
       </div>
+      
+      {/* AI Assistant available on login screen */}
+      <AIAssistant />
     </div>
   );
 };
