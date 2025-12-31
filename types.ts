@@ -10,32 +10,79 @@ export interface UserProfile {
   coins: number;
   role: 'user' | 'admin';
   status: 'active' | 'banned' | 'suspended';
-  createdAt: any; // Firestore Timestamp
-  lastLogin: any; // Firestore Timestamp
+  createdAt: any; 
+  lastLogin: any; 
   photoURL?: string | null;
   referralCode?: string;
+  
+  // New Progression Features
+  level?: number;
+  xp?: number;
+  maxXp?: number;
+  achievements?: string[];
+  
+  // Clan & Daily Features
+  clanTag?: string;
+  dailyLoginStreak?: number;
+  lastDailyClaim?: string; // ISO Date
+}
+
+export interface Advertisement {
+  id: string;
+  imageUrl: string;
+  link?: string; // Where to redirect on click
+  title?: string;
+  active: boolean;
 }
 
 export interface Tournament {
   id: string;
   title: string;
-  image: string; // New field for custom images
+  image: string; 
   map: string;
-  type: string; // e.g., 'Solo', 'Duo', 'Squad', 'Solo vs Squad'
-  gameMode: 'Classic' | 'CS-Ranked' | 'Custom Lobby' | 'Lone Wolf'; // New field for game modes
+  mapType?: 'Day' | 'Night' | 'Sunset';
+  serverRegion?: 'IN' | 'SG' | 'BD' | 'NA'; 
+  gameVersion?: 'OB43' | 'OB44'; 
+  
+  // Game Format
+  type: 'Solo' | 'Duo' | 'Squad' | 'Solo vs Squad'; 
+  gameMode: 'BR-Ranked' | 'CS-Ranked' | 'Lone Wolf' | 'Classic'; 
+  difficulty: 'Rookie' | 'Elite' | 'Legendary' | 'Hardcore';
+
   entryFee: number;
   prizePool: number;
-  startTime: string;
+  startTime: string; 
   status: 'open' | 'ongoing' | 'completed';
-  joined: number;
-  slots: number;
-  // Advanced fields
+  
+  // Slot Logic
+  joined: number; 
+  slots: number; 
+  
   perKill: number;
   rules: string[];
   prizeDistribution: { rank: number; amount: number }[];
+  
+  // Admin Controlled Fields
   roomId?: string;
   roomPassword?: string;
-  isJoined?: boolean; // Virtual field for UI
+  adminMessage?: string; 
+  lastUpdated?: number; 
+  organizerVerified?: boolean; 
+
+  isJoined?: boolean;
+  
+  // Advanced Features
+  youtubeLink?: string; 
+  topFragger?: string; 
+  topFraggerKills?: number;
+  tags?: string[]; 
+  deviceRestriction?: 'Mobile Only' | 'PC Allowed' | 'iPad Allowed'; 
+  spectateLink?: string;
+  
+  // User specific data
+  myTeam?: string[]; 
+  mySlot?: number;
+  joinedAs?: 'Solo' | 'Team'; 
 }
 
 export interface Transaction {
@@ -45,8 +92,8 @@ export interface Transaction {
   amount: number;
   description: string;
   date: string;
-  method?: string; // e.g., 'UPI', 'Bonus'
-  utr?: string; // For manual UPI verification
+  method?: string; 
+  utr?: string; 
 }
 
 export interface Notification {
@@ -65,13 +112,13 @@ export interface LeaderboardEntry {
   earnings: number;
   matches: number;
   wins: number;
-  // New Features
   clan?: string;
   kdRatio: number;
   headshotRate: number;
   trend: 'up' | 'down' | 'same';
   isVip?: boolean;
   isAdmin?: boolean;
+  achievements?: string[];
 }
 
 export interface AppSettings {

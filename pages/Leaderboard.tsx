@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { LeaderboardEntry } from '../types';
-import { Crown, Trophy, User, ArrowUp, ArrowDown, Minus, ShieldCheck, Crosshair, Skull, Swords, X, Flame } from 'lucide-react';
+import { Crown, Trophy, User, ArrowUp, ArrowDown, Minus, ShieldCheck, Crosshair, Skull, Swords, X, Flame, Medal, Star, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Badge, Card } from '../components/UI';
+import { Badge, Card, Button, Modal, ModalHeader, ModalBody, ModalFooter } from '../components/UI';
 
 const Leaderboard: React.FC = () => {
   const [timeFilter, setTimeFilter] = useState<'weekly' | 'all_time'>('weekly');
@@ -15,7 +15,7 @@ const Leaderboard: React.FC = () => {
     { 
       uid: '1', 
       name: 'RK_KILLER', 
-      photoURL: 'https://i.pinimg.com/736x/2e/0f/50/2e0f50b4313d3d63c224c6e9196b6307.jpg', // Cool Gaming Avatar
+      photoURL: 'https://i.pinimg.com/736x/2e/0f/50/2e0f50b4313d3d63c224c6e9196b6307.jpg', 
       earnings: 15000, 
       matches: 45, 
       wins: 18,
@@ -24,7 +24,8 @@ const Leaderboard: React.FC = () => {
       headshotRate: 65,
       trend: 'same',
       isVip: true,
-      isAdmin: true
+      isAdmin: true,
+      achievements: ['Sharpshooter', 'Berserker', 'Richie Rich']
     },
     { 
       uid: '2', 
@@ -37,7 +38,8 @@ const Leaderboard: React.FC = () => {
       kdRatio: 3.8,
       headshotRate: 45,
       trend: 'up',
-      isVip: true
+      isVip: true,
+      achievements: ['Rising Star']
     },
     { 
       uid: '3', 
@@ -49,7 +51,8 @@ const Leaderboard: React.FC = () => {
       clan: 'Team Elite',
       kdRatio: 2.9,
       headshotRate: 32,
-      trend: 'down'
+      trend: 'down',
+      achievements: ['Grinder']
     },
     { 
       uid: '4', 
@@ -87,13 +90,6 @@ const Leaderboard: React.FC = () => {
     },
   ];
 
-  const getRankStyle = (rank: number) => {
-    if (rank === 0) return "bg-gradient-to-t from-yellow-600 to-brand-gold border-yellow-400 shadow-[0_0_20px_rgba(255,215,0,0.4)] scale-110 z-20"; // 1st
-    if (rank === 1) return "bg-gradient-to-t from-gray-700 to-gray-400 border-gray-400 mt-8 z-10"; // 2nd
-    if (rank === 2) return "bg-gradient-to-t from-orange-800 to-orange-600 border-orange-500 mt-10 z-10"; // 3rd
-    return "";
-  };
-
   const getTrendIcon = (trend: string) => {
     if (trend === 'up') return <ArrowUp size={12} className="text-green-500" />;
     if (trend === 'down') return <ArrowDown size={12} className="text-red-500" />;
@@ -102,7 +98,7 @@ const Leaderboard: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-8 pb-10">
+      <div className="space-y-8">
         
         {/* Header Section */}
         <div className="flex items-center justify-between">
@@ -111,7 +107,6 @@ const Leaderboard: React.FC = () => {
                 <p className="text-gray-400 text-xs">Compete with the best to earn respect.</p>
             </div>
             
-            {/* Feature 5: Toggle Weekly/AllTime */}
             <div className="flex bg-brand-800 rounded-lg p-1 border border-white/5">
                 <button 
                     onClick={() => setTimeFilter('weekly')}
@@ -128,62 +123,61 @@ const Leaderboard: React.FC = () => {
             </div>
         </div>
 
-        {/* Top 3 Podium - Enhanced Visuals */}
-        <div className="flex items-end justify-center gap-2 sm:gap-6 px-2 mb-12 relative">
+        {/* Top 3 Podium - Responsive Scale */}
+        <div className="flex items-end justify-center gap-1 sm:gap-6 px-0 mb-12 relative overflow-visible">
            {/* Background Glow */}
            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full h-40 bg-brand-500/10 blur-[60px] rounded-full pointer-events-none"></div>
 
            {/* 2nd Place */}
            <motion.div 
              initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-             className="flex flex-col items-center cursor-pointer"
+             className="flex flex-col items-center cursor-pointer relative z-10 w-1/3 sm:w-auto"
              onClick={() => setSelectedPlayer(topPlayers[1])}
            >
               <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-gray-400 p-1 bg-gray-900 relative z-10">
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-gray-400 p-1 bg-gray-900 relative z-10">
                     <img src={topPlayers[1].photoURL || ''} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 border border-white/20">#2</div>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 border border-white/20">#2</div>
               </div>
               
-              <div className="mt-4 text-center">
-                  <p className="text-xs font-bold text-white truncate max-w-[80px]">{topPlayers[1].name}</p>
-                  <p className="text-[10px] text-gray-400">{topPlayers[1].clan}</p>
-                  <p className="text-sm font-black text-brand-gold mt-1">₹{topPlayers[1].earnings}</p>
+              <div className="mt-4 text-center w-full">
+                  <p className="text-xs font-bold text-white truncate px-1">{topPlayers[1].name}</p>
+                  <p className="text-[9px] text-gray-400 truncate">{topPlayers[1].clan}</p>
+                  <p className="text-xs font-black text-brand-gold mt-0.5">₹{topPlayers[1].earnings}</p>
               </div>
-              <div className="w-16 sm:w-24 h-24 bg-gradient-to-t from-gray-900/80 to-gray-800/20 mt-2 rounded-t-2xl border-x border-t border-white/5 backdrop-blur-sm"></div>
+              <div className="w-full sm:w-24 h-24 bg-gradient-to-t from-gray-900/80 to-gray-800/20 mt-2 rounded-t-2xl border-x border-t border-white/5 backdrop-blur-sm"></div>
            </motion.div>
 
            {/* 1st Place - The Champion */}
            <motion.div 
              initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, type: "spring" }}
-             className="flex flex-col items-center z-10 -mb-6 cursor-pointer"
+             className="flex flex-col items-center z-20 -mb-6 cursor-pointer w-1/3 sm:w-auto"
              onClick={() => setSelectedPlayer(topPlayers[0])}
            >
               <div className="relative group">
-                  <Crown size={32} className="text-brand-gold absolute -top-8 left-1/2 -translate-x-1/2 animate-bounce drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]" />
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-brand-gold p-1 bg-black relative z-10 shadow-[0_0_30px_rgba(255,215,0,0.3)]">
+                  <Crown size={24} className="sm:w-8 sm:h-8 text-brand-gold absolute -top-6 sm:-top-8 left-1/2 -translate-x-1/2 animate-bounce drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]" />
+                  <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-brand-gold p-1 bg-black relative z-10 shadow-[0_0_30px_rgba(255,215,0,0.3)]">
                     <img src={topPlayers[0].photoURL || ''} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-600 to-brand-gold text-black text-xs font-black px-3 py-1 rounded shadow-lg z-20 border border-white/20">#1</div>
+                  <div className="absolute -bottom-2 sm:-bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-600 to-brand-gold text-black text-[10px] sm:text-xs font-black px-3 py-1 rounded shadow-lg z-20 border border-white/20">#1</div>
                   
-                  {/* Admin/Verified Badge */}
                   {topPlayers[0].isAdmin && (
                       <div className="absolute top-0 right-0 bg-brand-500 text-white p-1 rounded-full border border-black shadow-lg" title="Admin / Owner">
-                          <ShieldCheck size={12} />
+                          <ShieldCheck size={10} />
                       </div>
                   )}
               </div>
               
-              <div className="mt-5 text-center">
-                  <div className="flex items-center gap-1 justify-center">
-                     <p className="text-sm font-black text-white truncate max-w-[100px]">{topPlayers[0].name}</p>
+              <div className="mt-4 sm:mt-5 text-center w-full">
+                  <div className="flex items-center gap-1 justify-center flex-wrap">
+                     <p className="text-xs sm:text-sm font-black text-white truncate px-1">{topPlayers[0].name}</p>
                      {topPlayers[0].isVip && <Badge color="purple">VIP</Badge>}
                   </div>
-                  <p className="text-[10px] text-brand-gold font-bold">{topPlayers[0].clan}</p>
-                  <p className="text-xl font-black text-brand-gold mt-1 drop-shadow-md">₹{topPlayers[0].earnings}</p>
+                  <p className="text-[9px] sm:text-[10px] text-brand-gold font-bold truncate">{topPlayers[0].clan}</p>
+                  <p className="text-base sm:text-xl font-black text-brand-gold mt-0.5 drop-shadow-md">₹{topPlayers[0].earnings}</p>
               </div>
-              <div className="w-20 sm:w-32 h-36 bg-gradient-to-t from-brand-gold/10 to-brand-gold/5 mt-2 rounded-t-2xl border-x border-t border-brand-gold/20 backdrop-blur-sm relative overflow-hidden">
+              <div className="w-full sm:w-32 h-36 bg-gradient-to-t from-brand-gold/10 to-brand-gold/5 mt-2 rounded-t-2xl border-x border-t border-brand-gold/20 backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
               </div>
            </motion.div>
@@ -191,22 +185,22 @@ const Leaderboard: React.FC = () => {
            {/* 3rd Place */}
            <motion.div 
              initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-             className="flex flex-col items-center cursor-pointer"
+             className="flex flex-col items-center cursor-pointer relative z-10 w-1/3 sm:w-auto"
              onClick={() => setSelectedPlayer(topPlayers[2])}
            >
               <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-orange-600 p-1 bg-gray-900 relative z-10">
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-orange-600 p-1 bg-gray-900 relative z-10">
                     <img src={topPlayers[2].photoURL || ''} alt="" className="w-full h-full rounded-full object-cover" />
                   </div>
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-orange-700 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 border border-white/20">#3</div>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-orange-700 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 border border-white/20">#3</div>
               </div>
               
-              <div className="mt-4 text-center">
-                  <p className="text-xs font-bold text-white truncate max-w-[80px]">{topPlayers[2].name}</p>
-                  <p className="text-[10px] text-gray-400">{topPlayers[2].clan}</p>
-                  <p className="text-sm font-black text-brand-gold mt-1">₹{topPlayers[2].earnings}</p>
+              <div className="mt-4 text-center w-full">
+                  <p className="text-xs font-bold text-white truncate px-1">{topPlayers[2].name}</p>
+                  <p className="text-[9px] text-gray-400 truncate">{topPlayers[2].clan}</p>
+                  <p className="text-xs font-black text-brand-gold mt-0.5">₹{topPlayers[2].earnings}</p>
               </div>
-              <div className="w-16 sm:w-24 h-20 bg-gradient-to-t from-gray-900/80 to-gray-800/20 mt-2 rounded-t-2xl border-x border-t border-white/5 backdrop-blur-sm"></div>
+              <div className="w-full sm:w-24 h-20 bg-gradient-to-t from-gray-900/80 to-gray-800/20 mt-2 rounded-t-2xl border-x border-t border-white/5 backdrop-blur-sm"></div>
            </motion.div>
         </div>
 
@@ -247,12 +241,6 @@ const Leaderboard: React.FC = () => {
                    </p>
                 </div>
 
-                {/* Stats Mini */}
-                <div className="mr-4 hidden sm:block text-right">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase">Wins</p>
-                    <p className="text-white font-bold text-xs">{player.wins}</p>
-                </div>
-
                 {/* Earnings */}
                 <div className="text-right">
                    <p className="font-black text-brand-gold font-display text-sm">₹{player.earnings}</p>
@@ -262,88 +250,96 @@ const Leaderboard: React.FC = () => {
            ))}
         </div>
 
-        {/* Feature 5: Player Stats Modal */}
-        <AnimatePresence>
-            {selectedPlayer && (
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
-                    onClick={() => setSelectedPlayer(null)}
-                >
-                    <motion.div 
-                        initial={{ scale: 0.9, y: 50 }}
-                        animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0.9, y: 50 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-brand-900 w-full max-w-sm rounded-3xl border border-white/10 relative overflow-hidden shadow-2xl"
-                    >
-                        {/* Background Banner */}
-                        <div className="h-24 bg-gradient-to-r from-brand-900 via-brand-800 to-brand-900 relative">
-                             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                             {selectedPlayer.isAdmin && (
-                                 <div className="absolute top-0 left-0 w-full h-1 bg-brand-500 shadow-[0_0_20px_#ff2e4d]"></div>
-                             )}
-                             <button onClick={() => setSelectedPlayer(null)} className="absolute top-3 right-3 p-1.5 bg-black/40 rounded-full text-white hover:bg-red-500 transition-colors z-20">
-                                 <X size={16} />
-                             </button>
-                        </div>
+        {/* --- STANDARDIZED PLAYER STATS MODAL --- */}
+        {selectedPlayer && (
+           <Modal isOpen={!!selectedPlayer} onClose={() => setSelectedPlayer(null)}>
+              {/* Header is visually hidden or custom in this specific design, 
+                  but we use the Modal structure for safety. 
+                  Here we use a custom body wrapper to achieve the overlap look 
+              */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+                  {/* Background Banner */}
+                  <div className="h-28 bg-gradient-to-r from-brand-900 via-brand-800 to-brand-900 relative shrink-0">
+                      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                      {selectedPlayer.isAdmin && (
+                          <div className="absolute top-0 left-0 w-full h-1 bg-brand-500 shadow-[0_0_20px_#ff2e4d]"></div>
+                      )}
+                      <button onClick={() => setSelectedPlayer(null)} className="absolute top-4 right-4 p-2 bg-black/40 rounded-full text-white hover:bg-red-500 transition-colors z-20">
+                          <X size={20} />
+                      </button>
+                  </div>
 
-                        {/* Profile Info */}
-                        <div className="px-6 -mt-12 flex flex-col items-center relative z-10">
-                            <div className="w-24 h-24 rounded-full border-4 border-brand-900 p-1 bg-black shadow-xl">
-                                <img src={selectedPlayer.photoURL || ''} className="w-full h-full rounded-full object-cover" alt="" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-white mt-2 flex items-center gap-2">
-                                {selectedPlayer.name}
-                                {selectedPlayer.isAdmin && <ShieldCheck size={20} className="text-blue-500 fill-blue-500/20" />}
-                            </h2>
-                            <p className="text-brand-gold font-display font-bold text-sm tracking-widest">{selectedPlayer.clan}</p>
-                            
-                            {selectedPlayer.isAdmin ? (
-                                <Badge color="red" className="mt-2">RK ESPORTS OWNER</Badge>
-                            ) : (
-                                selectedPlayer.isVip && <Badge color="purple" className="mt-2">VIP MEMBER</Badge>
-                            )}
-                        </div>
+                  {/* Profile Info */}
+                  <div className="px-6 -mt-14 flex flex-col items-center relative z-10 mb-6">
+                      <div className="w-28 h-28 rounded-full border-4 border-brand-900 p-1 bg-black shadow-xl">
+                          <img src={selectedPlayer.photoURL || ''} className="w-full h-full rounded-full object-cover" alt="" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-white mt-3 flex items-center gap-2 text-center">
+                          {selectedPlayer.name}
+                          {selectedPlayer.isAdmin && <ShieldCheck size={20} className="text-blue-500 fill-blue-500/20" />}
+                      </h2>
+                      <p className="text-brand-gold font-display font-bold text-sm tracking-widest">{selectedPlayer.clan}</p>
+                      
+                      {selectedPlayer.isAdmin ? (
+                          <Badge color="red" className="mt-2">RK ESPORTS OWNER</Badge>
+                      ) : (
+                          selectedPlayer.isVip && <Badge color="purple" className="mt-2">VIP MEMBER</Badge>
+                      )}
+                  </div>
 
-                        {/* Advanced Stats Grid */}
-                        <div className="p-6 grid grid-cols-2 gap-3">
-                            <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center">
-                                <Crosshair size={20} className="text-brand-500 mb-1" />
-                                <span className="text-2xl font-display font-bold text-white">{selectedPlayer.kdRatio}</span>
-                                <span className="text-[10px] text-gray-400 uppercase font-bold">K/D Ratio</span>
-                            </Card>
-                            <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center">
-                                <Skull size={20} className="text-purple-500 mb-1" />
-                                <span className="text-2xl font-display font-bold text-white">{selectedPlayer.headshotRate}%</span>
-                                <span className="text-[10px] text-gray-400 uppercase font-bold">Headshot %</span>
-                            </Card>
-                            <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center">
-                                <Trophy size={20} className="text-yellow-500 mb-1" />
-                                <span className="text-2xl font-display font-bold text-white">{selectedPlayer.wins}</span>
-                                <span className="text-[10px] text-gray-400 uppercase font-bold">Booyahs</span>
-                            </Card>
-                            <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center">
-                                <Swords size={20} className="text-green-500 mb-1" />
-                                <span className="text-2xl font-display font-bold text-white">{selectedPlayer.matches}</span>
-                                <span className="text-[10px] text-gray-400 uppercase font-bold">Matches</span>
-                            </Card>
-                        </div>
+                  {/* Advanced Stats Grid */}
+                  <div className="px-6 grid grid-cols-2 gap-3 mb-6">
+                      <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors">
+                          <Crosshair size={20} className="text-brand-500 mb-1" />
+                          <span className="text-xl sm:text-2xl font-display font-bold text-white">{selectedPlayer.kdRatio}</span>
+                          <span className="text-[10px] text-gray-400 uppercase font-bold">K/D Ratio</span>
+                      </Card>
+                      <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors">
+                          <Skull size={20} className="text-purple-500 mb-1" />
+                          <span className="text-xl sm:text-2xl font-display font-bold text-white">{selectedPlayer.headshotRate}%</span>
+                          <span className="text-[10px] text-gray-400 uppercase font-bold">Headshot %</span>
+                      </Card>
+                      <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors">
+                          <Trophy size={20} className="text-yellow-500 mb-1" />
+                          <span className="text-xl sm:text-2xl font-display font-bold text-white">{selectedPlayer.wins}</span>
+                          <span className="text-[10px] text-gray-400 uppercase font-bold">Booyahs</span>
+                      </Card>
+                      <Card className="bg-white/5 !p-3 border-white/5 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors">
+                          <Swords size={20} className="text-green-500 mb-1" />
+                          <span className="text-xl sm:text-2xl font-display font-bold text-white">{selectedPlayer.matches}</span>
+                          <span className="text-[10px] text-gray-400 uppercase font-bold">Matches</span>
+                      </Card>
+                  </div>
 
-                        {/* Footer Info */}
-                        <div className="bg-black/30 p-4 text-center border-t border-white/5">
-                            <div className="flex items-center justify-center gap-2 text-gray-400 text-xs">
-                                <Flame size={14} className="text-orange-500" />
-                                <span>Trending: {selectedPlayer.trend.toUpperCase()} this week</span>
-                            </div>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                  {/* Achievements Section */}
+                  <div className="px-6 mb-8">
+                      <h3 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                          <Medal size={14} className="text-brand-gold"/> Achievements
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                          {selectedPlayer.achievements && selectedPlayer.achievements.length > 0 ? (
+                              selectedPlayer.achievements.map((ach, i) => (
+                                  <div key={i} className="flex items-center gap-1.5 bg-brand-800 border border-white/10 px-3 py-1.5 rounded-full">
+                                      <Star size={10} className="text-yellow-400 fill-yellow-400" />
+                                      <span className="text-[10px] font-bold text-gray-200">{ach}</span>
+                                  </div>
+                              ))
+                          ) : (
+                              <p className="text-xs text-gray-600 italic">No achievements unlocked yet.</p>
+                          )}
+                      </div>
+                  </div>
 
+                  {/* Footer Info */}
+                  <div className="bg-black/30 p-4 text-center border-t border-white/5 shrink-0 mt-auto pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+                      <div className="flex items-center justify-center gap-2 text-gray-400 text-xs">
+                          <Flame size={14} className="text-orange-500" />
+                          <span>Trending: {selectedPlayer.trend.toUpperCase()} this week</span>
+                      </div>
+                  </div>
+              </div>
+           </Modal>
+        )}
       </div>
     </Layout>
   );

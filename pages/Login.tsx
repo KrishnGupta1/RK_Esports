@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button, Input, Card } from '../components/UI';
@@ -104,26 +105,26 @@ const Login: React.FC = () => {
   const isLoading = localLoading || authLoading;
 
   return (
-    <div className="min-h-screen bg-brand-900 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="h-[100dvh] bg-brand-900 flex flex-col items-center justify-center p-4 relative overflow-hidden overflow-y-auto">
       {/* Background Decor */}
       <div className="absolute top-[-20%] right-[-10%] w-80 h-80 bg-brand-500/20 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-80 h-80 bg-brand-gold/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md z-10">
-        <div className="text-center mb-10">
+      <div className="w-full max-w-md z-10 my-auto">
+        <div className="text-center mb-8">
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-24 h-24 bg-gradient-to-tr from-brand-500 to-orange-600 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-2xl shadow-brand-500/40"
+            className="w-20 h-20 bg-gradient-to-tr from-brand-500 to-orange-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-2xl shadow-brand-500/40"
           >
-            <span className="text-4xl font-black text-white tracking-tighter">RK</span>
+            <span className="text-3xl font-black text-white tracking-tighter">RK</span>
           </motion.div>
           <motion.h1 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-4xl font-bold text-white mb-2"
+            className="text-3xl font-bold text-white mb-2"
           >
             Welcome Back
           </motion.h1>
@@ -131,7 +132,7 @@ const Login: React.FC = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-gray-400 font-medium"
+            className="text-gray-400 font-medium text-sm"
           >
             The arena awaits your arrival
           </motion.p>
@@ -160,7 +161,7 @@ const Login: React.FC = () => {
                 <button 
                   onClick={handleGoogleLogin} 
                   disabled={isLoading}
-                  className="w-full bg-white hover:bg-gray-50 text-gray-700 font-roboto font-medium h-12 px-4 rounded-lg transition-all duration-200 flex items-center justify-center google-btn-shadow active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full bg-white hover:bg-gray-50 text-gray-700 font-roboto font-medium h-14 px-4 rounded-xl transition-all duration-200 flex items-center justify-center google-btn-shadow active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <Loader2 className="animate-spin text-gray-600" />
@@ -185,7 +186,7 @@ const Login: React.FC = () => {
                   onClick={() => setMethod('phone')} 
                   variant="secondary" 
                   disabled={isLoading}
-                  className="flex items-center justify-center gap-3 h-12 font-medium bg-gray-700 hover:bg-gray-600 border-0"
+                  className="flex items-center justify-center gap-3 h-14 font-medium bg-gray-700 hover:bg-gray-600 border-0"
                 >
                   <Smartphone size={20} />
                   Sign in with Phone
@@ -219,7 +220,7 @@ const Login: React.FC = () => {
                 <form onSubmit={handlePhoneSubmit} className="space-y-6">
                   <div>
                     <div className="flex items-center gap-3">
-                      <div className="bg-brand-900 border border-gray-700 rounded-lg px-3 py-3 flex items-center justify-center text-gray-400 font-mono font-medium select-none">
+                      <div className="bg-brand-900 border border-gray-700 rounded-xl px-3 py-4 flex items-center justify-center text-gray-400 font-mono font-medium select-none">
                         🇮🇳 +91
                       </div>
                       <input 
@@ -230,7 +231,7 @@ const Login: React.FC = () => {
                           const val = e.target.value.replace(/\D/g, ''); // Only numbers
                           if (val.length <= 10) setPhoneNumber(val);
                         }}
-                        className="flex-1 bg-brand-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors font-medium tracking-wide text-lg placeholder:text-gray-600"
+                        className="flex-1 bg-brand-900 border border-gray-700 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors font-medium tracking-wide text-lg placeholder:text-gray-600"
                         autoFocus
                       />
                     </div>
@@ -239,7 +240,7 @@ const Login: React.FC = () => {
                   
                   <div id="recaptcha-container" className="flex justify-center"></div>
                   
-                  <Button type="submit" disabled={isLoading || phoneNumber.length < 10} className="h-12 text-lg">
+                  <Button type="submit" disabled={isLoading || phoneNumber.length < 10} className="h-14 text-lg">
                     {isLoading ? <Loader2 className="animate-spin mx-auto" /> : 'Get OTP'}
                   </Button>
                 </form>
@@ -287,11 +288,11 @@ const Login: React.FC = () => {
                          if (val.length <= 6) setOtp(val);
                       }}
                       maxLength={6}
-                      className="w-full bg-brand-900 border border-gray-700 rounded-lg px-4 py-4 text-center text-3xl font-bold tracking-[0.5em] text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder:text-gray-700"
+                      className="w-full bg-brand-900 border border-gray-700 rounded-xl px-4 py-4 text-center text-3xl font-bold tracking-[0.5em] text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all placeholder:text-gray-700"
                       autoFocus
                     />
                   </div>
-                  <Button type="submit" disabled={isLoading || otp.length < 6} className="h-12 text-lg">
+                  <Button type="submit" disabled={isLoading || otp.length < 6} className="h-14 text-lg">
                     {isLoading ? <Loader2 className="animate-spin mx-auto" /> : 'Verify & Login'}
                   </Button>
                   

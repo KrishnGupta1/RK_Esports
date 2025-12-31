@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button, Input, Card } from '../components/UI';
@@ -52,8 +53,8 @@ const ProfileSetup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-900 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="h-[100dvh] bg-brand-900 flex flex-col items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-md my-auto">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-white">Complete Setup</h1>
           <p className="text-gray-400 text-sm mt-1">Required to join tournaments</p>
@@ -101,7 +102,7 @@ const ProfileSetup: React.FC = () => {
             </div>
 
             <div className="pt-2">
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="h-14 text-lg">
                 {loading ? 'SAVING PROFILE...' : 'SAVE & LOCK PROFILE'}
               </Button>
             </div>

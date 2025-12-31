@@ -1,10 +1,7 @@
+
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { UserProfile, Tournament, Transaction } from '../types';
+import { UserProfile, Tournament, Transaction, Advertisement } from '../types';
 
-// Apps Script Backend URL
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
-
-// Mock types
 interface MockUser {
   uid: string;
   displayName: string | null;
@@ -18,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   tournaments: Tournament[];
   transactions: Transaction[];
+  advertisements: Advertisement[];
   loginWithGoogle: () => Promise<void>;
   setupRecaptcha: (elementId: string) => void;
   sendOtp: (phoneNumber: string) => Promise<void>;
@@ -25,9 +23,11 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
-  joinTournament: (tournamentId: string) => Promise<{ success: boolean; message: string }>;
+  joinTournament: (tournamentId: string, joinType: 'Solo' | 'Team', teamNames?: string[], slot?: number) => Promise<{ success: boolean; message: string }>;
   requestDeposit: (amount: number, utr: string, method: string) => Promise<void>;
-  withdrawMoney: (amount: number, upiId: string) => Promise<void>;
+  withdrawMoney: (amount: number, details: string, method: string) => Promise<void>;
+  refreshMatchData: (tournamentId: string) => Promise<Tournament | null>;
+  applyPromoCode: (code: string) => Promise<number>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -38,87 +38,111 @@ export const useAuth = () => {
   return context;
 };
 
-// Initial Mock Tournaments with IMAGES and NEW MODES
+// --- INITIAL DATA ---
+const INITIAL_ADS: Advertisement[] = [
+  {
+    id: 'ad_1',
+    imageUrl: 'https://images.unsplash.com/photo-1593305841991-05c29736f005?auto=format&fit=crop&w=800&q=80',
+    link: 'https://youtube.com',
+    title: 'Watch Live Stream',
+    active: true
+  },
+  {
+    id: 'ad_2',
+    imageUrl: 'https://images.unsplash.com/photo-1628260412297-a3377e45006f?auto=format&fit=crop&w=800&q=80',
+    link: 'https://discord.com',
+    title: 'Join Discord',
+    active: true
+  }
+];
+
 const INITIAL_TOURNAMENTS: Tournament[] = [
   {
     id: '1',
     title: 'Grand Battle Royale #01',
     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
     map: 'Bermuda',
+    mapType: 'Day',
+    serverRegion: 'IN',
+    gameVersion: 'OB44',
     type: 'Squad',
-    gameMode: 'Classic',
+    gameMode: 'BR-Ranked',
+    difficulty: 'Elite',
     entryFee: 100,
     prizePool: 2000,
-    startTime: 'Today, 8:00 PM',
+    startTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
     status: 'open',
-    joined: 8,
+    joined: 41,
     slots: 48,
     perKill: 20,
     rules: ['No Hacking/Scripting', 'Teaming not allowed', 'Emulator not allowed', 'Wait for Room ID'],
     prizeDistribution: [{ rank: 1, amount: 1000 }, { rank: 2, amount: 600 }, { rank: 3, amount: 400 }],
-    roomId: '',
+    roomId: '', 
     roomPassword: '',
-    isJoined: false
+    adminMessage: 'Room ID will be shared 15 mins before start.',
+    isJoined: false,
+    tags: ['Filling Fast', 'High Prize'],
+    organizerVerified: true,
+    deviceRestriction: 'Mobile Only'
   },
   {
-    id: '2',
+    id: 'demo_live',
+    title: 'CS Ranked Pro League',
+    image: 'https://images.unsplash.com/photo-1593305841991-05c29736f005?auto=format&fit=crop&w=800&q=80',
+    map: 'Kalahari',
+    mapType: 'Day',
+    serverRegion: 'IN',
+    gameVersion: 'OB44',
+    type: 'Squad',
+    gameMode: 'CS-Ranked',
+    difficulty: 'Legendary',
+    entryFee: 200,
+    prizePool: 4000,
+    startTime: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // Started 15 mins ago
+    status: 'ongoing',
+    joined: 8,
+    slots: 8, 
+    perKill: 0,
+    rules: ['Best of 3', 'Clash Squad Rules', 'No Grenade Spam'],
+    prizeDistribution: [{ rank: 1, amount: 3000 }, { rank: 2, amount: 1000 }],
+    isJoined: true, 
+    myTeam: ['RK_KILLER', 'Hydra_X', 'Ninja_007', 'Slayer_OP'],
+    mySlot: 4,
+    joinedAs: 'Team',
+    roomId: '884210', 
+    roomPassword: '12', 
+    youtubeLink: 'https://youtube.com',
+    topFragger: 'RK_KILLER',
+    topFraggerKills: 12,
+    tags: ['Live Now', 'Verified'],
+    organizerVerified: true,
+    deviceRestriction: 'PC Allowed'
+  },
+  {
+    id: 'svs_1',
     title: 'Solo vs Squad Rush',
-    image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=800&q=80',
     map: 'Purgatory',
+    mapType: 'Sunset',
+    serverRegion: 'IN',
     type: 'Solo vs Squad',
-    gameMode: 'Custom Lobby',
+    gameMode: 'BR-Ranked',
+    difficulty: 'Hardcore',
     entryFee: 50,
     prizePool: 1500,
-    startTime: 'Today, 9:30 PM',
+    startTime: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
     status: 'open',
     joined: 12,
     slots: 48,
     perKill: 25,
-    rules: ['1v4 Gameplay', 'Mobile Only'],
+    rules: ['1v4 Logic', 'Survival Points', 'Aggressive Play'],
     prizeDistribution: [{ rank: 1, amount: 800 }, { rank: 2, amount: 400 }],
-    roomId: '',
-    roomPassword: '',
-    isJoined: false
-  },
-  {
-    id: '3',
-    title: 'CS Ranked Tournament',
-    image: 'https://images.unsplash.com/photo-1593305841991-05c29736f005?auto=format&fit=crop&w=800&q=80',
-    map: 'Kalahari',
-    type: 'Squad',
-    gameMode: 'CS-Ranked',
-    entryFee: 200,
-    prizePool: 4000,
-    startTime: 'Tomorrow, 6:00 PM',
-    status: 'open',
-    joined: 2,
-    slots: 8, // 8 Teams
-    perKill: 0,
-    rules: ['Best of 3', 'Clash Squad Rules', 'No Grenade Spam'],
-    prizeDistribution: [{ rank: 1, amount: 3000 }, { rank: 2, amount: 1000 }],
-    isJoined: false
-  },
-  {
-    id: '4',
-    title: 'Solo Sniper Challenge',
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
-    map: 'Alpine',
-    type: 'Solo',
-    gameMode: 'Classic',
-    entryFee: 30,
-    prizePool: 600,
-    startTime: 'Tomorrow, 9:00 PM',
-    status: 'open',
-    joined: 45,
-    slots: 48,
-    perKill: 15,
-    rules: ['Snipers Only', 'No Melee', 'No Pistols'],
-    prizeDistribution: [{ rank: 1, amount: 400 }, { rank: 2, amount: 200 }],
-    isJoined: false
+    isJoined: false,
+    tags: ['Skill Based'],
+    deviceRestriction: 'Mobile Only'
   }
 ];
 
-// Initial Mock Transactions
 const INITIAL_TRANSACTIONS: Transaction[] = [
   { 
     id: 'tx_1', 
@@ -131,7 +155,6 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
   }
 ];
 
-// Helper to simulate a Database in LocalStorage
 const getMockDB = (): Record<string, UserProfile> => {
   try {
     const db = localStorage.getItem('rk_esports_db');
@@ -145,17 +168,36 @@ const saveMockDB = (db: Record<string, UserProfile>) => {
   localStorage.setItem('rk_esports_db', JSON.stringify(db));
 };
 
+const getSavedTournaments = (): Tournament[] => {
+    try {
+        const saved = localStorage.getItem('rk_tournaments_data');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (e) { console.error(e); }
+    return INITIAL_TOURNAMENTS;
+};
+
+const saveTournaments = (data: Tournament[]) => {
+    localStorage.setItem('rk_tournaments_data', JSON.stringify(data));
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<MockUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tournaments, setTournaments] = useState<Tournament[]>(INITIAL_TOURNAMENTS);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [advertisements, setAdvertisements] = useState<Advertisement[]>(INITIAL_ADS);
 
-  // Restore session on mount
+  // --- REAL-TIME POLLING SIMULATION ---
   useEffect(() => {
+    // 1. Initial Load
     const initAuth = async () => {
       try {
+        const loadedTournaments = getSavedTournaments();
+        setTournaments(loadedTournaments);
+
         const sessionUid = localStorage.getItem('current_session_uid');
         if (sessionUid) {
           const db = getMockDB();
@@ -168,7 +210,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               photoURL: profile.photoURL || null
             });
             setUserProfile(profile);
-            // In a real app, restore transactions/matches here from backend
           } else {
             localStorage.removeItem('current_session_uid');
           }
@@ -180,171 +221,140 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
     initAuth();
+
+    // 2. Poll for updates every 3 seconds (Fast updates)
+    const intervalId = setInterval(() => {
+        setTournaments(prevTournaments => {
+            const now = new Date();
+            let hasChanges = false;
+            
+            const updated = prevTournaments.map(t => {
+                const startTime = new Date(t.startTime);
+                let newStatus = t.status;
+
+                if (t.status === 'open' && now >= startTime) {
+                    newStatus = 'ongoing';
+                }
+                
+                let newJoined = t.joined;
+                if (t.status === 'open' && t.joined < t.slots) {
+                     if(Math.random() > 0.6) {
+                         newJoined = Math.min(t.slots, t.joined + Math.floor(Math.random() * 2) + 1);
+                     }
+                }
+
+                if (newStatus !== t.status || newJoined !== t.joined) {
+                    hasChanges = true;
+                    return { ...t, status: newStatus, joined: newJoined };
+                }
+                return t;
+            });
+
+            if (hasChanges) {
+                saveTournaments(updated);
+                return updated;
+            }
+            return prevTournaments;
+        });
+    }, 3000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const loginWithGoogle = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network
-
-    const uid = 'mock-google-uid-123';
-    const db = getMockDB();
-    let profile = db[uid];
-
-    if (!profile) {
-      profile = {
-        uid,
-        name: 'Demo Gamer',
-        email: 'demo@gmail.com',
-        provider: 'google',
-        coins: 100,
-        role: 'user',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        photoURL: 'https://ui-avatars.com/api/?name=Demo+Gamer&background=ff2e4d&color=fff&bold=true',
-        referralCode: 'RK' + Math.floor(1000 + Math.random() * 9000)
-      };
-      db[uid] = profile;
-      saveMockDB(db);
-    } else {
-      profile.lastLogin = new Date().toISOString();
-      db[uid] = profile;
-      saveMockDB(db);
-    }
-
-    localStorage.setItem('current_session_uid', uid);
-    setCurrentUser({ uid, displayName: profile.name, phoneNumber: null, photoURL: profile.photoURL || null });
-    setUserProfile(profile);
-    setLoading(false);
-  };
-
-  const setupRecaptcha = useCallback((elementId: string) => {
-    console.log("Mock Recaptcha Initialized on", elementId);
-    window.recaptchaVerifier = {
-      clear: () => {},
-      verify: async () => "mock-token",
-      render: async () => 0
-    } as any;
-  }, []);
-
-  const sendOtp = async (phoneNumber: string) => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log(`OTP sent to ${phoneNumber}`);
-    setLoading(false);
-  };
-
-  const verifyOtp = async (otp: string) => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (otp === '123456') {
-      const uid = 'mock-phone-uid-456';
+      setLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 800)); 
+      const uid = 'mock-google-uid-123';
       const db = getMockDB();
       let profile = db[uid];
-      const phoneNumber = '+919876543210';
-
       if (!profile) {
         profile = {
-          uid,
-          name: 'Player ' + phoneNumber.slice(-4),
-          phone: phoneNumber,
-          provider: 'phone',
-          coins: 50,
-          role: 'user',
-          status: 'active',
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString(),
-          photoURL: 'https://ui-avatars.com/api/?name=Mobile+Player&background=00ffa3&color=000&bold=true',
-          referralCode: 'RK' + Math.floor(1000 + Math.random() * 9000)
+          uid, name: 'Demo Gamer', email: 'demo@gmail.com', provider: 'google', coins: 100, role: 'user', status: 'active',
+          createdAt: new Date().toISOString(), lastLogin: new Date().toISOString(), photoURL: 'https://ui-avatars.com/api/?name=Demo+Gamer&background=ff2e4d&color=fff&bold=true', referralCode: 'RK' + Math.floor(1000 + Math.random() * 9000),
+          level: 1, xp: 0, maxXp: 1000
         };
-        db[uid] = profile;
-        saveMockDB(db);
-      } else {
-        profile.lastLogin = new Date().toISOString();
-        db[uid] = profile;
-        saveMockDB(db);
+        db[uid] = profile; saveMockDB(db);
       }
-
       localStorage.setItem('current_session_uid', uid);
-      setCurrentUser({
-        uid,
-        displayName: profile.name,
-        phoneNumber: phoneNumber,
-        photoURL: null
-      });
+      setCurrentUser({ uid, displayName: profile.name, phoneNumber: null, photoURL: profile.photoURL || null });
       setUserProfile(profile);
-    } else {
       setLoading(false);
-      throw new Error("Invalid OTP (Try 123456)");
-    }
-    setLoading(false);
   };
 
+  const setupRecaptcha = useCallback((elementId: string) => {}, []);
+  const sendOtp = async (phoneNumber: string) => {};
+  const verifyOtp = async (otp: string) => {};
   const logout = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
     localStorage.removeItem('current_session_uid');
     setCurrentUser(null);
     setUserProfile(null);
-    setLoading(false);
   };
-
-  const refreshProfile = async () => {
-    const sessionUid = localStorage.getItem('current_session_uid');
-    if (sessionUid) {
-      const db = getMockDB();
-      const profile = db[sessionUid];
-      if (profile) setUserProfile(profile);
-    }
-  };
+  const refreshProfile = async () => {};
 
   const updateUserProfile = async (data: Partial<UserProfile>) => {
     if (!userProfile) return;
-    
     const newProfile = { ...userProfile, ...data };
     setUserProfile(newProfile);
-    
     const db = getMockDB();
     db[userProfile.uid] = newProfile;
     saveMockDB(db);
-    
     await new Promise(resolve => setTimeout(resolve, 500));
   };
 
-  // --- NEW: Tournament & Wallet Logic ---
+  const refreshMatchData = async (tournamentId: string): Promise<Tournament | null> => {
+     await new Promise(resolve => setTimeout(resolve, 500)); 
+     const match = tournaments.find(t => t.id === tournamentId);
+     return match || null;
+  };
 
-  const joinTournament = async (tournamentId: string): Promise<{ success: boolean; message: string }> => {
+  const joinTournament = async (tournamentId: string, joinType: 'Solo' | 'Team', teamNames: string[] = [], slotPreference?: number): Promise<{ success: boolean; message: string }> => {
     if (!userProfile) return { success: false, message: "Not logged in" };
 
     const matchIndex = tournaments.findIndex(t => t.id === tournamentId);
     if (matchIndex === -1) return { success: false, message: "Match not found" };
 
     const match = tournaments[matchIndex];
-    
+    const slotsNeeded = joinType === 'Team' ? (1 + teamNames.length) : 1;
+    const totalCost = match.entryFee * slotsNeeded;
+
     if (match.isJoined) return { success: false, message: "Already joined!" };
-    if (match.joined >= match.slots) return { success: false, message: "Match is full!" };
-    if (userProfile.coins < match.entryFee) return { success: false, message: "Insufficient balance!" };
+    if (match.joined + slotsNeeded > match.slots) return { success: false, message: "Not enough slots available!" };
+    if (userProfile.coins < totalCost) return { success: false, message: `Insufficient balance! You need ₹${totalCost}` };
 
-    // 1. Deduct Money
-    const newBalance = userProfile.coins - match.entryFee;
-    await updateUserProfile({ coins: newBalance });
+    let newXp = (userProfile.xp || 0) + 100;
+    let newLevel = userProfile.level || 1;
+    let max = userProfile.maxXp || 1000;
+    if (newXp >= max) {
+        newLevel += 1;
+        newXp = newXp - max;
+        max = Math.floor(max * 1.5);
+    }
 
-    // 2. Update Tournament State locally
+    const newBalance = userProfile.coins - totalCost;
+    await updateUserProfile({ coins: newBalance, xp: newXp, level: newLevel, maxXp: max });
+
     const updatedTournaments = [...tournaments];
+    const assignedSlot = slotPreference || Math.floor(Math.random() * match.slots) + 1;
+    
     updatedTournaments[matchIndex] = {
       ...match,
-      joined: match.joined + 1,
-      isJoined: true
+      joined: match.joined + slotsNeeded, 
+      isJoined: true,
+      myTeam: joinType === 'Team' ? teamNames : [],
+      joinedAs: joinType,
+      mySlot: assignedSlot,
+      roomId: match.roomId || "", 
+      roomPassword: match.roomPassword || ""
     };
+    
     setTournaments(updatedTournaments);
+    saveTournaments(updatedTournaments);
 
-    // 3. Add Transaction Log
     const newTx: Transaction = {
       id: `tx_${Date.now()}`,
       type: 'debit',
       status: 'success',
-      amount: match.entryFee,
+      amount: totalCost,
       description: `Joined: ${match.title}`,
       date: 'Just Now',
       method: 'Wallet'
@@ -355,36 +365,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const requestDeposit = async (amount: number, utr: string, method: string) => {
-    if (!userProfile) return;
-    
-    // 1. Log to Apps Script
-    const payload = {
-        type: 'deposit_request',
-        uid: userProfile.uid,
-        name: userProfile.name,
-        amount: amount,
-        utr: utr,
-        method: method,
-        date: new Date().toISOString()
-    };
-
-    try {
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
-        });
-    } catch (e) {
-        console.error("Failed to log deposit to backend", e);
-    }
-
-    // 2. Update Local State (Pending)
     const newTx: Transaction = {
       id: `tx_${Date.now()}`,
       type: 'credit',
-      status: 'pending', // Pending Admin Approval
+      status: 'pending', 
       amount: amount,
-      description: `Deposit Request (UTR: ${utr})`,
+      description: `Deposit (UTR: ${utr})`,
       date: 'Just Now',
       method: method,
       utr: utr
@@ -392,44 +378,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTransactions(prev => [newTx, ...prev]);
   };
 
-  const withdrawMoney = async (amount: number, upiId: string) => {
+  const withdrawMoney = async (amount: number, details: string, method: string) => {
     if (!userProfile) return;
     if (userProfile.coins < amount) throw new Error("Insufficient Balance");
     
-    // 1. Log to Apps Script
-    const payload = {
-        type: 'withdrawal_request',
-        uid: userProfile.uid,
-        name: userProfile.name,
-        amount: amount,
-        upiId: upiId,
-        date: new Date().toISOString()
-    };
-    
-    try {
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
-        });
-    } catch (e) {
-         console.error("Failed to log withdrawal", e);
-    }
-
-    // 2. Deduct Immediately from UI (Held in escrow effectively)
     const newBalance = userProfile.coins - amount;
     await updateUserProfile({ coins: newBalance });
-
+    
     const newTx: Transaction = {
       id: `tx_${Date.now()}`,
       type: 'debit',
-      status: 'pending', // Pending admin approval
+      status: 'pending', 
       amount: amount,
-      description: `Withdrawal to ${upiId}`,
+      description: `Withdraw to ${method}`,
       date: 'Just Now',
-      method: 'UPI'
+      method: method
     };
     setTransactions(prev => [newTx, ...prev]);
+  };
+
+  const applyPromoCode = async (code: string): Promise<number> => {
+      if(!userProfile) return 0;
+      await new Promise(r => setTimeout(r, 1000)); 
+      if (code.toUpperCase() === "RK2025") {
+          const bonus = 50;
+          await updateUserProfile({ coins: userProfile.coins + bonus });
+          setTransactions(prev => [{
+            id: `promo_${Date.now()}`,
+            type: 'credit',
+            status: 'success',
+            amount: bonus,
+            description: `Promo: ${code}`,
+            date: "Just Now",
+            method: "Coupon"
+          }, ...prev]);
+          return bonus;
+      }
+      throw new Error("Invalid or Expired Code");
   };
 
   return (
@@ -439,6 +424,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading, 
       tournaments,
       transactions,
+      advertisements,
       loginWithGoogle, 
       setupRecaptcha, 
       sendOtp,
@@ -448,15 +434,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateUserProfile,
       joinTournament,
       requestDeposit,
-      withdrawMoney
+      withdrawMoney,
+      refreshMatchData,
+      applyPromoCode
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-declare global {
-  interface Window {
-    recaptchaVerifier: any;
-  }
-}
