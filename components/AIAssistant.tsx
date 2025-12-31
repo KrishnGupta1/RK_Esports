@@ -70,14 +70,15 @@ export const AIAssistant: React.FC = () => {
         role: 'groq',           // Triggers Fast AI (Groq) in Backend
         input: userMsg.text,    // The user's question
         uid: userProfile?.uid || 'guest',  // For Sheet Logging
-        name: userProfile?.name || 'Guest' // For Sheet Logging
+        name: userProfile?.name || 'Guest', // For Sheet Logging
+        type: 'chat' // Explicit type just in case backend requires it
       };
 
       const response = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        // Using text/plain to avoid CORS preflight issues with Google Apps Script
+        redirect: "follow", // Explicitly follow the Google Redirect
         headers: {
-          "Content-Type": "text/plain;charset=utf-8", 
+          "Content-Type": "text/plain", // Simple content type to avoid CORS preflight
         },
         body: JSON.stringify(payload)
       });
