@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { Card, Button, Input } from '../components/UI';
 import { useAuth } from '../contexts/AuthContext';
-import { History, TrendingUp, TrendingDown, Ticket, Plus, ArrowUpRight, X, Smartphone, AlertCircle, Copy, CheckCircle, Download, Clock, Landmark, CreditCard, ShieldCheck, ChevronRight, ScanLine, AlertTriangle, Info } from 'lucide-react';
+import { History, TrendingUp, TrendingDown, Ticket, Plus, ArrowUpRight, X, Smartphone, AlertCircle, Copy, CheckCircle, Download, Clock, Landmark, CreditCard, ShieldCheck, ChevronRight, ScanLine, AlertTriangle, Info, Clipboard } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const Wallet: React.FC = () => {
@@ -54,6 +54,10 @@ const Wallet: React.FC = () => {
 
   const handleDeposit = async () => {
       if(!depositAmount || !utrNumber) return;
+      if(utrNumber.length !== 12) {
+          alert("Please enter a valid 12-digit UTR number.");
+          return;
+      }
       setProcessingDeposit(true);
       await requestDeposit(Number(depositAmount), utrNumber, 'UPI');
       setProcessingDeposit(false);
@@ -113,6 +117,20 @@ const Wallet: React.FC = () => {
       setCopied(true);
       if(navigator.vibrate) navigator.vibrate(50);
       setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePasteUTR = async () => {
+      try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+              // Extract only numbers and limit to 12 chars
+              const numericValue = text.replace(/\D/g, '').slice(0, 12);
+              setUtrNumber(numericValue);
+          }
+      } catch (err) {
+          console.error('Failed to read clipboard', err);
+          // Fallback handled by browser default paste
+      }
   };
 
   const handleDownloadQR = async () => {
@@ -317,12 +335,18 @@ const Wallet: React.FC = () => {
                                 <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.05)] border-4 border-white/10 mb-4 relative group">
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-500 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow-sm z-10 uppercase tracking-wide">Verified Merchant</div>
                                     <img 
-                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=${UPI_ID}&pn=${PAYEE_NAME}`} 
+                                      src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=${UPI_ID}&pn=${PAYEE_NAME}&am=${depositAmount && Number(depositAmount) > 0 ? depositAmount : '0'}&cu=INR`} 
                                       alt="QR" 
                                       className="w-40 h-40 object-contain" 
                                     />
-                                    <div className="mt-2 text-center border-t border-dashed border-gray-200 pt-2">
+                                    <div className="mt-2 text-center border-t border-dashed border-gray-200 pt-2 flex items-center justify-between gap-2">
                                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Scan to Pay</p>
+                                        <button 
+                                            onClick={handleDownloadQR}
+                                            className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 text-[10px] font-bold transition-colors"
+                                        >
+                                            <Download size={10} /> SAVE QR
+                                        </button>
                                     </div>
                                 </div>
                                 
@@ -421,12 +445,26 @@ const Wallet: React.FC = () => {
                                     <span className="w-5 h-5 rounded-full bg-brand-800 border border-white/10 flex items-center justify-center text-[10px] text-white">3</span>
                                     Verify Transaction
                                 </label>
-                                <Input 
-                                    value={utrNumber} 
-                                    onChange={e => setUtrNumber(e.target.value)} 
-                                    placeholder="Enter 12 Digit UTR / Ref No." 
-                                    className="text-sm font-mono h-12 tracking-wide border-white/10 bg-black/50"
-                                />
+                                <div className="relative">
+                                    <Input 
+                                        value={utrNumber} 
+                                        onChange={e => {
+                                            const val = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                                            if (val.length <= 12) setUtrNumber(val);
+                                        }}
+                                        type="text"
+                                        inputMode="numeric"
+                                        placeholder="Enter 12 Digit UTR / Ref No." 
+                                        className="text-sm font-mono h-12 tracking-wide border-white/10 bg-black/50 pr-12"
+                                    />
+                                    <button 
+                                        onClick={handlePasteUTR}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-brand-500 hover:text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 rounded-lg transition-colors"
+                                        title="Paste UTR"
+                                    >
+                                        <Clipboard size={16} />
+                                    </button>
+                                </div>
                                 <div className="mt-3 flex gap-2 items-start">
                                     <AlertTriangle size={14} className="text-yellow-500 shrink-0 mt-0.5" />
                                     <p className="text-[10px] text-gray-400 leading-relaxed">
@@ -438,7 +476,7 @@ const Wallet: React.FC = () => {
 
                         {/* Fixed Footer - Lifted Up with pb-20 */}
                         <div className="p-6 border-t border-white/10 bg-[#141416] shrink-0 z-20 pb-20">
-                            <Button onClick={handleDeposit} disabled={processingDeposit || !utrNumber || !depositAmount} className="h-14 text-lg font-black tracking-wider w-full shadow-xl">
+                            <Button onClick={handleDeposit} disabled={processingDeposit || utrNumber.length !== 12 || !depositAmount} className="h-14 text-lg font-black tracking-wider w-full shadow-xl">
                                 {processingDeposit ? 'VERIFYING...' : 'SUBMIT REQUEST'}
                             </Button>
                         </div>

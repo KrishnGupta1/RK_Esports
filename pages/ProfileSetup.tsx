@@ -25,13 +25,25 @@ const ProfileSetup: React.FC = () => {
     const cleanUid = ffUid.replace(/\s/g, ''); // Remove spaces
     const cleanName = ffName.trim();
 
+    // UID Validation: Numbers only, length 8-12
     if (!cleanUid.match(/^\d+$/)) {
       setError('Free Fire UID must contain numbers only.');
       return;
     }
     
+    if (cleanUid.length < 8 || cleanUid.length > 12) {
+      setError('Free Fire UID must be between 8 and 12 digits.');
+      return;
+    }
+    
+    // Name Validation: Min 3, Max 30 chars
     if (cleanName.length < 3) {
       setError('In-Game Name must be at least 3 characters.');
+      return;
+    }
+
+    if (cleanName.length > 30) {
+      setError('In-Game Name cannot exceed 30 characters.');
       return;
     }
 
@@ -83,22 +95,30 @@ const ProfileSetup: React.FC = () => {
               <label className="block text-sm font-medium text-gray-300 mb-1">Free Fire UID (Number)</label>
               <Input 
                 value={ffUid} 
-                onChange={(e) => setFfUid(e.target.value)}
+                onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val.length <= 12) setFfUid(val);
+                }}
                 placeholder="e.g. 1234567890"
                 inputMode="numeric"
                 type="text" 
                 required
               />
+              <p className="text-[10px] text-gray-500 mt-1 text-right">{ffUid.length}/12</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">In-Game Name</label>
               <Input 
                 value={ffName} 
-                onChange={(e) => setFfName(e.target.value)}
+                onChange={(e) => {
+                    if (e.target.value.length <= 30) setFfName(e.target.value);
+                }}
                 placeholder="e.g. RK_KILLER"
+                maxLength={30}
                 required
               />
+              <p className="text-[10px] text-gray-500 mt-1 text-right">{ffName.length}/30</p>
             </div>
 
             <div className="pt-2">

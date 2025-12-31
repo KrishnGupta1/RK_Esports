@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, Loader2, Minimize2 } from 'lucide-react';
@@ -10,6 +11,7 @@ interface Message {
   timestamp: Date;
 }
 
+// THE REAL BACKEND API SERVER (Google Apps Script)
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
 
 export const AIAssistant: React.FC = () => {
@@ -63,22 +65,19 @@ export const AIAssistant: React.FC = () => {
 
     try {
       // API Call to Google Apps Script Web App
-      // We send UID and Role to give context to the AI
+      // Conforms to LEVEL 1 USER APP specification
       const payload = {
-        message: userMsg.text,
-        uid: userProfile?.uid || 'guest',
-        role: userProfile?.role || 'user',
-        name: userProfile?.name || 'Guest',
-        context: {
-          coins: userProfile?.coins,
-          ffUid: userProfile?.ffUid
-        }
+        role: 'groq',           // Triggers Fast AI (Groq) in Backend
+        input: userMsg.text,    // The user's question
+        uid: userProfile?.uid || 'guest',  // For Sheet Logging
+        name: userProfile?.name || 'Guest' // For Sheet Logging
       };
 
       const response = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
+        // Using text/plain to avoid CORS preflight issues with Google Apps Script
         headers: {
-          "Content-Type": "text/plain;charset=utf-8", // text/plain avoids CORS preflight issues with GAS
+          "Content-Type": "text/plain;charset=utf-8", 
         },
         body: JSON.stringify(payload)
       });
@@ -89,6 +88,7 @@ export const AIAssistant: React.FC = () => {
 
       const data = await response.json();
       
+      // Handle response from backend
       const botText = data.response || data.text || data.reply || "I received your message.";
 
       const botMsg: Message = {
@@ -103,7 +103,7 @@ export const AIAssistant: React.FC = () => {
       console.error("AI Error:", error);
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble connecting to the server. Please try again later.",
+        text: "Connection error. Please try again later.",
         sender: 'bot',
         timestamp: new Date()
       };

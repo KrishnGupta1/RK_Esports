@@ -126,8 +126,7 @@ const Settings: React.FC = () => {
     pushNotifs: true,
     emailNotifs: false,
     soundEffects: true,
-    haptic: true,
-    darkMode: true,
+    haptic: true,    darkMode: true,
     showStats: true,
     twoFactor: false,
   });
