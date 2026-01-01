@@ -34,6 +34,7 @@ interface AuthContextType {
   inviteToTeam: (uid: string) => Promise<void>;
   removeTeamMember: (uid: string) => Promise<void>;
   sendFriendRequest: (uid: string) => Promise<void>;
+  removeFriend: (uid: string) => Promise<void>;
   toggleFollow: (uid: string) => Promise<boolean>; // Returns new follow state
   toggleLike: (uid: string) => Promise<boolean>; // Returns new like state
 }
@@ -258,7 +259,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     initAuth();
 
-    // 2. Poll for updates
+    // 2. Poll for updates (Tournaments)
     const intervalId = setInterval(() => {
         setTournaments(prevTournaments => {
             const now = new Date();
@@ -305,10 +306,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let profile = db[uid];
       if (!profile) {
         profile = {
-          uid, name: 'Demo Gamer', email: 'demo@gmail.com', provider: 'google', coins: 100, role: 'user', status: 'active',
+          uid, name: 'Demo Gamer', email: 'demo@gmail.com', provider: 'google', coins: 100, role: 'admin', status: 'active',
           createdAt: new Date().toISOString(), lastLogin: new Date().toISOString(), photoURL: 'https://ui-avatars.com/api/?name=Demo+Gamer&background=ff2e4d&color=fff&bold=true', referralCode: 'RK' + Math.floor(1000 + Math.random() * 9000),
           level: 1, xp: 0, maxXp: 1000,
-          friends: [], followers: [], following: [], likes: 0, teamMembers: [{ uid, name: 'Demo Gamer', role: 'Leader' }]
+          friends: [], followers: [], following: [], likes: 0, teamMembers: [{ uid, name: 'Demo Gamer', role: 'Leader' }],
+          isVerified: true,
+          customTag: 'RK ESPORTS OWNER',
+          clanTag: 'RK OFFICIAL',
+          activeBadge: { name: 'Verified', icon: 'shield', color: 'blue' },
+          stats: { kd: '4.5', headshot: '65', matches: '120', wins: '40' }
         };
         db[uid] = profile; saveMockDB(db);
       }
@@ -456,7 +462,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // --- SOCIAL MOCK FUNCTIONS ---
   const inviteToTeam = async (uid: string) => {
-      // In a real app, check if user exists in DB
       await new Promise(r => setTimeout(r, 500));
       if (!userProfile) return;
       const currentTeam = userProfile.teamMembers || [];
@@ -474,15 +479,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendFriendRequest = async (uid: string) => {
-      // Logic: If already friend, do nothing. If not, add to friends list.
       await new Promise(r => setTimeout(r, 500));
       if (!userProfile) return;
-      const currentFriends = userProfile.friends || [];
       
-      if (!currentFriends.includes(uid)) {
-          const newFriends = [...currentFriends, uid];
-          await updateUserProfile({ friends: newFriends });
+      const currentSent = userProfile.friendRequestsSent || [];
+      if(!currentSent.includes(uid)) {
+          await updateUserProfile({ friendRequestsSent: [...currentSent, uid] });
       }
+  };
+
+  const removeFriend = async (uid: string) => {
+     await new Promise(r => setTimeout(r, 500));
+     if (!userProfile) return;
+     const newFriends = (userProfile.friends || []).filter(f => f !== uid);
+     await updateUserProfile({ friends: newFriends });
   };
 
   const toggleFollow = async (uid: string) => {
@@ -501,10 +511,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleLike = async (uid: string) => {
-      await new Promise(r => setTimeout(r, 300));
-      // In a real app, this would increment the like count on the server.
-      // Here we just return true to simulate success.
-      return true;
+      // Simulate backend persistence via LocalStorage for "Liked Users" list
+      await new Promise(r => setTimeout(r, 200));
+      
+      const storedLikes = localStorage.getItem('my_liked_users');
+      let likedList = storedLikes ? JSON.parse(storedLikes) : [];
+      
+      const isLiked = likedList.includes(uid);
+      if(!isLiked) {
+          likedList.push(uid);
+          localStorage.setItem('my_liked_users', JSON.stringify(likedList));
+          return true; // Liked successfully
+      }
+      return false; // Already liked
   };
 
   return (
@@ -531,6 +550,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       inviteToTeam,
       removeTeamMember,
       sendFriendRequest,
+      removeFriend,
       toggleFollow,
       toggleLike
     }}>

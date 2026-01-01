@@ -2,17 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { LeaderboardEntry } from '../types';
-import { Crown, Trophy, User, ArrowUp, ArrowDown, Minus, ShieldCheck, Crosshair, Skull, Swords, X, Flame, Medal, Star, Zap, Heart, UserPlus, Bell, Check } from 'lucide-react';
+import { Crown, Trophy, User, ArrowUp, ArrowDown, Minus, ShieldCheck, Crosshair, Skull, Swords, X, Flame, Medal, Star, Zap, Heart, UserPlus, Bell, Check, Award, BadgeCheck, MessageCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge, Card, Button, Modal, ModalHeader, ModalBody, ModalFooter } from '../components/UI';
 import { useAuth } from '../contexts/AuthContext';
 
 const Leaderboard: React.FC = () => {
-  const { toggleFollow, toggleLike, sendFriendRequest, userProfile } = useAuth();
+  const { toggleFollow, toggleLike, sendFriendRequest, removeFriend, userProfile } = useAuth();
   const [timeFilter, setTimeFilter] = useState<'weekly' | 'all_time'>('weekly');
   const [selectedPlayer, setSelectedPlayer] = useState<LeaderboardEntry | null>(null);
 
-  // Initial Data
+  // Initial Data (Mocked with new fields)
   const [players, setPlayers] = useState<LeaderboardEntry[]>([
     { 
       uid: '1', 
@@ -27,8 +27,10 @@ const Leaderboard: React.FC = () => {
       trend: 'same',
       isVip: true,
       isAdmin: true,
+      isVerified: true,
+      customTag: 'RK ESPORTS OWNER',
       likes: 1200,
-      followersCount: 500,
+      activeBadge: { name: 'Verified', icon: 'shield', color: 'blue' },
       achievements: ['Sharpshooter', 'Berserker', 'Richie Rich']
     },
     { 
@@ -43,8 +45,9 @@ const Leaderboard: React.FC = () => {
       headshotRate: 45,
       trend: 'up',
       isVip: true,
+      isVerified: true,
       likes: 850,
-      followersCount: 320,
+      activeBadge: { name: 'VIP Member', icon: 'star', color: 'purple' },
       achievements: ['Rising Star']
     },
     { 
@@ -59,7 +62,7 @@ const Leaderboard: React.FC = () => {
       headshotRate: 32,
       trend: 'down',
       likes: 400,
-      followersCount: 150,
+      activeBadge: { name: 'Sniper King', icon: 'crosshair', color: 'green' },
       achievements: ['Grinder']
     },
     { 
@@ -112,34 +115,40 @@ const Leaderboard: React.FC = () => {
   const isFriend = (uid: string) => {
       return userProfile?.friends?.includes(uid);
   };
+  
+  const isRequestSent = (uid: string) => {
+      return userProfile?.friendRequestsSent?.includes(uid);
+  }
 
-  const handleSocialAction = async (type: 'like' | 'follow' | 'friend') => {
+  const handleSocialAction = async (type: 'like' | 'friend' | 'delete_friend') => {
       if(!selectedPlayer) return;
       
       if (type === 'like') {
-          // Increment locally immediately
-          const newLikes = (selectedPlayer.likes || 0) + 1;
-          const updatedPlayer = { ...selectedPlayer, likes: newLikes };
-          setSelectedPlayer(updatedPlayer);
+          // Check local storage to see if already liked
+          const storedLikes = localStorage.getItem('my_liked_users');
+          const likedList = storedLikes ? JSON.parse(storedLikes) : [];
           
-          setPlayers(prev => prev.map(p => p.uid === selectedPlayer.uid ? updatedPlayer : p));
-          
-          await toggleLike(selectedPlayer.uid);
-      } 
-      else if (type === 'follow') {
-          // Toggle follow count mock
-          const isFollowing = false; // Mock toggle state
-          const newCount = (selectedPlayer.followersCount || 0) + (isFollowing ? -1 : 1);
-          const updatedPlayer = { ...selectedPlayer, followersCount: newCount };
-          setSelectedPlayer(updatedPlayer);
-          setPlayers(prev => prev.map(p => p.uid === selectedPlayer.uid ? updatedPlayer : p));
-          
-          await toggleFollow(selectedPlayer.uid);
-          alert(`Followed ${selectedPlayer.name}!`);
+          if(!likedList.includes(selectedPlayer.uid)) {
+              // Increment locally immediately
+              const newLikes = (selectedPlayer.likes || 0) + 1;
+              const updatedPlayer = { ...selectedPlayer, likes: newLikes };
+              setSelectedPlayer(updatedPlayer);
+              setPlayers(prev => prev.map(p => p.uid === selectedPlayer.uid ? updatedPlayer : p));
+              await toggleLike(selectedPlayer.uid);
+          } else {
+              // Already liked visual feedback
+              alert("You have already liked this player!");
+          }
       } 
       else if (type === 'friend') {
           await sendFriendRequest(selectedPlayer.uid);
-          // Force re-render to update "Add" to "Added" state based on userProfile change in context
+      }
+      else if (type === 'delete_friend') {
+          if(confirm("Are you sure you want to remove this friend?")) {
+            await removeFriend(selectedPlayer.uid);
+            // Update local state to reflect removal immediately
+            setSelectedPlayer({...selectedPlayer}); 
+          }
       }
   };
 
@@ -189,8 +198,11 @@ const Leaderboard: React.FC = () => {
               </div>
               
               <div className="mt-4 text-center w-full">
-                  <p className="text-xs font-bold text-white truncate px-1">{topPlayers[1].name}</p>
-                  <p className="text-[9px] text-gray-400 truncate">{topPlayers[1].clan}</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <p className="text-xs font-bold text-white truncate px-1">{topPlayers[1].name}</p>
+                    {topPlayers[1].isVerified && <BadgeCheck size={12} className="text-blue-500 fill-blue-500/20" />}
+                  </div>
+                  <p className="text-[9px] text-yellow-400 font-bold truncate">{topPlayers[1].clan}</p>
                   <p className="text-xs font-black text-brand-gold mt-0.5">₹{topPlayers[1].earnings}</p>
               </div>
               <div className="w-full sm:w-24 h-24 bg-gradient-to-t from-gray-900/80 to-gray-800/20 mt-2 rounded-t-2xl border-x border-t border-white/5 backdrop-blur-sm"></div>
@@ -219,9 +231,9 @@ const Leaderboard: React.FC = () => {
               <div className="mt-4 sm:mt-5 text-center w-full">
                   <div className="flex items-center gap-1 justify-center flex-wrap">
                      <p className="text-xs sm:text-sm font-black text-white truncate px-1">{topPlayers[0].name}</p>
-                     {topPlayers[0].isVip && <Badge color="purple">VIP</Badge>}
+                     {topPlayers[0].isVerified && <BadgeCheck size={14} className="text-blue-500 fill-blue-500/20" />}
                   </div>
-                  <p className="text-[9px] sm:text-[10px] text-brand-gold font-bold truncate">{topPlayers[0].clan}</p>
+                  <p className="text-[9px] sm:text-[10px] text-yellow-400 font-bold truncate tracking-wide">{topPlayers[0].clan}</p>
                   <p className="text-base sm:text-xl font-black text-brand-gold mt-0.5 drop-shadow-md">₹{topPlayers[0].earnings}</p>
               </div>
               <div className="w-full sm:w-32 h-36 bg-gradient-to-t from-brand-gold/10 to-brand-gold/5 mt-2 rounded-t-2xl border-x border-t border-brand-gold/20 backdrop-blur-sm relative overflow-hidden">
@@ -243,8 +255,11 @@ const Leaderboard: React.FC = () => {
               </div>
               
               <div className="mt-4 text-center w-full">
-                  <p className="text-xs font-bold text-white truncate px-1">{topPlayers[2].name}</p>
-                  <p className="text-[9px] text-gray-400 truncate">{topPlayers[2].clan}</p>
+                  <div className="flex items-center justify-center gap-1">
+                     <p className="text-xs font-bold text-white truncate px-1">{topPlayers[2].name}</p>
+                     {topPlayers[2].isVerified && <BadgeCheck size={12} className="text-blue-500 fill-blue-500/20" />}
+                  </div>
+                  <p className="text-[9px] text-yellow-400 font-bold truncate">{topPlayers[2].clan}</p>
                   <p className="text-xs font-black text-brand-gold mt-0.5">₹{topPlayers[2].earnings}</p>
               </div>
               <div className="w-full sm:w-24 h-20 bg-gradient-to-t from-gray-900/80 to-gray-800/20 mt-2 rounded-t-2xl border-x border-t border-white/5 backdrop-blur-sm"></div>
@@ -281,10 +296,11 @@ const Leaderboard: React.FC = () => {
                 <div className="flex-1 min-w-0">
                    <div className="flex items-center gap-2">
                        <p className="font-bold text-white truncate text-sm">{player.name}</p>
+                       {player.isVerified && <BadgeCheck size={14} className="text-blue-500 fill-blue-500/20" />}
                        {player.isVip && <Badge color="purple">VIP</Badge>}
                    </div>
-                   <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                       <ShieldCheck size={10} className="text-brand-500"/> {player.clan}
+                   <p className="text-[10px] text-yellow-500 font-bold flex items-center gap-1">
+                       {player.clan}
                    </p>
                 </div>
 
@@ -318,57 +334,86 @@ const Leaderboard: React.FC = () => {
 
                   {/* Profile Info */}
                   <div className="px-6 -mt-14 flex flex-col items-center relative z-10 mb-6">
-                      <div className="w-28 h-28 rounded-full border-4 border-brand-900 p-1 bg-black shadow-xl">
+                      <div className="w-28 h-28 rounded-full border-4 border-brand-900 p-1 bg-black shadow-xl relative">
                           <img src={selectedPlayer.photoURL || ''} className="w-full h-full rounded-full object-cover" alt="" />
                       </div>
+                      
+                      {/* Name + Verified Tick */}
                       <h2 className="text-2xl font-bold text-white mt-3 flex items-center gap-2 text-center">
                           {selectedPlayer.name}
-                          {selectedPlayer.isAdmin && <ShieldCheck size={20} className="text-blue-500 fill-blue-500/20" />}
+                          {selectedPlayer.isVerified && <BadgeCheck size={20} className="text-blue-500 fill-blue-500/20" />}
                       </h2>
-                      <p className="text-brand-gold font-display font-bold text-sm tracking-widest">{selectedPlayer.clan}</p>
                       
-                      <div className="flex flex-wrap gap-2 justify-center mt-2">
-                        {selectedPlayer.isAdmin ? (
-                            <Badge color="red">RK ESPORTS OWNER</Badge>
-                        ) : (
-                            selectedPlayer.isVip && <Badge color="purple">VIP MEMBER</Badge>
-                        )}
-                      </div>
+                      {/* Yellow Clan Name */}
+                      <p className="text-yellow-400 font-display font-bold text-sm tracking-widest mt-0.5">{selectedPlayer.clan}</p>
+                      
+                      {/* Red Custom Owner/Admin Tag */}
+                      {selectedPlayer.customTag && (
+                          <div className="mt-2 bg-brand-500/10 border border-brand-500/20 px-3 py-0.5 rounded">
+                              <span className="text-[10px] font-black text-brand-500 uppercase tracking-wider shadow-sm">{selectedPlayer.customTag}</span>
+                          </div>
+                      )}
                       
                       {/* --- SOCIAL ACTIONS --- */}
                       <div className="flex items-center gap-4 mt-6">
+                          
+                          {/* LIKE BUTTON (Persistent) */}
                           <button 
                              onClick={() => handleSocialAction('like')}
                              className="flex flex-col items-center gap-1 group active:scale-90 transition-transform"
                           >
                               <div className="w-10 h-10 rounded-full bg-brand-800 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:bg-red-500/10 transition-colors">
-                                  <Heart size={18} />
+                                  <Heart size={18} className={localStorage.getItem('my_liked_users')?.includes(selectedPlayer.uid) ? 'fill-red-500 text-red-500' : ''} />
                               </div>
                               <span className="text-[10px] font-bold text-gray-400">{selectedPlayer.likes || 0}</span>
                           </button>
                           
-                          <button 
-                             onClick={() => handleSocialAction('follow')}
-                             className="flex flex-col items-center gap-1 group active:scale-90 transition-transform"
-                          >
-                              <div className="w-10 h-10 rounded-full bg-brand-800 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-blue-500 group-hover:bg-blue-500/10 transition-colors">
-                                  <Bell size={18} />
+                          {/* BADGES DISPLAY (Modified: Icon + Name only, No Number) */}
+                          <div className="flex flex-col items-center gap-1 group">
+                              <div className={`w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-${selectedPlayer.activeBadge?.color || 'brand'}-500/10 text-${selectedPlayer.activeBadge?.color || 'brand'}-500`}>
+                                  {selectedPlayer.activeBadge ? (
+                                      <Award size={18} /> // In real app, render dynamic icon based on badge string
+                                  ) : (
+                                      <Award size={18} className="text-gray-600" />
+                                  )}
                               </div>
-                              <span className="text-[10px] font-bold text-gray-400">{selectedPlayer.followersCount || 0}</span>
-                          </button>
+                              <span className="text-[10px] font-bold text-gray-400 uppercase">{selectedPlayer.activeBadge?.name || 'No Badge'}</span>
+                          </div>
 
+                          {/* FRIEND BUTTON LOGIC */}
                           <button 
-                             onClick={() => !isFriend(selectedPlayer.uid) && handleSocialAction('friend')}
+                             onClick={() => {
+                                 if(isFriend(selectedPlayer.uid)) {
+                                     // If friend, offer delete or chat
+                                     handleSocialAction('delete_friend');
+                                 } else if (!isRequestSent(selectedPlayer.uid)) {
+                                     handleSocialAction('friend');
+                                 }
+                             }}
                              className="flex flex-col items-center gap-1 group active:scale-90 transition-transform disabled:opacity-70"
-                             disabled={isFriend(selectedPlayer.uid)}
+                             disabled={isRequestSent(selectedPlayer.uid)}
                           >
-                              <div className={`w-10 h-10 rounded-full border border-white/10 flex items-center justify-center transition-colors ${isFriend(selectedPlayer.uid) ? 'bg-green-500/20 text-green-500 border-green-500/30' : 'bg-brand-800 text-gray-400 group-hover:text-green-500 group-hover:bg-green-500/10'}`}>
-                                  {isFriend(selectedPlayer.uid) ? <Check size={18}/> : <UserPlus size={18} />}
+                              <div className={`w-10 h-10 rounded-full border border-white/10 flex items-center justify-center transition-colors ${
+                                  isFriend(selectedPlayer.uid) ? 'bg-green-500/20 text-green-500 border-green-500/30' : 
+                                  isRequestSent(selectedPlayer.uid) ? 'bg-gray-700 text-gray-400' :
+                                  'bg-brand-800 text-gray-400 group-hover:text-green-500 group-hover:bg-green-500/10'
+                              }`}>
+                                  {isFriend(selectedPlayer.uid) ? <Trash2 size={16}/> : isRequestSent(selectedPlayer.uid) ? <Check size={18}/> : <UserPlus size={18} />}
                               </div>
                               <span className={`text-[10px] font-bold ${isFriend(selectedPlayer.uid) ? 'text-green-500' : 'text-gray-400'}`}>
-                                  {isFriend(selectedPlayer.uid) ? 'Added' : 'Add'}
+                                  {isFriend(selectedPlayer.uid) ? 'Remove' : isRequestSent(selectedPlayer.uid) ? 'Requested' : 'Add'}
                               </span>
                           </button>
+
+                          {/* Chat Button (Only if friend) */}
+                          {isFriend(selectedPlayer.uid) && (
+                              <button className="flex flex-col items-center gap-1 group active:scale-90 transition-transform">
+                                  <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 flex items-center justify-center">
+                                      <MessageCircle size={18} />
+                                  </div>
+                                  <span className="text-[10px] font-bold text-blue-500">Chat</span>
+                              </button>
+                          )}
                       </div>
                   </div>
 
@@ -409,4 +454,25 @@ const Leaderboard: React.FC = () => {
                                       <span className="text-[10px] font-bold text-gray-200">{ach}</span>
                                   </div>
                               ))
-                          
+                          ) : (
+                              <p className="text-xs text-gray-600 italic">No achievements unlocked yet.</p>
+                          )}
+                      </div>
+                  </div>
+
+                  {/* Footer Info */}
+                  <div className="bg-black/30 p-4 text-center border-t border-white/5 shrink-0 mt-auto pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+                      <div className="flex items-center justify-center gap-2 text-gray-400 text-xs">
+                          <Flame size={14} className="text-orange-500" />
+                          <span>Trending: {selectedPlayer.trend.toUpperCase()} this week</span>
+                      </div>
+                  </div>
+              </div>
+           </Modal>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default Leaderboard;

@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, Button, Input, Badge } from '../components/UI';
+import { Card, Button, Input, Badge, TextArea } from '../components/UI';
 import { 
   User, Shield, Bell, Smartphone, Monitor, Globe, 
   CreditCard, Lock, LogOut, ChevronRight, Moon, 
   Volume2, Zap, RefreshCw, HelpCircle, FileText,
   Gamepad2, Camera, Mail, Edit3, Trash2, X, Save, Share2, Gift, Copy, CheckCircle, AlertTriangle, Users, Star, ShoppingBag, ShieldCheck, Crosshair,
-  UserPlus, UserMinus
+  UserPlus, UserMinus, Sliders, Medal, Code, ExternalLink, Link as LinkIcon, Plus, Upload, FileBarChart, Info,
+  Facebook, Twitter, Instagram, Youtube, MessageCircle, Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -128,7 +129,7 @@ const Settings: React.FC = () => {
   
   // Modals state
   const [activeModal, setActiveModal] = useState<
-    'profile' | 'phone' | 'password' | 'delete' | 'refer' | 'terms' | 'ff_details' | 'badges' | 'my_team' | 'friends' | null
+    'profile' | 'phone' | 'password' | 'delete' | 'refer' | 'terms' | 'ff_details' | 'badges' | 'my_team' | 'friends' | 'request_stats' | 'achievements' | 'developer' | 'social_media' | null
   >(null);
   
   // State for toggles with persistence
@@ -142,7 +143,29 @@ const Settings: React.FC = () => {
     twoFactor: false,
   });
 
+  // Developer Info State (Read Only in User App)
+  const [devInfo, setDevInfo] = useState({
+      name: "RK OFFICIAL",
+      image: "https://i.pinimg.com/736x/2e/0f/50/2e0f50b4313d3d63c224c6e9196b6307.jpg",
+      bio: "Owner of RK Esports Platform. We host daily free fire tournaments. Download our other apps below.",
+      apps: [
+          { name: "RK Shop", url: "https://google.com" },
+          { name: "Status Saver", url: "https://google.com" }
+      ]
+  });
+  
+  // Social Media Links (Read Only - Managed by Admin App)
+  const socialLinks = [
+      { id: 'whatsapp', name: 'WhatsApp Group', url: 'https://chat.whatsapp.com/example', icon: <MessageCircle size={20} />, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+      { id: 'telegram', name: 'Telegram Channel', url: 'https://t.me/example', icon: <Send size={20} />, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+      { id: 'instagram', name: 'Instagram', url: 'https://instagram.com/example', icon: <Instagram size={20} />, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+      { id: 'youtube', name: 'YouTube', url: 'https://youtube.com/example', icon: <Youtube size={20} />, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20' },
+      { id: 'facebook', name: 'Facebook', url: 'https://facebook.com/example', icon: <Facebook size={20} />, color: 'text-blue-600', bg: 'bg-blue-600/10', border: 'border-blue-600/20' },
+      { id: 'twitter', name: 'Twitter (X)', url: 'https://twitter.com/example', icon: <Twitter size={20} />, color: 'text-sky-500', bg: 'bg-sky-500/10', border: 'border-sky-500/20' },
+  ];
+  
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmMemberId, setConfirmMemberId] = useState<string | null>(null);
 
   // Edit States
   const [editName, setEditName] = useState('');
@@ -150,6 +173,17 @@ const Settings: React.FC = () => {
   const [editPhone, setEditPhone] = useState('');
   const [clanName, setClanName] = useState('');
   const [inviteUid, setInviteUid] = useState('');
+  
+  // Request Stats State
+  const [requestStatsData, setRequestStatsData] = useState({
+      kd: '',
+      headshot: '',
+      matches: '',
+      wins: ''
+  });
+  
+  // Achievements State
+  const [achievementsInput, setAchievementsInput] = useState('');
 
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -158,7 +192,23 @@ const Settings: React.FC = () => {
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
     }
+    
+    // Load Dev Info
+    const savedDevInfo = localStorage.getItem('app_dev_info');
+    if(savedDevInfo) {
+        const parsed = JSON.parse(savedDevInfo);
+        setDevInfo(parsed);
+    }
   }, []);
+  
+  useEffect(() => {
+      if(userProfile?.stats) {
+          setRequestStatsData(userProfile.stats);
+      }
+      if(userProfile?.achievements) {
+          setAchievementsInput(userProfile.achievements.join(', '));
+      }
+  }, [userProfile]);
 
   const toggle = (key: keyof typeof settings) => {
     const newSettings = { ...settings, [key]: !settings[key] };
@@ -186,6 +236,22 @@ const Settings: React.FC = () => {
     await updateUserProfile({ phone: editPhone });
     setActiveModal(null);
   };
+  
+  const handleRequestStats = async () => {
+      if(!requestStatsData.kd || !requestStatsData.headshot) {
+          alert("Please fill in the stats you want to display.");
+          return;
+      }
+      // Mock request logic
+      setActiveModal(null);
+      alert("Request Sent to Admin! \n\nOnce approved, your profile stats will be updated.");
+  };
+  
+  const handleSaveAchievements = async () => {
+      const arr = achievementsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
+      await updateUserProfile({ achievements: arr });
+      setActiveModal(null);
+  };
 
   // Team Logic
   const handleUpdateClanName = async () => {
@@ -208,13 +274,10 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleRemoveMember = async (uid: string, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if(window.confirm("Are you sure you want to remove this player?")) {
-          await removeTeamMember(uid);
-      }
-  }
+  const handleConfirmRemoveMember = async (uid: string) => {
+      await removeTeamMember(uid);
+      setConfirmMemberId(null);
+  };
 
   const copyReferral = () => {
       navigator.clipboard.writeText(userProfile?.referralCode || '');
@@ -269,7 +332,6 @@ const Settings: React.FC = () => {
   ];
 
   const handleBuyBadge = (badgeName: string, price: number) => {
-      // 916205557860 is the Admin Number
       const phoneNumber = "916205557860";
       const message = `Hello Admin, I want to purchase the *${badgeName}* Badge for ₹${price}.\n\nMy UID: ${userProfile?.uid || 'N/A'}\nMy Name: ${userProfile?.name || 'User'}\n\nPlease send QR Code for payment.`;
       
@@ -320,6 +382,151 @@ const Settings: React.FC = () => {
               </Button>
            </div>
         </Modal>
+        
+        <Modal 
+          isOpen={activeModal === 'achievements'} 
+          onClose={() => setActiveModal(null)} 
+          title="My Achievements"
+          icon={<Medal size={20} />}
+        >
+           <div className="space-y-4">
+              <p className="text-sm text-gray-400">Enter achievements separated by commas.</p>
+              <div>
+                  <label className="text-gray-400 text-xs uppercase font-bold mb-1 block">Tags / Titles</label>
+                  <Input 
+                    value={achievementsInput} 
+                    onChange={(e) => setAchievementsInput(e.target.value)} 
+                    placeholder="Sharpshooter, Rusher, MVP" 
+                  />
+              </div>
+              <Button onClick={handleSaveAchievements} className="mt-2">
+                  <Save size={18} /> Save Tags
+              </Button>
+           </div>
+        </Modal>
+
+        {/* --- SOCIAL MEDIA MODAL --- */}
+        <Modal 
+          isOpen={activeModal === 'social_media'} 
+          onClose={() => setActiveModal(null)} 
+          title="Follow Us"
+          icon={<Globe size={20} />}
+        >
+           <div className="space-y-4">
+               <p className="text-sm text-gray-400 text-center mb-4">
+                   Join our community on other platforms for daily updates and giveaways!
+               </p>
+               <div className="grid grid-cols-2 gap-3">
+                   {socialLinks.map((link) => (
+                       <a 
+                         key={link.id}
+                         href={link.url}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-transform active:scale-95 hover:brightness-110 ${link.bg} ${link.border} ${link.color}`}
+                       >
+                           {link.icon}
+                           <span className="text-xs font-bold text-white">{link.name}</span>
+                       </a>
+                   ))}
+               </div>
+           </div>
+        </Modal>
+
+        {/* --- REQUEST STATS UPDATE MODAL --- */}
+        <Modal 
+          isOpen={activeModal === 'request_stats'} 
+          onClose={() => setActiveModal(null)} 
+          title="Request Stat Update"
+          icon={<FileBarChart size={20} />}
+        >
+           <div className="space-y-4">
+              <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl flex gap-3">
+                  <Info size={20} className="text-blue-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-200 leading-relaxed">
+                      Enter your real in-game stats below. Admin will verify these with your uploaded profile screenshot.
+                  </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                  <div>
+                      <label className="text-gray-400 text-[10px] uppercase font-bold mb-2 block">K/D RATIO</label>
+                      <Input value={requestStatsData.kd} onChange={(e) => setRequestStatsData({...requestStatsData, kd: e.target.value})} placeholder="4.5" className="bg-black/30 border-white/5 focus:border-brand-500/50" />
+                  </div>
+                  <div>
+                      <label className="text-gray-400 text-[10px] uppercase font-bold mb-2 block">HEADSHOT %</label>
+                      <Input value={requestStatsData.headshot} onChange={(e) => setRequestStatsData({...requestStatsData, headshot: e.target.value})} placeholder="65" className="bg-black/30 border-white/5 focus:border-brand-500/50" />
+                  </div>
+                  <div>
+                      <label className="text-gray-400 text-[10px] uppercase font-bold mb-2 block">BOOYAHS</label>
+                      <Input value={requestStatsData.wins} onChange={(e) => setRequestStatsData({...requestStatsData, wins: e.target.value})} placeholder="10" className="bg-black/30 border-white/5 focus:border-brand-500/50" />
+                  </div>
+                  <div>
+                      <label className="text-gray-400 text-[10px] uppercase font-bold mb-2 block">MATCHES</label>
+                      <Input value={requestStatsData.matches} onChange={(e) => setRequestStatsData({...requestStatsData, matches: e.target.value})} placeholder="50" className="bg-black/30 border-white/5 focus:border-brand-500/50" />
+                  </div>
+              </div>
+
+              <div>
+                  <label className="text-gray-400 text-xs uppercase font-bold mb-2 block">Upload Screenshot</label>
+                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center text-gray-500 hover:text-white hover:border-brand-500/50 transition-colors cursor-pointer bg-black/20">
+                      <Upload size={24} className="mb-2" />
+                      <span className="text-xs font-bold">Tap to Upload Image</span>
+                  </div>
+              </div>
+
+              <Button onClick={handleRequestStats} className="mt-4">
+                  Submit Request
+              </Button>
+           </div>
+        </Modal>
+        
+        {/* --- DEVELOPER INFO MODAL (READ ONLY) --- */}
+        <Modal 
+          isOpen={activeModal === 'developer'} 
+          onClose={() => setActiveModal(null)} 
+          title="Developer Info"
+          icon={<Code size={20} />}
+        >
+           <div className="text-center space-y-6">
+               <div className="relative inline-block mt-2">
+                   <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-brand-500 to-purple-600 shadow-xl mx-auto">
+                       <img src={devInfo.image} alt="Developer" className="w-full h-full rounded-full object-cover border-2 border-black" />
+                   </div>
+                   <Badge color="red" className="absolute -bottom-2 left-1/2 -translate-x-1/2 shadow-lg">OWNER</Badge>
+               </div>
+               
+               <div>
+                   <h2 className="text-2xl font-bold text-white mb-1">{devInfo.name}</h2>
+                   <p className="text-sm text-gray-400 leading-relaxed px-4">{devInfo.bio}</p>
+               </div>
+               
+               <div className="space-y-3 bg-brand-800/30 p-4 rounded-xl border border-white/5">
+                   <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">More Apps by Developer</h4>
+                   {devInfo.apps.length > 0 ? (
+                       devInfo.apps.map((app, idx) => (
+                           <a 
+                             key={idx} 
+                             href={app.url} 
+                             target="_blank" 
+                             rel="noopener noreferrer"
+                             className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-colors group"
+                           >
+                               <div className="flex items-center gap-3">
+                                   <div className="w-8 h-8 rounded bg-brand-900 flex items-center justify-center text-brand-500">
+                                       <Smartphone size={16} />
+                                   </div>
+                                   <span className="text-sm font-bold text-white group-hover:text-brand-gold transition-colors">{app.name}</span>
+                               </div>
+                               <ExternalLink size={14} className="text-gray-500 group-hover:text-white" />
+                           </a>
+                       ))
+                   ) : (
+                       <p className="text-xs text-gray-600 italic">No other apps listed.</p>
+                   )}
+               </div>
+           </div>
+        </Modal>
 
         <Modal 
           isOpen={activeModal === 'my_team'} 
@@ -360,14 +567,45 @@ const Settings: React.FC = () => {
                                     <p className="text-[10px] text-brand-500">{member.role}</p>
                                 </div>
                             </div>
+                            
                             {member.uid !== userProfile?.uid && (
-                                <button 
-                                    onClick={(e) => handleRemoveMember(member.uid, e)} 
-                                    className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors active:scale-95 hover:text-red-400"
-                                    title="Remove Member"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                <div className="flex items-center">
+                                    {confirmMemberId === member.uid ? (
+                                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-5 duration-200">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleConfirmRemoveMember(member.uid);
+                                                }}
+                                                className="bg-red-500 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-red-500/20 active:scale-95 transition-all hover:bg-red-600"
+                                            >
+                                                Remove
+                                            </button>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setConfirmMemberId(null);
+                                                }}
+                                                className="bg-gray-700 text-gray-300 text-[10px] uppercase font-bold px-2 py-1.5 rounded-lg active:scale-95 transition-all hover:bg-gray-600"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setConfirmMemberId(member.uid);
+                                            }} 
+                                            className="text-red-500 hover:bg-red-500/10 p-3 -mr-2 rounded-xl transition-colors active:scale-90 hover:text-red-400 relative z-20"
+                                            title="Remove Member"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    )}
+                                </div>
                             )}
                         </div>
                      ))}
@@ -631,6 +869,7 @@ const Settings: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
             {/* --- SECTION: GAME CENTER --- */}
             <div className="space-y-2">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Game Center</h3>
@@ -648,10 +887,22 @@ const Settings: React.FC = () => {
                     onClick={() => setActiveModal('my_team')}
                   />
                   <SettingItem 
+                    icon={<FileBarChart size={20} />} 
+                    label="Request Stat Update" 
+                    subLabel="Update K/D & Headshot rate"
+                    onClick={() => setActiveModal('request_stats')}
+                  />
+                  <SettingItem 
                     icon={<UserPlus size={20} />} 
                     label="My Friends" 
                     subLabel={`${userProfile?.friends?.length || 0} Connections`}
                     onClick={() => setActiveModal('friends')}
+                  />
+                  <SettingItem 
+                    icon={<Medal size={20} />} 
+                    label="My Achievements" 
+                    subLabel="Edit your profile tags"
+                    onClick={() => setActiveModal('achievements')}
                   />
                   <SettingItem 
                     icon={<ShoppingBag size={20} />} 
@@ -737,10 +988,22 @@ const Settings: React.FC = () => {
               </Card>
             </div>
 
-            {/* --- SECTION: SUPPORT & LEGAL --- */}
+            {/* --- SECTION: COMMUNITY & SUPPORT --- */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Support</h3>
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Community & Support</h3>
               <Card className="!p-0 overflow-hidden bg-brand-800/50 backdrop-blur-md border border-white/5">
+                  <SettingItem 
+                    icon={<Globe size={20} />} 
+                    label="Social Media" 
+                    subLabel="Join our WhatsApp, Telegram & more"
+                    onClick={() => setActiveModal('social_media')} 
+                  />
+                  <SettingItem 
+                    icon={<Code size={20} />} 
+                    label="Developer Info" 
+                    subLabel="Owner Details & More Apps"
+                    onClick={() => setActiveModal('developer')} 
+                  />
                   <SettingItem 
                     icon={<HelpCircle size={20} />} 
                     label="Help Center" 

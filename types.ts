@@ -1,5 +1,4 @@
 
-
 export interface UserProfile {
   uid: string;
   name: string;
@@ -16,6 +15,11 @@ export interface UserProfile {
   photoURL?: string | null;
   referralCode?: string;
   
+  // Verification & Custom Tags
+  isVerified?: boolean;
+  customTag?: string; // The Red Text (e.g. Owner)
+  activeBadge?: { name: string; icon: string; color: string };
+
   // New Progression Features
   level?: number;
   xp?: number;
@@ -29,10 +33,19 @@ export interface UserProfile {
 
   // Social Features
   friends?: string[]; // List of UIDs
+  friendRequestsSent?: string[]; // List of UIDs
   followers?: string[]; // List of UIDs
   following?: string[]; // List of UIDs
   likes?: number;
   teamMembers?: { uid: string; name: string; role: 'Leader' | 'Member' }[];
+  
+  // Stats (Editable by Admin)
+  stats?: {
+      kd: string;
+      headshot: string;
+      matches: string;
+      wins: string;
+  }
 }
 
 export interface Advertisement {
@@ -124,8 +137,14 @@ export interface LeaderboardEntry {
   kdRatio: number;
   headshotRate: number;
   trend: 'up' | 'down' | 'same';
+  
+  // Roles & Badges
   isVip?: boolean;
   isAdmin?: boolean;
+  isVerified?: boolean; // Blue Tick
+  customTag?: string;   // Red Text
+  activeBadge?: { name: string; icon: string; color: string }; // The bought badge
+  
   achievements?: string[];
   
   // Social Stats for Leaderboard Display
@@ -133,6 +152,7 @@ export interface LeaderboardEntry {
   followersCount?: number;
   isFollowing?: boolean;
   isFriend?: boolean;
+  isRequested?: boolean; // If friend request sent
 }
 
 export interface AppSettings {
