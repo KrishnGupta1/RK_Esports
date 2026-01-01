@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { AIAssistant } from './AIAssistant';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { userProfile } = useAuth();
+  const { userProfile, notifications } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,6 +18,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { icon: <Wallet size={22} />, label: 'Wallet', path: '/wallet' },
     { icon: <User size={22} />, label: 'Profile', path: '/settings' },
   ];
+
+  const unreadCount = notifications ? notifications.filter(n => !n.read).length : 0;
 
   return (
     <div className="h-[100dvh] w-full bg-[#050505] selection:bg-brand-500 selection:text-white font-sans text-gray-100 flex flex-col md:flex-row overflow-hidden fixed inset-0">
@@ -102,18 +104,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             className="relative p-2 text-gray-400 hover:text-white transition-colors hover:bg-white/5 rounded-full active:bg-white/10"
           >
             <Bell size={22} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-brand-500 rounded-full border-2 border-black"></span>
+            {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-500 rounded-full border-2 border-black flex items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                </span>
+            )}
           </button>
         </div>
       </div>
 
       {/* --- MAIN CONTENT AREA --- */}
-      {/* 
-         GLOBAL FIX: 
-         1. h-full ensures it takes the remaining height inside the flex container.
-         2. pt-20 (5rem) ensures top bar clearance.
-         3. pb-32 (8rem) guarantees bottom clearance for Navbar + FABs + Safe Area.
-      */}
       <main className="flex-1 w-full relative z-10 overflow-y-auto overflow-x-hidden scroll-smooth pt-20 pb-32 md:pt-8 md:pb-8 md:pl-64">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {children}

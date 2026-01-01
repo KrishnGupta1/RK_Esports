@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { Card, Input, Button, TextArea } from '../components/UI';
 import { MessageSquare, Loader2, Image as ImageIcon, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHAsGV11ZIy7Vg53HPFIft8260HuoLT-t7JoBMOM49-Swy3yz0-dwNQa3AVQPTgNIXyw/exec";
 
 // SVGs for Logos
 const WhatsAppIcon = () => (
@@ -19,6 +20,24 @@ const TelegramIcon = () => (
   </svg>
 );
 
+// Helper to convert file to base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+       const str = reader.result as string;
+       // Remove prefix like "data:image/jpeg;base64,"
+       if(str.includes(',')) {
+         resolve(str.split(',')[1]);
+       } else {
+         resolve(str);
+       }
+    };
+    reader.onerror = error => reject(error);
+  });
+};
+
 const Support: React.FC = () => {
   const { userProfile } = useAuth();
   const [subject, setSubject] = useState('');
@@ -28,9 +47,9 @@ const Support: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Constants for support links
-  const WHATSAPP_LINK = "https://wa.me/916205557860";
-  const TELEGRAM_LINK = "https://t.me/rk_esports_support"; // Placeholder
+  // Community Links
+  const WHATSAPP_LINK = "https://chat.whatsapp.com/H6QE7np6vVdBDuNAE0VW4B";
+  const TELEGRAM_LINK = "https://t.me/+T8gGZkVbZyM2ZDQ1";
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -54,21 +73,45 @@ const Support: React.FC = () => {
     setLoading(true);
 
     try {
-      // In a real app, you would upload the image to Firebase Storage here and get the URL.
-      // For this mock/apps script implementation, we'll just send a note that an image was attached.
-      const payload = {
+      let uploadedImageUrl = 'No Attachment';
+
+      // 1. Upload Image if present
+      if (image) {
+         const base64Str = await fileToBase64(image);
+         const imgPayload = {
+             type: 'image',
+             image: base64Str,
+             uid: userProfile?.uid || 'guest'
+         };
+         
+         const imgRes = await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(imgPayload)
+         });
+         
+         if(imgRes.ok) {
+             const imgData = await imgRes.json();
+             // Assuming backend returns the url in 'url' or 'response' field
+             uploadedImageUrl = imgData.url || imgData.response || imgData.text || 'Upload Failed';
+         }
+      }
+
+      // 2. Submit Ticket
+      const ticketPayload = {
         uid: userProfile?.uid || 'unknown',
         role: userProfile?.role || 'user',
         name: userProfile?.name || 'User',
-        message: `[SUPPORT TICKET]\nSubject: ${subject}\nDetails: ${message}\nHas Image: ${image ? 'Yes' : 'No'}`,
-        type: 'support_ticket',
-        // imageBase64: imagePreview // Optional: send base64 if backend supports it
+        message: `[SUPPORT TICKET]\nSubject: ${subject}\nDetails: ${message}\nAttachment: ${uploadedImageUrl}`,
+        type: 'support_ticket', // Logs to Google Sheet
       };
 
       await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(ticketPayload)
       });
 
       setSubmitted(true);
@@ -99,7 +142,7 @@ const Support: React.FC = () => {
              <div className="p-2 bg-white/20 rounded-full">
                <WhatsAppIcon />
              </div>
-             <span className="font-bold text-sm">WhatsApp</span>
+             <span className="font-bold text-sm">Join Group</span>
            </a>
 
            <a 
@@ -111,7 +154,7 @@ const Support: React.FC = () => {
              <div className="p-2 bg-white/20 rounded-full">
                <TelegramIcon />
              </div>
-             <span className="font-bold text-sm">Telegram</span>
+             <span className="font-bold text-sm">Join Channel</span>
            </a>
         </div>
 

@@ -3,8 +3,27 @@ import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { Card, Button, Input } from '../components/UI';
 import { useAuth } from '../contexts/AuthContext';
-import { History, TrendingUp, TrendingDown, Ticket, Plus, ArrowUpRight, X, Smartphone, AlertCircle, Copy, CheckCircle, Download, Clock, Landmark, CreditCard, ShieldCheck, ChevronRight, ScanLine, AlertTriangle, Info, Clipboard } from 'lucide-react';
+import { History, TrendingUp, TrendingDown, Ticket, Plus, ArrowUpRight, X, Smartphone, AlertCircle, Copy, CheckCircle, Download, Clock, Landmark, CreditCard, ShieldCheck, ChevronRight, ScanLine, AlertTriangle, Info, Clipboard, Image as ImageIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHAsGV11ZIy7Vg53HPFIft8260HuoLT-t7JoBMOM49-Swy3yz0-dwNQa3AVQPTgNIXyw/exec";
+
+// Helper to convert file to base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+       const str = reader.result as string;
+       if(str.includes(',')) {
+         resolve(str.split(',')[1]);
+       } else {
+         resolve(str);
+       }
+    };
+    reader.onerror = error => reject(error);
+  });
+};
 
 const Wallet: React.FC = () => {
   const { userProfile, transactions, applyPromoCode, requestDeposit, withdrawMoney } = useAuth();
@@ -15,13 +34,16 @@ const Wallet: React.FC = () => {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
+  const [proofImage, setProofImage] = useState<File | null>(null);
   const [processingDeposit, setProcessingDeposit] = useState(false);
 
   // Withdraw State
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawMethod, setWithdrawMethod] = useState<'UPI' | 'Bank'>('UPI');
-  const [withdrawDetails, setWithdrawDetails] = useState(''); // UPI ID or Bank Account Details
+  const [withdrawDetails, setWithdrawDetails] = useState(''); // UPI ID or Bank Account Number
+  const [bankIfsc, setBankIfsc] = useState('');
+  const [bankName, setBankName] = useState('');
   const [processingWithdraw, setProcessingWithdraw] = useState(false);
   
   // UI State for Copy
@@ -52,39 +74,125 @@ const Wallet: React.FC = () => {
       }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+          setProofImage(e.target.files[0]);
+      }
+  };
+
   const handleDeposit = async () => {
       if(!depositAmount || !utrNumber) return;
       if(utrNumber.length !== 12) {
           alert("Please enter a valid 12-digit UTR number.");
           return;
       }
+      
       setProcessingDeposit(true);
-      await requestDeposit(Number(depositAmount), utrNumber, 'UPI');
-      setProcessingDeposit(false);
-      setShowDepositModal(false);
-      setDepositAmount('');
-      setUtrNumber('');
-      alert("Verification Submitted! Amount will be added after Admin verification (approx 10-30 mins).");
+      try {
+          let proofUrl = 'Not Provided';
+          
+          // 1. Upload Proof if exists
+          if (proofImage) {
+             const base64Str = await fileToBase64(proofImage);
+             const imgPayload = {
+                 type: 'image',
+                 image: base64Str,
+                 uid: userProfile?.uid || 'guest'
+             };
+             
+             const imgRes = await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                redirect: "follow",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(imgPayload)
+             });
+             
+             if(imgRes.ok) {
+                 const imgData = await imgRes.json();
+                 proofUrl = imgData.url || imgData.response || imgData.text || 'Upload Failed';
+             }
+          }
+
+          // 2. Log Deposit Request to Backend
+          const logPayload = {
+              type: 'deposit_log', // Log to sheet
+              uid: userProfile?.uid || 'unknown',
+              role: userProfile?.role || 'user',
+              input: `Deposit Request: ₹${depositAmount} | UTR: ${utrNumber} | Proof: ${proofUrl}`,
+              output: 'Pending Verification'
+          };
+
+          await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(logPayload)
+          });
+
+          // 3. Update Local State (Mock)
+          await requestDeposit(Number(depositAmount), utrNumber, 'UPI');
+          
+          setShowDepositModal(false);
+          setDepositAmount('');
+          setUtrNumber('');
+          setProofImage(null);
+          alert("Verification Submitted! Admin will verify UTR and Screenshot.");
+
+      } catch (error) {
+          console.error("Deposit Error:", error);
+          alert("Connection failed. Please check internet.");
+      } finally {
+          setProcessingDeposit(false);
+      }
   }
 
   const handleWithdraw = async () => {
       const amount = Number(withdrawAmount);
-      if(!amount || amount <= 0) return;
+      if(!amount) return;
+
+      // --- WITHDRAWAL LIMITS ---
+      if (amount < 100) {
+          alert("Minimum withdrawal amount is ₹100.");
+          return;
+      }
+      if (amount > 500) {
+          alert("Maximum withdrawal limit is ₹500 per day.");
+          return;
+      }
+
       if(amount > (userProfile?.coins || 0)) {
           alert("Insufficient Balance!");
           return;
       }
-      if(!withdrawDetails) {
-          alert("Please enter valid payment details.");
-          return;
+
+      let finalDetails = withdrawDetails;
+
+      if (withdrawMethod === 'Bank') {
+          if (!withdrawDetails || !bankIfsc || !bankName) {
+              alert("Please fill all bank details.");
+              return;
+          }
+          if (bankIfsc.length !== 11) {
+              alert("Invalid IFSC Code (Must be 11 characters)");
+              return;
+          }
+          finalDetails = `Ac: ${withdrawDetails} | IFSC: ${bankIfsc} | Name: ${bankName}`;
+      } else {
+          // UPI
+          if (!withdrawDetails) {
+              alert("Please enter a valid UPI ID");
+              return;
+          }
       }
 
       setProcessingWithdraw(true);
       try {
-        await withdrawMoney(amount, withdrawDetails, withdrawMethod);
+        await withdrawMoney(amount, finalDetails, withdrawMethod);
         setShowWithdrawModal(false);
         setWithdrawAmount('');
         setWithdrawDetails('');
+        setBankIfsc('');
+        setBankName('');
         alert("Withdrawal Request Submitted! It will be processed within 24 hours.");
       } catch (e: any) {
         alert(e.message);
@@ -92,6 +200,17 @@ const Wallet: React.FC = () => {
         setProcessingWithdraw(false);
       }
   }
+
+  // Handle Withdrawal Method Switch
+  const handleSwitchWithdrawMethod = (method: 'UPI' | 'Bank') => {
+      if (withdrawMethod === method) return;
+      setWithdrawMethod(method);
+      setWithdrawDetails(''); // Clear shared input (UPI ID or Account Number)
+      if (method === 'UPI') {
+          setBankIfsc('');
+          setBankName('');
+      }
+  };
 
   // UPI Configuration
   const UPI_ID = "6205557860@ybl";
@@ -233,20 +352,27 @@ const Wallet: React.FC = () => {
                         <p className="text-[10px] text-gray-400">Enter code to get instant bonus cash.</p>
                     </div>
                 </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <input 
-                       placeholder="Ex: RK2025" 
-                       value={promoCode} 
-                       onChange={e => setPromoCode(e.target.value)}
-                       className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-xs text-white placeholder-gray-600 focus:border-brand-500/50 outline-none w-full md:w-40 font-mono uppercase"
-                    />
-                    <button 
-                       onClick={handleApplyPromo} 
-                       disabled={applyingPromo || !promoCode} 
-                       className="bg-brand-800 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2 rounded-lg border border-white/10 transition-colors disabled:opacity-50"
-                    >
-                        APPLY
-                    </button>
+                <div className="flex flex-col w-full md:w-auto">
+                    <div className="flex gap-2">
+                        <input 
+                           placeholder="Ex: RK2025" 
+                           value={promoCode} 
+                           onChange={e => setPromoCode(e.target.value)}
+                           maxLength={20} // Limit promo code length
+                           className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-xs text-white placeholder-gray-600 focus:border-brand-500/50 outline-none w-full md:w-40 font-mono uppercase"
+                        />
+                        <button 
+                           onClick={handleApplyPromo} 
+                           disabled={applyingPromo || !promoCode} 
+                           className="bg-brand-800 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2 rounded-lg border border-white/10 transition-colors disabled:opacity-50"
+                        >
+                            APPLY
+                        </button>
+                    </div>
+                    {/* Character Count */}
+                    <p className="text-[10px] text-gray-500 text-right mt-1 pr-1 font-mono">
+                        {promoCode.length}/20
+                    </p>
                 </div>
             </div>
         </div>
@@ -299,7 +425,7 @@ const Wallet: React.FC = () => {
           </div>
         </div>
 
-        {/* --- DEPOSIT MODAL (SAFE LAYOUT FIX) --- */}
+        {/* --- DEPOSIT MODAL --- */}
         <AnimatePresence>
             {showDepositModal && (
                 <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -327,7 +453,7 @@ const Wallet: React.FC = () => {
                             <button onClick={() => setShowDepositModal(false)} className="bg-white/5 p-2 rounded-full text-gray-400 hover:text-white transition-colors"><X size={20}/></button>
                         </div>
 
-                        {/* Scrollable Content (Takes Space) */}
+                        {/* Scrollable Content */}
                         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8 pb-8">
                             
                             {/* QR Section */}
@@ -445,36 +571,61 @@ const Wallet: React.FC = () => {
                                     <span className="w-5 h-5 rounded-full bg-brand-800 border border-white/10 flex items-center justify-center text-[10px] text-white">3</span>
                                     Verify Transaction
                                 </label>
-                                <div className="relative">
-                                    <Input 
-                                        value={utrNumber} 
-                                        onChange={e => {
-                                            const val = e.target.value.replace(/\D/g, ''); // Remove non-digits
-                                            if (val.length <= 12) setUtrNumber(val);
-                                        }}
-                                        type="text"
-                                        inputMode="numeric"
-                                        placeholder="Enter 12 Digit UTR / Ref No." 
-                                        className="text-sm font-mono h-12 tracking-wide border-white/10 bg-black/50 pr-12"
-                                    />
-                                    <button 
-                                        onClick={handlePasteUTR}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-brand-500 hover:text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 rounded-lg transition-colors"
-                                        title="Paste UTR"
-                                    >
-                                        <Clipboard size={16} />
-                                    </button>
+                                <div className="space-y-4">
+                                    <div className="relative">
+                                        <Input 
+                                            value={utrNumber} 
+                                            onChange={e => {
+                                                const val = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                                                if (val.length <= 12) setUtrNumber(val);
+                                            }}
+                                            type="text"
+                                            inputMode="numeric"
+                                            placeholder="Enter 12 Digit UTR / Ref No." 
+                                            className="text-sm font-mono h-12 tracking-wide border-white/10 bg-black/50 pr-12"
+                                        />
+                                        <button 
+                                            onClick={handlePasteUTR}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-brand-500 hover:text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 rounded-lg transition-colors"
+                                            title="Paste UTR"
+                                        >
+                                            <Clipboard size={16} />
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 text-right mt-1">{utrNumber.length}/12</p>
+                                    
+                                    {/* Proof Upload */}
+                                    <div className="relative">
+                                        <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Payment Screenshot (Optional)</label>
+                                        <input 
+                                            type="file" 
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                            id="proof-upload"
+                                        />
+                                        <label 
+                                            htmlFor="proof-upload"
+                                            className={`flex items-center justify-between p-3 rounded-xl border border-dashed cursor-pointer transition-colors ${proofImage ? 'bg-green-500/10 border-green-500/30 text-green-500' : 'bg-black/30 border-white/10 text-gray-400 hover:border-brand-500/50'}`}
+                                        >
+                                            <span className="text-xs font-medium truncate flex-1 mr-2">
+                                                {proofImage ? proofImage.name : "Click to upload proof"}
+                                            </span>
+                                            {proofImage ? <CheckCircle size={16} /> : <ImageIcon size={16} />}
+                                        </label>
+                                    </div>
                                 </div>
+                                
                                 <div className="mt-3 flex gap-2 items-start">
                                     <AlertTriangle size={14} className="text-yellow-500 shrink-0 mt-0.5" />
                                     <p className="text-[10px] text-gray-400 leading-relaxed">
-                                        Please ensure the UTR is correct. Incorrect details may lead to manual verification delays or rejection.
+                                        Ensure UTR is correct. Uploading a screenshot speeds up verification.
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Fixed Footer - Lifted Up with pb-20 */}
+                        {/* Fixed Footer */}
                         <div className="p-6 border-t border-white/10 bg-[#141416] shrink-0 z-20 pb-20">
                             <Button onClick={handleDeposit} disabled={processingDeposit || utrNumber.length !== 12 || !depositAmount} className="h-14 text-lg font-black tracking-wider w-full shadow-xl">
                                 {processingDeposit ? 'VERIFYING...' : 'SUBMIT REQUEST'}
@@ -485,7 +636,7 @@ const Wallet: React.FC = () => {
             )}
         </AnimatePresence>
 
-        {/* Withdrawal Modal (SAFE LAYOUT FIX) */}
+        {/* Withdrawal Modal */}
         <AnimatePresence>
             {showWithdrawModal && (
                 <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -532,6 +683,7 @@ const Wallet: React.FC = () => {
                                         className="pl-8 text-xl font-bold text-white bg-black/40 h-14 border-white/10 focus:border-white/30"
                                     />
                                 </div>
+                                <p className="text-[10px] text-gray-500 mt-1">Min: ₹100 | Max: ₹500 per day</p>
                             </div>
 
                             {/* Method Selection */}
@@ -539,14 +691,14 @@ const Wallet: React.FC = () => {
                                 <label className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-3 block">Transfer Method</label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button 
-                                        onClick={() => setWithdrawMethod('UPI')}
+                                        onClick={() => handleSwitchWithdrawMethod('UPI')}
                                         className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${withdrawMethod === 'UPI' ? 'bg-white text-black border-white shadow-lg' : 'bg-brand-800/50 border-white/5 text-gray-400 hover:bg-brand-800'}`}
                                     >
                                         <Smartphone size={24} />
                                         <span className="text-xs font-bold">UPI Transfer</span>
                                     </button>
                                     <button 
-                                        onClick={() => setWithdrawMethod('Bank')}
+                                        onClick={() => handleSwitchWithdrawMethod('Bank')}
                                         className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${withdrawMethod === 'Bank' ? 'bg-white text-black border-white shadow-lg' : 'bg-brand-800/50 border-white/5 text-gray-400 hover:bg-brand-800'}`}
                                     >
                                         <Landmark size={24} />
@@ -561,22 +713,48 @@ const Wallet: React.FC = () => {
                                     {withdrawMethod === 'UPI' ? 'Recipient Details' : 'Bank Account Details'}
                                 </label>
                                 {withdrawMethod === 'UPI' ? (
-                                    <Input 
-                                        placeholder="Enter UPI ID (e.g. 9876543210@ybl)" 
-                                        value={withdrawDetails}
-                                        onChange={e => setWithdrawDetails(e.target.value)}
-                                        className="bg-black/50 border-white/10"
-                                    />
-                                ) : (
-                                    <div className="space-y-3">
+                                    <div>
                                         <Input 
-                                            placeholder="Account Number" 
+                                            placeholder="Enter UPI ID (e.g. 9876543210@ybl)" 
                                             value={withdrawDetails}
                                             onChange={e => setWithdrawDetails(e.target.value)}
+                                            maxLength={50} // Limit UPI ID length
                                             className="bg-black/50 border-white/10"
                                         />
-                                        <Input placeholder="IFSC Code" className="bg-black/50 border-white/10" />
-                                        <Input placeholder="Account Holder Name" className="bg-black/50 border-white/10" />
+                                        <p className="text-[10px] text-gray-500 text-right mt-1">{withdrawDetails.length}/50</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div>
+                                            <Input 
+                                                placeholder="Account Number" 
+                                                value={withdrawDetails}
+                                                onChange={e => setWithdrawDetails(e.target.value)}
+                                                maxLength={18} // Limit Account Number length
+                                                className="bg-black/50 border-white/10"
+                                            />
+                                            <p className="text-[10px] text-gray-500 text-right mt-1">{withdrawDetails.length}/18</p>
+                                        </div>
+                                        <div>
+                                            <Input 
+                                                placeholder="IFSC Code" 
+                                                value={bankIfsc}
+                                                onChange={e => setBankIfsc(e.target.value.toUpperCase())}
+                                                maxLength={11} // Limit IFSC Code length
+                                                className="bg-black/50 border-white/10" 
+                                            />
+                                            <p className="text-[10px] text-gray-500 text-right mt-1">{bankIfsc.length}/11</p>
+                                        </div>
+                                        <div>
+                                            <Input 
+                                                placeholder="Account Holder Name" 
+                                                value={bankName}
+                                                onChange={e => setBankName(e.target.value)}
+                                                maxLength={40} // Limit Account Holder Name length
+                                                className="bg-black/50 border-white/10" 
+                                            />
+                                            <p className="text-[10px] text-gray-500 text-right mt-1">{bankName.length}/40</p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -589,11 +767,11 @@ const Wallet: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Fixed Footer - Lifted Up with pb-20 */}
+                        {/* Fixed Footer */}
                         <div className="p-6 border-t border-white/10 bg-[#141416] shrink-0 z-20 pb-20">
                             <Button 
                                 onClick={handleWithdraw} 
-                                disabled={processingWithdraw || !withdrawAmount || !withdrawDetails}
+                                disabled={processingWithdraw || !withdrawAmount || (withdrawMethod === 'UPI' ? !withdrawDetails : (!withdrawDetails || !bankIfsc || !bankName))}
                                 className="h-14 text-lg w-full font-black tracking-wide"
                             >
                                 {processingWithdraw ? 'PROCESSING...' : 'CONFIRM WITHDRAWAL'}

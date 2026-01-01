@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { UserProfile, Tournament, Transaction, Advertisement } from '../types';
+import { UserProfile, Tournament, Transaction, Advertisement, Notification } from '../types';
 
 interface MockUser {
   uid: string;
@@ -16,6 +16,7 @@ interface AuthContextType {
   tournaments: Tournament[];
   transactions: Transaction[];
   advertisements: Advertisement[];
+  notifications: Notification[];
   loginWithGoogle: () => Promise<void>;
   setupRecaptcha: (elementId: string) => void;
   sendOtp: (phoneNumber: string) => Promise<void>;
@@ -28,6 +29,13 @@ interface AuthContextType {
   withdrawMoney: (amount: number, details: string, method: string) => Promise<void>;
   refreshMatchData: (tournamentId: string) => Promise<Tournament | null>;
   applyPromoCode: (code: string) => Promise<number>;
+  
+  // Social Actions
+  inviteToTeam: (uid: string) => Promise<void>;
+  removeTeamMember: (uid: string) => Promise<void>;
+  sendFriendRequest: (uid: string) => Promise<void>;
+  toggleFollow: (uid: string) => Promise<boolean>; // Returns new follow state
+  toggleLike: (uid: string) => Promise<boolean>; // Returns new like state
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -54,6 +62,33 @@ const INITIAL_ADS: Advertisement[] = [
     title: 'Join Discord',
     active: true
   }
+];
+
+const INITIAL_NOTIFICATIONS: Notification[] = [
+    {
+      id: '1',
+      title: 'Room ID Updated',
+      message: 'Room ID for Match #42 has been updated. Check details now.',
+      date: '10 mins ago',
+      read: false,
+      type: 'success'
+    },
+    {
+      id: '2',
+      title: 'Welcome to RK Esports',
+      message: 'Complete your profile to join your first tournament.',
+      date: '2 hours ago',
+      read: true,
+      type: 'info'
+    },
+    {
+      id: '3',
+      title: 'Maintenance Alert',
+      message: 'Servers will be down for 30 mins tonight at 2 AM.',
+      date: '1 day ago',
+      read: true,
+      type: 'warning'
+    }
 ];
 
 const INITIAL_TOURNAMENTS: Tournament[] = [
@@ -189,6 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [advertisements, setAdvertisements] = useState<Advertisement[]>(INITIAL_ADS);
+  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
 
   // --- REAL-TIME POLLING SIMULATION ---
   useEffect(() => {
@@ -222,7 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     initAuth();
 
-    // 2. Poll for updates every 3 seconds (Fast updates)
+    // 2. Poll for updates
     const intervalId = setInterval(() => {
         setTournaments(prevTournaments => {
             const now = new Date();
@@ -271,7 +307,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile = {
           uid, name: 'Demo Gamer', email: 'demo@gmail.com', provider: 'google', coins: 100, role: 'user', status: 'active',
           createdAt: new Date().toISOString(), lastLogin: new Date().toISOString(), photoURL: 'https://ui-avatars.com/api/?name=Demo+Gamer&background=ff2e4d&color=fff&bold=true', referralCode: 'RK' + Math.floor(1000 + Math.random() * 9000),
-          level: 1, xp: 0, maxXp: 1000
+          level: 1, xp: 0, maxXp: 1000,
+          friends: [], followers: [], following: [], likes: 0, teamMembers: [{ uid, name: 'Demo Gamer', role: 'Leader' }]
         };
         db[uid] = profile; saveMockDB(db);
       }
@@ -417,6 +454,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error("Invalid or Expired Code");
   };
 
+  // --- SOCIAL MOCK FUNCTIONS ---
+  const inviteToTeam = async (uid: string) => {
+      // In a real app, check if user exists in DB
+      await new Promise(r => setTimeout(r, 500));
+      if (!userProfile) return;
+      const currentTeam = userProfile.teamMembers || [];
+      if (currentTeam.length >= 4) throw new Error("Team is full (Max 4)");
+      if (currentTeam.find(m => m.uid === uid)) throw new Error("User already in team");
+      
+      const newTeam = [...currentTeam, { uid: uid, name: `Player_${uid.slice(0,4)}`, role: 'Member' as const }];
+      await updateUserProfile({ teamMembers: newTeam });
+  };
+
+  const removeTeamMember = async (uid: string) => {
+      if (!userProfile) return;
+      const newTeam = (userProfile.teamMembers || []).filter(m => m.uid !== uid);
+      await updateUserProfile({ teamMembers: newTeam });
+  };
+
+  const sendFriendRequest = async (uid: string) => {
+      // Logic: If already friend, do nothing. If not, add to friends list.
+      await new Promise(r => setTimeout(r, 500));
+      if (!userProfile) return;
+      const currentFriends = userProfile.friends || [];
+      
+      if (!currentFriends.includes(uid)) {
+          const newFriends = [...currentFriends, uid];
+          await updateUserProfile({ friends: newFriends });
+      }
+  };
+
+  const toggleFollow = async (uid: string) => {
+      await new Promise(r => setTimeout(r, 300));
+      if (!userProfile) return false;
+      const following = userProfile.following || [];
+      const isFollowing = following.includes(uid);
+      let newFollowing;
+      if (isFollowing) {
+          newFollowing = following.filter(id => id !== uid);
+      } else {
+          newFollowing = [...following, uid];
+      }
+      await updateUserProfile({ following: newFollowing });
+      return !isFollowing;
+  };
+
+  const toggleLike = async (uid: string) => {
+      await new Promise(r => setTimeout(r, 300));
+      // In a real app, this would increment the like count on the server.
+      // Here we just return true to simulate success.
+      return true;
+  };
+
   return (
     <AuthContext.Provider value={{ 
       currentUser, 
@@ -425,6 +515,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tournaments,
       transactions,
       advertisements,
+      notifications,
       loginWithGoogle, 
       setupRecaptcha, 
       sendOtp,
@@ -436,7 +527,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       requestDeposit,
       withdrawMoney,
       refreshMatchData,
-      applyPromoCode
+      applyPromoCode,
+      inviteToTeam,
+      removeTeamMember,
+      sendFriendRequest,
+      toggleFollow,
+      toggleLike
     }}>
       {children}
     </AuthContext.Provider>

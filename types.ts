@@ -1,4 +1,5 @@
 
+
 export interface UserProfile {
   uid: string;
   name: string;
@@ -25,6 +26,13 @@ export interface UserProfile {
   clanTag?: string;
   dailyLoginStreak?: number;
   lastDailyClaim?: string; // ISO Date
+
+  // Social Features
+  friends?: string[]; // List of UIDs
+  followers?: string[]; // List of UIDs
+  following?: string[]; // List of UIDs
+  likes?: number;
+  teamMembers?: { uid: string; name: string; role: 'Leader' | 'Member' }[];
 }
 
 export interface Advertisement {
@@ -119,6 +127,12 @@ export interface LeaderboardEntry {
   isVip?: boolean;
   isAdmin?: boolean;
   achievements?: string[];
+  
+  // Social Stats for Leaderboard Display
+  likes?: number;
+  followersCount?: number;
+  isFollowing?: boolean;
+  isFriend?: boolean;
 }
 
 export interface AppSettings {

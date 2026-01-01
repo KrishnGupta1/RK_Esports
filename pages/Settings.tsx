@@ -7,12 +7,13 @@ import {
   User, Shield, Bell, Smartphone, Monitor, Globe, 
   CreditCard, Lock, LogOut, ChevronRight, Moon, 
   Volume2, Zap, RefreshCw, HelpCircle, FileText,
-  Gamepad2, Camera, Mail, Edit3, Trash2, X, Save, Share2, Gift, Copy, CheckCircle, AlertTriangle
+  Gamepad2, Camera, Mail, Edit3, Trash2, X, Save, Share2, Gift, Copy, CheckCircle, AlertTriangle, Users, Star, ShoppingBag, ShieldCheck, Crosshair,
+  UserPlus, UserMinus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-// Reusable Setting Item Component
+// Reusable Setting Item Component (Optimized for clicking)
 const SettingItem: React.FC<{
   icon: React.ReactNode;
   label: string;
@@ -22,10 +23,16 @@ const SettingItem: React.FC<{
   isDestructive?: boolean;
 }> = ({ icon, label, subLabel, action, onClick, isDestructive }) => (
   <div 
-    onClick={onClick}
+    onClick={(e) => {
+        if (onClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+        }
+    }}
     className={`flex items-center justify-between p-4 border-b border-white/5 last:border-0 relative z-10 ${onClick ? 'cursor-pointer hover:bg-white/5 active:bg-white/10' : ''} transition-colors group ${isDestructive ? 'hover:bg-red-500/10' : ''}`}
   >
-    <div className="flex items-center gap-4 min-w-0">
+    <div className="flex items-center gap-4 min-w-0 pointer-events-none">
       <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors ${
         isDestructive 
           ? 'bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white' 
@@ -39,25 +46,28 @@ const SettingItem: React.FC<{
       </div>
     </div>
     <div className="text-gray-500 pl-2 shrink-0">
-      {action || (onClick && <ChevronRight size={18} />)}
+      {action ? (
+         <div onClick={(e) => e.stopPropagation()}>{action}</div>
+      ) : (onClick && <ChevronRight size={18} />)}
     </div>
   </div>
 );
 
-// Toggle Switch Component
+// Toggle Switch Component (Smoother)
 const Toggle: React.FC<{ checked: boolean; onChange: () => void }> = ({ checked, onChange }) => (
   <div 
-    onClick={(e) => { e.stopPropagation(); onChange(); }}
-    className={`w-11 h-6 rounded-full flex items-center p-1 cursor-pointer transition-colors duration-300 relative z-20 ${checked ? 'bg-brand-500' : 'bg-gray-700'}`}
+    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange(); }}
+    className={`w-11 h-6 rounded-full flex items-center p-1 cursor-pointer transition-colors duration-200 relative z-20 ${checked ? 'bg-brand-500' : 'bg-gray-700'}`}
   >
     <motion.div 
       layout
       className="w-4 h-4 bg-white rounded-full shadow-md"
+      transition={{ type: "spring", stiffness: 700, damping: 30 }}
     />
   </div>
 );
 
-// Improved Modal Component - Responsive Positioning with Safe Scroll Layout
+// Improved Modal Component
 const Modal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -102,8 +112,8 @@ const Modal: React.FC<{
              </button>
           </div>
           
-          {/* Content (Scrollable) - INCREASED BOTTOM PADDING TO pb-24 */}
-          <div className="p-6 overflow-y-auto flex-1 no-scrollbar pb-24">
+          {/* Content (Scrollable) */}
+          <div className="p-6 overflow-y-auto flex-1 no-scrollbar pb-24 relative z-10">
             {children}
           </div>
         </motion.div>
@@ -113,12 +123,12 @@ const Modal: React.FC<{
 );
 
 const Settings: React.FC = () => {
-  const { userProfile, logout, updateUserProfile } = useAuth();
+  const { userProfile, logout, updateUserProfile, inviteToTeam, removeTeamMember } = useAuth();
   const navigate = useNavigate();
   
   // Modals state
   const [activeModal, setActiveModal] = useState<
-    'profile' | 'phone' | 'password' | 'delete' | 'refer' | 'terms' | 'ff_details' | null
+    'profile' | 'phone' | 'password' | 'delete' | 'refer' | 'terms' | 'ff_details' | 'badges' | 'my_team' | 'friends' | null
   >(null);
   
   // State for toggles with persistence
@@ -126,12 +136,22 @@ const Settings: React.FC = () => {
     pushNotifs: true,
     emailNotifs: false,
     soundEffects: true,
-    haptic: true,    darkMode: true,
+    haptic: true,    
+    darkMode: true,
     showStats: true,
     twoFactor: false,
   });
 
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Edit States
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [clanName, setClanName] = useState('');
+  const [inviteUid, setInviteUid] = useState('');
+
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const savedSettings = localStorage.getItem('app_settings');
@@ -145,14 +165,6 @@ const Settings: React.FC = () => {
     setSettings(newSettings);
     localStorage.setItem('app_settings', JSON.stringify(newSettings));
   };
-
-  // Profile Edit State
-  const [editName, setEditName] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editPhone, setEditPhone] = useState('');
-
-  // Sync Animation State
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleOpenProfile = () => {
     setEditName(userProfile?.name || '');
@@ -174,6 +186,35 @@ const Settings: React.FC = () => {
     await updateUserProfile({ phone: editPhone });
     setActiveModal(null);
   };
+
+  // Team Logic
+  const handleUpdateClanName = async () => {
+    if(!clanName.trim()) {
+        alert("Enter Clan Name");
+        return;
+    }
+    await updateUserProfile({ clanTag: clanName });
+    alert("Clan Name Updated!");
+  };
+
+  const handleInviteToTeam = async () => {
+    if(!inviteUid) return;
+    try {
+        await inviteToTeam(inviteUid);
+        setInviteUid('');
+        alert("User invited to team!");
+    } catch (e: any) {
+        alert(e.message);
+    }
+  };
+
+  const handleRemoveMember = async (uid: string, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if(window.confirm("Are you sure you want to remove this player?")) {
+          await removeTeamMember(uid);
+      }
+  }
 
   const copyReferral = () => {
       navigator.clipboard.writeText(userProfile?.referralCode || '');
@@ -209,15 +250,31 @@ const Settings: React.FC = () => {
     setActiveModal(null);
   };
 
-  // Improved Delete Functionality
   const handleDeleteAccount = async () => {
       setIsDeleting(true);
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       setActiveModal(null);
       setIsDeleting(false);
       alert("Account deletion scheduled successfully. You have been logged out.");
-      logout(); // Force logout to show the action worked
+      logout();
+  };
+
+  // Badge Store Data
+  const badges = [
+      { id: 'vip', name: 'VIP Member', price: 500, color: 'purple', icon: <Star size={18} /> },
+      { id: 'influencer', name: 'Influencer', price: 1000, color: 'pink', icon: <Users size={18} /> },
+      { id: 'verified', name: 'Verified', price: 2000, color: 'blue', icon: <CheckCircle size={18} /> },
+      { id: 'sniper', name: 'Sniper King', price: 200, color: 'green', icon: <Crosshair size={18} /> },
+      { id: 'rusher', name: 'Rusher', price: 300, color: 'red', icon: <Zap size={18} /> },
+  ];
+
+  const handleBuyBadge = (badgeName: string, price: number) => {
+      // 916205557860 is the Admin Number
+      const phoneNumber = "916205557860";
+      const message = `Hello Admin, I want to purchase the *${badgeName}* Badge for ₹${price}.\n\nMy UID: ${userProfile?.uid || 'N/A'}\nMy Name: ${userProfile?.name || 'User'}\n\nPlease send QR Code for payment.`;
+      
+      const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
   };
 
   return (
@@ -261,6 +318,152 @@ const Settings: React.FC = () => {
               <Button onClick={handleSavePhone} className="mt-2">
                   <Save size={18} /> Update Number
               </Button>
+           </div>
+        </Modal>
+
+        <Modal 
+          isOpen={activeModal === 'my_team'} 
+          onClose={() => setActiveModal(null)} 
+          title="My Team & Clan"
+          icon={<Users size={20} />}
+        >
+           <div className="space-y-6">
+              {/* Clan Name Section */}
+              <div className="space-y-2">
+                 <label className="text-gray-400 text-xs uppercase font-bold block">Clan / Team Name</label>
+                 <div className="flex gap-2">
+                    <Input 
+                        value={clanName} 
+                        onChange={(e) => setClanName(e.target.value)} 
+                        placeholder={userProfile?.clanTag || "Set Clan Name"}
+                        maxLength={15}
+                    />
+                    <Button onClick={handleUpdateClanName} className="w-auto px-4"><Save size={18}/></Button>
+                 </div>
+              </div>
+
+              {/* Members Section */}
+              <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-gray-400 text-xs uppercase font-bold">Squad Members ({userProfile?.teamMembers?.length || 1}/4)</label>
+                  </div>
+                  
+                  <div className="bg-black/30 rounded-xl border border-white/5 overflow-hidden">
+                     {(userProfile?.teamMembers || []).map((member, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-brand-800 flex items-center justify-center text-xs font-bold shrink-0">
+                                    {member.name.charAt(0)}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-bold text-white truncate">{member.name}</p>
+                                    <p className="text-[10px] text-brand-500">{member.role}</p>
+                                </div>
+                            </div>
+                            {member.uid !== userProfile?.uid && (
+                                <button 
+                                    onClick={(e) => handleRemoveMember(member.uid, e)} 
+                                    className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors active:scale-95 hover:text-red-400"
+                                    title="Remove Member"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            )}
+                        </div>
+                     ))}
+                     {/* Empty Slots */}
+                     {Array.from({ length: 4 - (userProfile?.teamMembers?.length || 0) }).map((_, i) => (
+                         <div key={`empty-${i}`} className="p-3 border-b border-white/5 last:border-0 flex items-center gap-3 opacity-50">
+                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-dashed border-white/20">
+                                 <UserPlus size={14} />
+                             </div>
+                             <p className="text-xs text-gray-500">Empty Slot</p>
+                         </div>
+                     ))}
+                  </div>
+              </div>
+
+              {/* Invite Section */}
+              <div className="pt-2">
+                  <label className="text-gray-400 text-xs uppercase font-bold block mb-2">Invite Player</label>
+                  <div className="flex gap-2">
+                      <Input 
+                          value={inviteUid}
+                          onChange={(e) => setInviteUid(e.target.value)}
+                          placeholder="Enter Player UID"
+                      />
+                      <Button onClick={handleInviteToTeam} className="w-auto px-4 bg-brand-800 border border-white/10">Invite</Button>
+                  </div>
+              </div>
+           </div>
+        </Modal>
+
+        <Modal 
+          isOpen={activeModal === 'friends'} 
+          onClose={() => setActiveModal(null)} 
+          title="My Friends"
+          icon={<Users size={20} />}
+        >
+            <div className="space-y-4">
+               {userProfile?.friends && userProfile.friends.length > 0 ? (
+                   userProfile.friends.map(fid => (
+                       <div key={fid} className="flex items-center justify-between p-3 bg-brand-800/50 rounded-xl border border-white/5">
+                           <div className="flex items-center gap-3">
+                               <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                                   <User size={18} />
+                               </div>
+                               <div>
+                                   <p className="font-bold text-white text-sm">Player_{fid.slice(0,5)}</p>
+                                   <p className="text-[10px] text-green-500">Online</p>
+                               </div>
+                           </div>
+                           <Button variant="secondary" className="w-auto py-1 px-3 text-xs h-8">Message</Button>
+                       </div>
+                   ))
+               ) : (
+                   <div className="text-center py-10 text-gray-500">
+                       <UserPlus size={32} className="mx-auto mb-2 opacity-30" />
+                       <p>No friends added yet.</p>
+                       <p className="text-xs">Add friends from Leaderboard profiles.</p>
+                   </div>
+               )}
+            </div>
+        </Modal>
+
+        <Modal 
+          isOpen={activeModal === 'badges'} 
+          onClose={() => setActiveModal(null)} 
+          title="Badge Store"
+          icon={<ShoppingBag size={20} />}
+        >
+           <div className="space-y-4">
+              <div className="bg-brand-800/50 p-3 rounded-xl border border-white/5 mb-4">
+                  <p className="text-xs text-gray-400 text-center">
+                      Select a badge to view price. Buying opens WhatsApp with your request.
+                  </p>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-3">
+                  {badges.map((badge) => (
+                      <div key={badge.id} className="flex items-center justify-between p-3 bg-black/40 border border-white/10 rounded-xl">
+                          <div className="flex items-center gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-${badge.color}-500/10 text-${badge.color}-500 border border-${badge.color}-500/30`}>
+                                  {badge.icon}
+                              </div>
+                              <div>
+                                  <h4 className="text-sm font-bold text-white">{badge.name}</h4>
+                                  <p className="text-[10px] text-brand-gold font-bold">₹{badge.price}</p>
+                              </div>
+                          </div>
+                          <button 
+                            onClick={() => handleBuyBadge(badge.name, badge.price)}
+                            className="bg-brand-800 hover:bg-brand-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg border border-white/10 transition-colors"
+                          >
+                              BUY
+                          </button>
+                      </div>
+                  ))}
+              </div>
            </div>
         </Modal>
 
@@ -404,10 +607,11 @@ const Settings: React.FC = () => {
                   </h2>
                   <div className="flex items-center justify-center md:justify-start gap-2 mt-1">
                      <Badge color="yellow">GOLD MEMBER</Badge>
+                     {userProfile?.clanTag && <Badge color="purple">{userProfile.clanTag}</Badge>}
                      <span className="text-xs text-gray-500 font-mono">UID: {userProfile?.uid?.slice(0,6) || '---'}</span>
                   </div>
                   
-                  {/* Refer Banner (Desktop positioned) */}
+                  {/* Refer Banner */}
                   <div 
                       onClick={() => setActiveModal('refer')}
                       className="mt-4 bg-gradient-to-r from-purple-900/50 to-brand-900/50 border border-purple-500/30 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:border-purple-500/60 transition-colors active:scale-[0.98]"
@@ -436,6 +640,24 @@ const Settings: React.FC = () => {
                     label="Free Fire Details" 
                     subLabel={`UID: ${userProfile?.ffUid || 'Not Set'}`}
                     onClick={() => setActiveModal('ff_details')}
+                  />
+                  <SettingItem 
+                    icon={<Users size={20} />} 
+                    label="My Team / Clan" 
+                    subLabel={userProfile?.teamMembers?.length ? `${userProfile.teamMembers.length} Members` : "Manage Squad"}
+                    onClick={() => setActiveModal('my_team')}
+                  />
+                  <SettingItem 
+                    icon={<UserPlus size={20} />} 
+                    label="My Friends" 
+                    subLabel={`${userProfile?.friends?.length || 0} Connections`}
+                    onClick={() => setActiveModal('friends')}
+                  />
+                  <SettingItem 
+                    icon={<ShoppingBag size={20} />} 
+                    label="Badge Store" 
+                    subLabel="Buy VIP, Influencer & Titles"
+                    onClick={() => setActiveModal('badges')}
                   />
                   <SettingItem 
                     icon={<Monitor size={20} />} 

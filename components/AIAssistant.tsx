@@ -12,7 +12,7 @@ interface Message {
 }
 
 // THE REAL BACKEND API SERVER (Google Apps Script)
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHAsGV11ZIy7Vg53HPFIft8260HuoLT-t7JoBMOM49-Swy3yz0-dwNQa3AVQPTgNIXyw/exec";
 
 export const AIAssistant: React.FC = () => {
   const { userProfile } = useAuth();
@@ -65,13 +65,13 @@ export const AIAssistant: React.FC = () => {
 
     try {
       // API Call to Google Apps Script Web App
-      // Conforms to LEVEL 1 USER APP specification
+      // Conforms to REAL BACKEND specification
       const payload = {
-        role: 'groq',           // Triggers Fast AI (Groq) in Backend
+        role: userProfile?.role || 'user', // 'admin' triggers Groq, 'user' triggers OpenRouter
         input: userMsg.text,    // The user's question
         uid: userProfile?.uid || 'guest',  // For Sheet Logging
         name: userProfile?.name || 'Guest', // For Sheet Logging
-        type: 'chat' // Explicit type just in case backend requires it
+        type: 'chat' // Explicit type for backend dispatcher
       };
 
       const response = await fetch(APPS_SCRIPT_URL, {

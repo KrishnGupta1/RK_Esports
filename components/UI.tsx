@@ -9,7 +9,7 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
   children,
   ...props 
 }) => {
-  const baseStyle = "w-full py-3.5 px-4 rounded-xl font-display font-bold uppercase tracking-wider transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center relative overflow-hidden group touch-manipulation";
+  const baseStyle = "w-full py-3.5 px-4 rounded-xl font-display font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center relative overflow-hidden group touch-manipulation z-10";
   
   const variants = {
     primary: "bg-gradient-to-r from-brand-500 to-brand-400 text-white shadow-[0_4px_20px_rgba(255,46,77,0.3)] hover:shadow-[0_6px_25px_rgba(255,46,77,0.5)] border border-white/10",
@@ -25,7 +25,7 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
     >
       {/* Shine effect overlay for primary buttons */}
       {variant === 'primary' && (
-        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10 pointer-events-none" />
       )}
       <span className="relative z-20 flex items-center gap-2">{children}</span>
     </button>
@@ -34,8 +34,8 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
 
 export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ className = '', ...props }) => {
   return (
-    <div className="relative group">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-brand-purple opacity-0 group-focus-within:opacity-50 transition duration-500 blur rounded-xl"></div>
+    <div className="relative group z-10">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-brand-purple opacity-0 group-focus-within:opacity-50 transition duration-500 blur rounded-xl pointer-events-none"></div>
       <input 
         className={`relative w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50 focus:text-white transition-all font-display tracking-wide ${className}`}
         {...props} 
@@ -46,8 +46,8 @@ export const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({ c
 
 export const TextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = ({ className = '', ...props }) => {
   return (
-    <div className="relative group">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-brand-purple opacity-0 group-focus-within:opacity-50 transition duration-500 blur rounded-xl"></div>
+    <div className="relative group z-10">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-brand-purple opacity-0 group-focus-within:opacity-50 transition duration-500 blur rounded-xl pointer-events-none"></div>
       <textarea 
         className={`relative w-full bg-[#0a0a0c] border border-white/10 rounded-xl px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand-500/50 focus:text-white transition-all font-display tracking-wide min-h-[120px] resize-none ${className}`}
         {...props} 
@@ -58,19 +58,21 @@ export const TextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string; noPadding?: boolean }> = ({ children, className = '', noPadding = false }) => {
   return (
-    <div className={`glass-panel rounded-2xl shadow-xl ${noPadding ? '' : 'p-5'} ${className}`}>
+    <div className={`glass-panel rounded-2xl shadow-xl relative z-0 ${noPadding ? '' : 'p-5'} ${className}`}>
       {children}
     </div>
   );
 };
 
-export const Badge: React.FC<{ children: React.ReactNode; color?: 'green' | 'red' | 'yellow' | 'blue' | 'purple' }> = ({ children, color = 'blue' }) => {
+export const Badge: React.FC<{ children: React.ReactNode; color?: 'green' | 'red' | 'yellow' | 'blue' | 'purple' | 'gold' | 'pink' }> = ({ children, color = 'blue' }) => {
   const colors = {
     green: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(52,211,153,0.1)]",
     red: "bg-brand-500/10 text-brand-400 border-brand-500/20 shadow-[0_0_10px_rgba(255,46,77,0.1)]",
     yellow: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[0_0_10px_rgba(250,204,21,0.1)]",
     blue: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 shadow-[0_0_10px_rgba(34,211,238,0.1)]",
     purple: "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]",
+    gold: "bg-yellow-600/10 text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)]",
+    pink: "bg-pink-500/10 text-pink-400 border-pink-500/20 shadow-[0_0_10px_rgba(236,72,153,0.1)]",
   };
   return (
     <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border backdrop-blur-sm ${colors[color]}`}>
@@ -90,7 +92,7 @@ export const Modal: React.FC<{
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4 h-[100dvh]">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 h-[100dvh] overflow-hidden">
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }} 
@@ -106,7 +108,7 @@ export const Modal: React.FC<{
             animate={{ y: 0 }} 
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`bg-[#0f0f11] w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/10 relative shadow-2xl max-h-[90dvh] flex flex-col z-10 ${className}`}
+            className={`bg-[#0f0f11] w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl border-t sm:border border-white/10 relative shadow-2xl max-h-[90dvh] flex flex-col z-20 ${className}`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Mobile Handle */}
@@ -132,7 +134,7 @@ export const ModalHeader: React.FC<{ title: string; onClose: () => void; icon?: 
     </div>
     <button 
        onClick={onClose}
-       className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white bg-white/5 rounded-full transition-colors active:bg-white/10"
+       className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white bg-white/5 rounded-full transition-colors active:bg-white/10 z-20"
     >
        <X size={20} />
     </button>
@@ -140,13 +142,13 @@ export const ModalHeader: React.FC<{ title: string; onClose: () => void; icon?: 
 );
 
 export const ModalBody: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`p-5 overflow-y-auto flex-1 custom-scrollbar ${className}`}>
+  <div className={`p-5 overflow-y-auto flex-1 custom-scrollbar relative z-10 ${className}`}>
     {children}
   </div>
 );
 
 export const ModalFooter: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`p-5 border-t border-white/5 bg-[#141416] shrink-0 pb-[calc(2rem+env(safe-area-inset-bottom))] ${className}`}>
+  <div className={`p-5 border-t border-white/5 bg-[#141416] shrink-0 pb-[calc(2rem+env(safe-area-inset-bottom))] z-20 ${className}`}>
     {children}
   </div>
 );

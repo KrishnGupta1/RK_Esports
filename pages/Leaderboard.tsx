@@ -1,17 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { LeaderboardEntry } from '../types';
-import { Crown, Trophy, User, ArrowUp, ArrowDown, Minus, ShieldCheck, Crosshair, Skull, Swords, X, Flame, Medal, Star, Zap } from 'lucide-react';
+import { Crown, Trophy, User, ArrowUp, ArrowDown, Minus, ShieldCheck, Crosshair, Skull, Swords, X, Flame, Medal, Star, Zap, Heart, UserPlus, Bell, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge, Card, Button, Modal, ModalHeader, ModalBody, ModalFooter } from '../components/UI';
+import { useAuth } from '../contexts/AuthContext';
 
 const Leaderboard: React.FC = () => {
+  const { toggleFollow, toggleLike, sendFriendRequest, userProfile } = useAuth();
   const [timeFilter, setTimeFilter] = useState<'weekly' | 'all_time'>('weekly');
   const [selectedPlayer, setSelectedPlayer] = useState<LeaderboardEntry | null>(null);
 
-  // Enhanced Mock Data with Real Image URLs and Stats
-  const topPlayers: LeaderboardEntry[] = [
+  // Initial Data
+  const [players, setPlayers] = useState<LeaderboardEntry[]>([
     { 
       uid: '1', 
       name: 'RK_KILLER', 
@@ -25,6 +27,8 @@ const Leaderboard: React.FC = () => {
       trend: 'same',
       isVip: true,
       isAdmin: true,
+      likes: 1200,
+      followersCount: 500,
       achievements: ['Sharpshooter', 'Berserker', 'Richie Rich']
     },
     { 
@@ -39,6 +43,8 @@ const Leaderboard: React.FC = () => {
       headshotRate: 45,
       trend: 'up',
       isVip: true,
+      likes: 850,
+      followersCount: 320,
       achievements: ['Rising Star']
     },
     { 
@@ -52,6 +58,8 @@ const Leaderboard: React.FC = () => {
       kdRatio: 2.9,
       headshotRate: 32,
       trend: 'down',
+      likes: 400,
+      followersCount: 150,
       achievements: ['Grinder']
     },
     { 
@@ -64,7 +72,8 @@ const Leaderboard: React.FC = () => {
       clan: 'Lone Wolves',
       kdRatio: 3.2,
       headshotRate: 40,
-      trend: 'up'
+      trend: 'up',
+      likes: 120
     },
     { 
       uid: '5', 
@@ -75,7 +84,8 @@ const Leaderboard: React.FC = () => {
       clan: 'Syndicate',
       kdRatio: 2.1,
       headshotRate: 25,
-      trend: 'down'
+      trend: 'down',
+      likes: 90
     },
     { 
       uid: '6', 
@@ -86,14 +96,51 @@ const Leaderboard: React.FC = () => {
       clan: 'Darkness',
       kdRatio: 1.8,
       headshotRate: 20,
-      trend: 'same'
+      trend: 'same',
+      likes: 45
     },
-  ];
+  ]);
+
+  const topPlayers = players; // Use state
 
   const getTrendIcon = (trend: string) => {
     if (trend === 'up') return <ArrowUp size={12} className="text-green-500" />;
     if (trend === 'down') return <ArrowDown size={12} className="text-red-500" />;
     return <Minus size={12} className="text-gray-500" />;
+  };
+
+  const isFriend = (uid: string) => {
+      return userProfile?.friends?.includes(uid);
+  };
+
+  const handleSocialAction = async (type: 'like' | 'follow' | 'friend') => {
+      if(!selectedPlayer) return;
+      
+      if (type === 'like') {
+          // Increment locally immediately
+          const newLikes = (selectedPlayer.likes || 0) + 1;
+          const updatedPlayer = { ...selectedPlayer, likes: newLikes };
+          setSelectedPlayer(updatedPlayer);
+          
+          setPlayers(prev => prev.map(p => p.uid === selectedPlayer.uid ? updatedPlayer : p));
+          
+          await toggleLike(selectedPlayer.uid);
+      } 
+      else if (type === 'follow') {
+          // Toggle follow count mock
+          const isFollowing = false; // Mock toggle state
+          const newCount = (selectedPlayer.followersCount || 0) + (isFollowing ? -1 : 1);
+          const updatedPlayer = { ...selectedPlayer, followersCount: newCount };
+          setSelectedPlayer(updatedPlayer);
+          setPlayers(prev => prev.map(p => p.uid === selectedPlayer.uid ? updatedPlayer : p));
+          
+          await toggleFollow(selectedPlayer.uid);
+          alert(`Followed ${selectedPlayer.name}!`);
+      } 
+      else if (type === 'friend') {
+          await sendFriendRequest(selectedPlayer.uid);
+          // Force re-render to update "Add" to "Added" state based on userProfile change in context
+      }
   };
 
   return (
@@ -280,11 +327,49 @@ const Leaderboard: React.FC = () => {
                       </h2>
                       <p className="text-brand-gold font-display font-bold text-sm tracking-widest">{selectedPlayer.clan}</p>
                       
-                      {selectedPlayer.isAdmin ? (
-                          <Badge color="red" className="mt-2">RK ESPORTS OWNER</Badge>
-                      ) : (
-                          selectedPlayer.isVip && <Badge color="purple" className="mt-2">VIP MEMBER</Badge>
-                      )}
+                      <div className="flex flex-wrap gap-2 justify-center mt-2">
+                        {selectedPlayer.isAdmin ? (
+                            <Badge color="red">RK ESPORTS OWNER</Badge>
+                        ) : (
+                            selectedPlayer.isVip && <Badge color="purple">VIP MEMBER</Badge>
+                        )}
+                      </div>
+                      
+                      {/* --- SOCIAL ACTIONS --- */}
+                      <div className="flex items-center gap-4 mt-6">
+                          <button 
+                             onClick={() => handleSocialAction('like')}
+                             className="flex flex-col items-center gap-1 group active:scale-90 transition-transform"
+                          >
+                              <div className="w-10 h-10 rounded-full bg-brand-800 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-red-500 group-hover:bg-red-500/10 transition-colors">
+                                  <Heart size={18} />
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-400">{selectedPlayer.likes || 0}</span>
+                          </button>
+                          
+                          <button 
+                             onClick={() => handleSocialAction('follow')}
+                             className="flex flex-col items-center gap-1 group active:scale-90 transition-transform"
+                          >
+                              <div className="w-10 h-10 rounded-full bg-brand-800 border border-white/10 flex items-center justify-center text-gray-400 group-hover:text-blue-500 group-hover:bg-blue-500/10 transition-colors">
+                                  <Bell size={18} />
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-400">{selectedPlayer.followersCount || 0}</span>
+                          </button>
+
+                          <button 
+                             onClick={() => !isFriend(selectedPlayer.uid) && handleSocialAction('friend')}
+                             className="flex flex-col items-center gap-1 group active:scale-90 transition-transform disabled:opacity-70"
+                             disabled={isFriend(selectedPlayer.uid)}
+                          >
+                              <div className={`w-10 h-10 rounded-full border border-white/10 flex items-center justify-center transition-colors ${isFriend(selectedPlayer.uid) ? 'bg-green-500/20 text-green-500 border-green-500/30' : 'bg-brand-800 text-gray-400 group-hover:text-green-500 group-hover:bg-green-500/10'}`}>
+                                  {isFriend(selectedPlayer.uid) ? <Check size={18}/> : <UserPlus size={18} />}
+                              </div>
+                              <span className={`text-[10px] font-bold ${isFriend(selectedPlayer.uid) ? 'text-green-500' : 'text-gray-400'}`}>
+                                  {isFriend(selectedPlayer.uid) ? 'Added' : 'Add'}
+                              </span>
+                          </button>
+                      </div>
                   </div>
 
                   {/* Advanced Stats Grid */}
@@ -324,25 +409,4 @@ const Leaderboard: React.FC = () => {
                                       <span className="text-[10px] font-bold text-gray-200">{ach}</span>
                                   </div>
                               ))
-                          ) : (
-                              <p className="text-xs text-gray-600 italic">No achievements unlocked yet.</p>
-                          )}
-                      </div>
-                  </div>
-
-                  {/* Footer Info */}
-                  <div className="bg-black/30 p-4 text-center border-t border-white/5 shrink-0 mt-auto pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
-                      <div className="flex items-center justify-center gap-2 text-gray-400 text-xs">
-                          <Flame size={14} className="text-orange-500" />
-                          <span>Trending: {selectedPlayer.trend.toUpperCase()} this week</span>
-                      </div>
-                  </div>
-              </div>
-           </Modal>
-        )}
-      </div>
-    </Layout>
-  );
-};
-
-export default Leaderboard;
+                          
