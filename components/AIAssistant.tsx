@@ -12,7 +12,7 @@ interface Message {
 }
 
 // THE REAL BACKEND API SERVER (Google Apps Script)
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHAsGV11ZIy7Vg53HPFIft8260HuoLT-t7JoBMOM49-Swy3yz0-dwNQa3AVQPTgNIXyw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
 
 export const AIAssistant: React.FC = () => {
   const { userProfile } = useAuth();

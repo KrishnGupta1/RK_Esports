@@ -5,7 +5,7 @@ import { Card, Input, Button, TextArea } from '../components/UI';
 import { MessageSquare, Loader2, Image as ImageIcon, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHAsGV11ZIy7Vg53HPFIft8260HuoLT-t7JoBMOM49-Swy3yz0-dwNQa3AVQPTgNIXyw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
 
 // SVGs for Logos
 const WhatsAppIcon = () => (

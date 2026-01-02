@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { History, TrendingUp, TrendingDown, Ticket, Plus, ArrowUpRight, X, Smartphone, AlertCircle, Copy, CheckCircle, Download, Clock, Landmark, CreditCard, ShieldCheck, ChevronRight, ScanLine, AlertTriangle, Info, Clipboard, Image as ImageIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHAsGV11ZIy7Vg53HPFIft8260HuoLT-t7JoBMOM49-Swy3yz0-dwNQa3AVQPTgNIXyw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbcjU71sjaELrdnjX_yIHlYDPJNbnOPo9telCTUDuiC8J4B8GWRzJDErYnKGMC1J3_bw/exec";
 
 // Helper to convert file to base64
 const fileToBase64 = (file: File): Promise<string> => {

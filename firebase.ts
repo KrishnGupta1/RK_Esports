@@ -4,18 +4,19 @@ import { getAuth, GoogleAuthProvider, PhoneAuthProvider, Auth } from 'firebase/a
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAnalytics } from "firebase/analytics";
 
-// 🔴 IMPORTANT: REPLACE WITH YOUR FIREBASE CONFIG KEYS 🔴
+// 🔴 LIVE CONFIGURATION 🔴
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
+  authDomain: "rk-esports1.firebaseapp.com",
+  databaseURL: "https://rk-esports1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rk-esports1",
+  storageBucket: "rk-esports1.firebasestorage.app",
+  messagingSenderId: "640016800272",
+  appId: "1:640016800272:web:c2b86d7b11b1e6b8f04895",
+  measurementId: "G-KWLLW2GN9P"
 };
 
-// Safety check: Don't crash if keys are missing
+// Safety check: Detect if running with real keys
 const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
 let app;
@@ -39,6 +40,7 @@ if (isConfigured) {
         console.warn("Analytics failed to load", e);
       }
     }
+    console.log("✅ Firebase Connected Successfully");
   } catch (e) {
     console.error("Firebase Initialization Error:", e);
   }
