@@ -1,10 +1,10 @@
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, PhoneAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, PhoneAuthProvider, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAnalytics } from "firebase/analytics";
 
-// REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIG KEYS
+// 🔴 IMPORTANT: REPLACE WITH YOUR FIREBASE CONFIG KEYS 🔴
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -15,18 +15,35 @@ const firebaseConfig = {
   measurementId: "YOUR_MEASUREMENT_ID"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Safety check: Don't crash if keys are missing
+const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
-// Export services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const googleProvider = new GoogleAuthProvider();
-export const phoneProvider = new PhoneAuthProvider(auth);
-
-// Analytics (optional, runs only in browser)
+let app;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
 let analytics;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
+let googleProvider = new GoogleAuthProvider();
+let phoneProvider = null;
+
+if (isConfigured) {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    phoneProvider = new PhoneAuthProvider(auth);
+    
+    if (typeof window !== 'undefined') {
+      try {
+        analytics = getAnalytics(app);
+      } catch (e) {
+        console.warn("Analytics failed to load", e);
+      }
+    }
+  } catch (e) {
+    console.error("Firebase Initialization Error:", e);
+  }
+} else {
+  console.warn("⚠️ Firebase keys missing. App running in DEMO MODE.");
 }
-export { analytics };
+
+export { auth, db, googleProvider, phoneProvider, analytics, isConfigured };
