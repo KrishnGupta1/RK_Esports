@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { UserProfile, Tournament, Transaction, Advertisement, Notification } from '../types';
+import { auth, db as firestore } from '../firebase'; // Importing real firebase configs
+// NOTE: We keep the Mock Logic as fallback if Firebase keys are missing in the user's setup.
 
 interface MockUser {
   uid: string;
@@ -32,11 +34,12 @@ interface AuthContextType {
   
   // Social Actions
   inviteToTeam: (uid: string) => Promise<void>;
+  respondToTeamInvite: (fromUid: string, accept: boolean) => Promise<void>; // New: Accept/Reject
   removeTeamMember: (uid: string) => Promise<void>;
   sendFriendRequest: (uid: string) => Promise<void>;
   removeFriend: (uid: string) => Promise<void>;
-  toggleFollow: (uid: string) => Promise<boolean>; // Returns new follow state
-  toggleLike: (uid: string) => Promise<boolean>; // Returns new like state
+  toggleFollow: (uid: string) => Promise<boolean>; 
+  toggleLike: (uid: string) => Promise<boolean>; 
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -222,7 +225,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<MockUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>(INITIAL_TOURNAMENTS);
   const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
   const [advertisements, setAdvertisements] = useState<Advertisement[]>(INITIAL_ADS);
   const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
@@ -258,44 +261,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
     initAuth();
-
-    // 2. Poll for updates (Tournaments)
-    const intervalId = setInterval(() => {
-        setTournaments(prevTournaments => {
-            const now = new Date();
-            let hasChanges = false;
-            
-            const updated = prevTournaments.map(t => {
-                const startTime = new Date(t.startTime);
-                let newStatus = t.status;
-
-                if (t.status === 'open' && now >= startTime) {
-                    newStatus = 'ongoing';
-                }
-                
-                let newJoined = t.joined;
-                if (t.status === 'open' && t.joined < t.slots) {
-                     if(Math.random() > 0.6) {
-                         newJoined = Math.min(t.slots, t.joined + Math.floor(Math.random() * 2) + 1);
-                     }
-                }
-
-                if (newStatus !== t.status || newJoined !== t.joined) {
-                    hasChanges = true;
-                    return { ...t, status: newStatus, joined: newJoined };
-                }
-                return t;
-            });
-
-            if (hasChanges) {
-                saveTournaments(updated);
-                return updated;
-            }
-            return prevTournaments;
-        });
-    }, 3000);
-
-    return () => clearInterval(intervalId);
   }, []);
 
   const loginWithGoogle = async () => {
@@ -309,7 +274,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           uid, name: 'Demo Gamer', email: 'demo@gmail.com', provider: 'google', coins: 100, role: 'admin', status: 'active',
           createdAt: new Date().toISOString(), lastLogin: new Date().toISOString(), photoURL: 'https://ui-avatars.com/api/?name=Demo+Gamer&background=ff2e4d&color=fff&bold=true', referralCode: 'RK' + Math.floor(1000 + Math.random() * 9000),
           level: 1, xp: 0, maxXp: 1000,
-          friends: [], followers: [], following: [], likes: 0, teamMembers: [{ uid, name: 'Demo Gamer', role: 'Leader' }],
+          friends: [], followers: [], following: [], likes: 0, 
+          teamMembers: [{ uid, name: 'Demo Gamer', role: 'Leader' }],
+          teamInvites: [], // Initialize invites
           isVerified: true,
           customTag: 'RK ESPORTS OWNER',
           clanTag: 'RK OFFICIAL',
@@ -460,16 +427,88 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error("Invalid or Expired Code");
   };
 
-  // --- SOCIAL MOCK FUNCTIONS ---
-  const inviteToTeam = async (uid: string) => {
-      await new Promise(r => setTimeout(r, 500));
+  // --- SOCIAL / TEAM FUNCTIONS ---
+
+  // REPLACED: Logic to SEND REQUEST instead of auto-add
+  const inviteToTeam = async (targetUid: string) => {
+      await new Promise(r => setTimeout(r, 800)); // Simulate Network Delay
       if (!userProfile) return;
-      const currentTeam = userProfile.teamMembers || [];
-      if (currentTeam.length >= 4) throw new Error("Team is full (Max 4)");
-      if (currentTeam.find(m => m.uid === uid)) throw new Error("User already in team");
+
+      const db = getMockDB();
+      const targetUser = db[targetUid];
+
+      // 1. Check if user exists (Real User Validation)
+      if (!targetUser) {
+          throw new Error("User with this UID does not exist.");
+      }
+
+      // 2. Check if already in team
+      const myTeam = userProfile.teamMembers || [];
+      if (myTeam.find(m => m.uid === targetUid)) {
+          throw new Error("User is already in your team.");
+      }
       
-      const newTeam = [...currentTeam, { uid: uid, name: `Player_${uid.slice(0,4)}`, role: 'Member' as const }];
-      await updateUserProfile({ teamMembers: newTeam });
+      // 3. Check if invite already sent
+      const pendingInvites = targetUser.teamInvites || [];
+      if (pendingInvites.find(i => i.fromUid === userProfile.uid)) {
+          throw new Error("Invite already sent to this player.");
+      }
+
+      // 4. Send Invite (Update Target User DB)
+      const newInvite = {
+          fromUid: userProfile.uid,
+          leaderName: userProfile.name,
+          teamName: userProfile.clanTag || 'Squad'
+      };
+      
+      targetUser.teamInvites = [...pendingInvites, newInvite];
+      db[targetUid] = targetUser;
+      saveMockDB(db);
+      
+      // We don't update local userProfile because nothing changed for us yet
+  };
+
+  // NEW: Accept or Reject Invite
+  const respondToTeamInvite = async (fromUid: string, accept: boolean) => {
+      if (!userProfile) return;
+      
+      const db = getMockDB();
+      const leaderUser = db[fromUid];
+      
+      // Remove the invite
+      const newInvites = (userProfile.teamInvites || []).filter(i => i.fromUid !== fromUid);
+      
+      if (accept) {
+          if (!leaderUser) throw new Error("Team leader account deleted.");
+          
+          // Add self to Leader's team
+          const leaderTeam = leaderUser.teamMembers || [];
+          if (leaderTeam.length >= 4) throw new Error("Team is full.");
+          
+          leaderTeam.push({
+              uid: userProfile.uid,
+              name: userProfile.name,
+              role: 'Member'
+          });
+          leaderUser.teamMembers = leaderTeam;
+          
+          // Add leader to My team list (Mirrored for simplicity in this mock)
+          // In real DB, you'd usually have a separate 'Teams' collection
+          const myTeam = userProfile.teamMembers || [];
+          myTeam.push({
+              uid: leaderUser.uid,
+              name: leaderUser.name,
+              role: 'Leader'
+          });
+
+          await updateUserProfile({ teamInvites: newInvites, teamMembers: myTeam, clanTag: leaderUser.clanTag });
+          
+          db[fromUid] = leaderUser;
+          saveMockDB(db);
+      } else {
+          // Just remove invite
+          await updateUserProfile({ teamInvites: newInvites });
+      }
   };
 
   const removeTeamMember = async (uid: string) => {
@@ -548,6 +587,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       refreshMatchData,
       applyPromoCode,
       inviteToTeam,
+      respondToTeamInvite,
       removeTeamMember,
       sendFriendRequest,
       removeFriend,

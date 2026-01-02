@@ -37,8 +37,11 @@ export interface UserProfile {
   followers?: string[]; // List of UIDs
   following?: string[]; // List of UIDs
   likes?: number;
-  teamMembers?: { uid: string; name: string; role: 'Leader' | 'Member' }[];
   
+  // Team Logic
+  teamMembers?: { uid: string; name: string; role: 'Leader' | 'Member' }[];
+  teamInvites?: { fromUid: string; teamName: string; leaderName: string }[]; // Incoming Invites
+
   // Stats (Editable by Admin)
   stats?: {
       kd: string;

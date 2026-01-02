@@ -9,7 +9,8 @@ import {
   Volume2, Zap, RefreshCw, HelpCircle, FileText,
   Gamepad2, Camera, Mail, Edit3, Trash2, X, Save, Share2, Gift, Copy, CheckCircle, AlertTriangle, Users, Star, ShoppingBag, ShieldCheck, Crosshair,
   UserPlus, UserMinus, Sliders, Medal, Code, ExternalLink, Link as LinkIcon, Plus, Upload, FileBarChart, Info,
-  Facebook, Twitter, Instagram, Youtube, MessageCircle, Send
+  Facebook, Twitter, Instagram, Youtube, MessageCircle, Send,
+  Inbox
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -124,12 +125,12 @@ const Modal: React.FC<{
 );
 
 const Settings: React.FC = () => {
-  const { userProfile, logout, updateUserProfile, inviteToTeam, removeTeamMember } = useAuth();
+  const { userProfile, logout, updateUserProfile, inviteToTeam, removeTeamMember, respondToTeamInvite } = useAuth();
   const navigate = useNavigate();
   
   // Modals state
   const [activeModal, setActiveModal] = useState<
-    'profile' | 'phone' | 'password' | 'delete' | 'refer' | 'terms' | 'ff_details' | 'badges' | 'my_team' | 'friends' | 'request_stats' | 'achievements' | 'developer' | 'social_media' | null
+    'profile' | 'phone' | 'password' | 'delete' | 'refer' | 'terms' | 'ff_details' | 'badges' | 'my_team' | 'friends' | 'request_stats' | 'developer' | 'social_media' | null
   >(null);
   
   // State for toggles with persistence
@@ -154,7 +155,6 @@ const Settings: React.FC = () => {
       ]
   });
   
-  // Social Media Links (Read Only - Managed by Admin App)
   const socialLinks = [
       { id: 'whatsapp', name: 'WhatsApp Group', url: 'https://chat.whatsapp.com/example', icon: <MessageCircle size={20} />, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20' },
       { id: 'telegram', name: 'Telegram Channel', url: 'https://t.me/example', icon: <Send size={20} />, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
@@ -173,18 +173,17 @@ const Settings: React.FC = () => {
   const [editPhone, setEditPhone] = useState('');
   const [clanName, setClanName] = useState('');
   const [inviteUid, setInviteUid] = useState('');
+  const [sendingInvite, setSendingInvite] = useState(false);
   
-  // Request Stats State
+  // Request Stats & Achievements State
   const [requestStatsData, setRequestStatsData] = useState({
       kd: '',
       headshot: '',
       matches: '',
-      wins: ''
+      wins: '',
+      achievements: ''
   });
   
-  // Achievements State
-  const [achievementsInput, setAchievementsInput] = useState('');
-
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
@@ -192,21 +191,18 @@ const Settings: React.FC = () => {
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
     }
-    
-    // Load Dev Info
     const savedDevInfo = localStorage.getItem('app_dev_info');
     if(savedDevInfo) {
-        const parsed = JSON.parse(savedDevInfo);
-        setDevInfo(parsed);
+        setDevInfo(JSON.parse(savedDevInfo));
     }
   }, []);
   
   useEffect(() => {
       if(userProfile?.stats) {
-          setRequestStatsData(userProfile.stats);
+          setRequestStatsData(prev => ({...prev, ...userProfile.stats}));
       }
       if(userProfile?.achievements) {
-          setAchievementsInput(userProfile.achievements.join(', '));
+          setRequestStatsData(prev => ({...prev, achievements: userProfile.achievements.join(', ')}));
       }
   }, [userProfile]);
 
@@ -242,15 +238,8 @@ const Settings: React.FC = () => {
           alert("Please fill in the stats you want to display.");
           return;
       }
-      // Mock request logic
       setActiveModal(null);
-      alert("Request Sent to Admin! \n\nOnce approved, your profile stats will be updated.");
-  };
-  
-  const handleSaveAchievements = async () => {
-      const arr = achievementsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
-      await updateUserProfile({ achievements: arr });
-      setActiveModal(null);
+      alert("Request Sent to Admin! \n\nStats and Achievements update requested.");
   };
 
   // Team Logic
@@ -265,14 +254,26 @@ const Settings: React.FC = () => {
 
   const handleInviteToTeam = async () => {
     if(!inviteUid) return;
+    setSendingInvite(true);
     try {
         await inviteToTeam(inviteUid);
         setInviteUid('');
-        alert("User invited to team!");
+        alert("Invite Sent! Wait for them to accept.");
     } catch (e: any) {
         alert(e.message);
+    } finally {
+        setSendingInvite(false);
     }
   };
+
+  const handleRespondToInvite = async (fromUid: string, accept: boolean) => {
+      try {
+          await respondToTeamInvite(fromUid, accept);
+          if (accept) alert("Joined team successfully!");
+      } catch (e: any) {
+          alert(e.message);
+      }
+  }
 
   const handleConfirmRemoveMember = async (uid: string) => {
       await removeTeamMember(uid);
@@ -322,7 +323,6 @@ const Settings: React.FC = () => {
       logout();
   };
 
-  // Badge Store Data
   const badges = [
       { id: 'vip', name: 'VIP Member', price: 500, color: 'purple', icon: <Star size={18} /> },
       { id: 'influencer', name: 'Influencer', price: 1000, color: 'pink', icon: <Users size={18} /> },
@@ -384,29 +384,6 @@ const Settings: React.FC = () => {
         </Modal>
         
         <Modal 
-          isOpen={activeModal === 'achievements'} 
-          onClose={() => setActiveModal(null)} 
-          title="My Achievements"
-          icon={<Medal size={20} />}
-        >
-           <div className="space-y-4">
-              <p className="text-sm text-gray-400">Enter achievements separated by commas.</p>
-              <div>
-                  <label className="text-gray-400 text-xs uppercase font-bold mb-1 block">Tags / Titles</label>
-                  <Input 
-                    value={achievementsInput} 
-                    onChange={(e) => setAchievementsInput(e.target.value)} 
-                    placeholder="Sharpshooter, Rusher, MVP" 
-                  />
-              </div>
-              <Button onClick={handleSaveAchievements} className="mt-2">
-                  <Save size={18} /> Save Tags
-              </Button>
-           </div>
-        </Modal>
-
-        {/* --- SOCIAL MEDIA MODAL --- */}
-        <Modal 
           isOpen={activeModal === 'social_media'} 
           onClose={() => setActiveModal(null)} 
           title="Follow Us"
@@ -433,7 +410,6 @@ const Settings: React.FC = () => {
            </div>
         </Modal>
 
-        {/* --- REQUEST STATS UPDATE MODAL --- */}
         <Modal 
           isOpen={activeModal === 'request_stats'} 
           onClose={() => setActiveModal(null)} 
@@ -466,6 +442,17 @@ const Settings: React.FC = () => {
                       <Input value={requestStatsData.matches} onChange={(e) => setRequestStatsData({...requestStatsData, matches: e.target.value})} placeholder="50" className="bg-black/30 border-white/5 focus:border-brand-500/50" />
                   </div>
               </div>
+              
+              <div>
+                  <label className="text-gray-400 text-[10px] uppercase font-bold mb-2 block">My Achievements / Tags</label>
+                  <Input 
+                    value={requestStatsData.achievements} 
+                    onChange={(e) => setRequestStatsData({...requestStatsData, achievements: e.target.value})} 
+                    placeholder="Sharpshooter, Rusher, MVP" 
+                    className="bg-black/30 border-white/5 focus:border-brand-500/50" 
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">Separate tags with commas</p>
+              </div>
 
               <div>
                   <label className="text-gray-400 text-xs uppercase font-bold mb-2 block">Upload Screenshot</label>
@@ -481,7 +468,6 @@ const Settings: React.FC = () => {
            </div>
         </Modal>
         
-        {/* --- DEVELOPER INFO MODAL (READ ONLY) --- */}
         <Modal 
           isOpen={activeModal === 'developer'} 
           onClose={() => setActiveModal(null)} 
@@ -528,6 +514,7 @@ const Settings: React.FC = () => {
            </div>
         </Modal>
 
+        {/* --- MY TEAM MODAL WITH REQUESTS --- */}
         <Modal 
           isOpen={activeModal === 'my_team'} 
           onClose={() => setActiveModal(null)} 
@@ -548,6 +535,40 @@ const Settings: React.FC = () => {
                     <Button onClick={handleUpdateClanName} className="w-auto px-4"><Save size={18}/></Button>
                  </div>
               </div>
+
+              {/* PENDING INVITES SECTION */}
+              {userProfile?.teamInvites && userProfile.teamInvites.length > 0 && (
+                  <div className="bg-brand-800/80 border border-brand-500/30 rounded-xl p-4 animate-in slide-in-from-top-4">
+                      <div className="flex items-center gap-2 mb-3">
+                          <Inbox size={16} className="text-brand-500" />
+                          <h4 className="text-sm font-bold text-white uppercase">Pending Invites</h4>
+                      </div>
+                      <div className="space-y-2">
+                          {userProfile.teamInvites.map((invite, idx) => (
+                              <div key={idx} className="bg-black/30 p-3 rounded-lg flex items-center justify-between border border-white/5">
+                                  <div>
+                                      <p className="text-xs font-bold text-white">{invite.leaderName}</p>
+                                      <p className="text-[10px] text-gray-400">Invited you to: <span className="text-brand-gold">{invite.teamName}</span></p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                      <button 
+                                        onClick={() => handleRespondToInvite(invite.fromUid, true)}
+                                        className="bg-green-500 text-white p-1.5 rounded hover:bg-green-600 transition-colors"
+                                      >
+                                          <CheckCircle size={14} />
+                                      </button>
+                                      <button 
+                                        onClick={() => handleRespondToInvite(invite.fromUid, false)}
+                                        className="bg-red-500 text-white p-1.5 rounded hover:bg-red-600 transition-colors"
+                                      >
+                                          <X size={14} />
+                                      </button>
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              )}
 
               {/* Members Section */}
               <div className="space-y-2">
@@ -630,8 +651,13 @@ const Settings: React.FC = () => {
                           onChange={(e) => setInviteUid(e.target.value)}
                           placeholder="Enter Player UID"
                       />
-                      <Button onClick={handleInviteToTeam} className="w-auto px-4 bg-brand-800 border border-white/10">Invite</Button>
+                      <Button onClick={handleInviteToTeam} disabled={sendingInvite} className="w-auto px-4 bg-brand-800 border border-white/10">
+                          {sendingInvite ? 'Sending...' : 'Invite'}
+                      </Button>
                   </div>
+                  <p className="text-[10px] text-gray-500 mt-2 italic">
+                      *Invited players must accept your request to join.
+                  </p>
               </div>
            </div>
         </Modal>
@@ -883,7 +909,8 @@ const Settings: React.FC = () => {
                   <SettingItem 
                     icon={<Users size={20} />} 
                     label="My Team / Clan" 
-                    subLabel={userProfile?.teamMembers?.length ? `${userProfile.teamMembers.length} Members` : "Manage Squad"}
+                    subLabel={userProfile?.teamInvites?.length ? `Requests (${userProfile.teamInvites.length})` : userProfile?.teamMembers?.length ? `${userProfile.teamMembers.length} Members` : "Manage Squad"}
+                    action={userProfile?.teamInvites?.length ? <Badge color="red">{userProfile.teamInvites.length} NEW</Badge> : undefined}
                     onClick={() => setActiveModal('my_team')}
                   />
                   <SettingItem 
@@ -897,12 +924,6 @@ const Settings: React.FC = () => {
                     label="My Friends" 
                     subLabel={`${userProfile?.friends?.length || 0} Connections`}
                     onClick={() => setActiveModal('friends')}
-                  />
-                  <SettingItem 
-                    icon={<Medal size={20} />} 
-                    label="My Achievements" 
-                    subLabel="Edit your profile tags"
-                    onClick={() => setActiveModal('achievements')}
                   />
                   <SettingItem 
                     icon={<ShoppingBag size={20} />} 
