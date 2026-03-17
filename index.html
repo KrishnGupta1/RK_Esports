@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- SEO Meta Tags -->
     <title>RK_Esports | Play & Win</title>
-    <meta name="description" content="Join RK_Esports Free Fire Tournaments. Founder: Krishn Gupta. Parent: RKApnaStore.">
+    <meta name="description" content="Join RK_Esports Free Fire Tournaments.">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,37 +13,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Mobile App Reset & Styling */
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #000000; /* Pure black background for outside container */
-            display: flex;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            margin: 0; padding: 0;
+            background-color: #000000;
+            display: flex; justify-content: center;
+            height: 100vh; overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* App Container - Acts like a mobile screen on Desktop */
         #app-container {
-            width: 100%;
-            max-width: 400px; /* Mobile width */
-            height: 100%;
-            background-color: #0f172a; /* Slate 900 */
-            color: #ffffff;
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            width: 100%; max-width: 400px; height: 100%;
+            background-color: #0f172a; color: #ffffff;
+            position: relative; display: flex; flex-direction: column;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
-        /* Hide Scrollbar */
         ::-webkit-scrollbar { display: none; }
-
-        /* Animations */
         .view-section { display: none; animation: fadeIn 0.3s ease; }
         .view-section.active { display: block; }
         
@@ -55,7 +40,6 @@
 
         .click-anim:active { transform: scale(0.95); }
 
-        /* Loader */
         .loader {
             border: 3px solid #1e293b; border-top: 3px solid #ef4444;
             border-radius: 50%; width: 24px; height: 24px;
@@ -71,24 +55,56 @@
         <!-- ======================= -->
         <!-- 🔐 AUTHENTICATION SCREEN -->
         <!-- ======================= -->
-        <div id="auth-screen" class="view-section active absolute inset-0 bg-slate-900 z-50 flex flex-col justify-center items-center p-6">
-            <div class="text-center mb-10">
+        <div id="auth-screen" class="view-section active absolute inset-0 bg-slate-900 z-50 flex flex-col justify-center items-center p-6 overflow-y-auto">
+            <div class="text-center mb-8 mt-10">
                 <i class="fas fa-gamepad text-6xl text-red-500 mb-4 drop-shadow-lg"></i>
                 <h1 class="text-3xl font-bold tracking-wider">RK<span class="text-red-500">_ESPORTS</span></h1>
                 <p class="text-gray-400 text-sm mt-2">By RKApnaStore</p>
             </div>
             
-            <div class="w-full space-y-4">
-                <button id="btn-google-login" class="w-full py-3 px-4 bg-white text-gray-900 rounded-lg font-bold flex items-center justify-center gap-3 click-anim transition">
+            <div id="login-buttons" class="w-full space-y-4">
+                <!-- Google Login -->
+                <button id="btn-google-login" class="w-full py-3 px-4 bg-white text-gray-900 rounded-lg font-bold flex items-center justify-center gap-3 click-anim transition hover:bg-gray-200">
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
                     Continue with Google
                 </button>
-                <button onclick="alert('Phone login setup required in Firebase Console. Use Google Login for now.')" class="w-full py-3 px-4 bg-slate-800 text-white border border-slate-700 rounded-lg font-bold flex items-center justify-center gap-3 click-anim transition">
-                    <i class="fas fa-phone text-green-500"></i>
-                    Login with Phone
-                </button>
+
+                <div class="flex items-center justify-center space-x-2 my-4">
+                    <div class="h-px bg-slate-700 w-1/3"></div>
+                    <span class="text-xs text-gray-500 uppercase">OR</span>
+                    <div class="h-px bg-slate-700 w-1/3"></div>
+                </div>
+                
+                <!-- Phone Login Input -->
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md">
+                    <p class="text-sm text-gray-400 mb-3 text-center">Login with Mobile Number</p>
+                    <div class="flex gap-2">
+                        <span class="bg-slate-900 p-3 rounded-lg text-gray-400 font-bold border border-slate-700">+91</span>
+                        <input type="tel" id="phone-number" placeholder="10-digit number" maxlength="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                    <button id="btn-send-otp" class="w-full py-3 mt-4 bg-green-600 hover:bg-green-700 rounded-lg font-bold transition click-anim shadow-lg">
+                        Get OTP
+                    </button>
+                </div>
             </div>
-            <div id="auth-loading" class="hidden mt-6"><div class="loader"></div></div>
+
+            <!-- OTP Verification Section (Hidden Initially) -->
+            <div id="otp-section" class="w-full hidden bg-slate-800 p-5 rounded-lg border border-slate-700 shadow-xl mt-4">
+                <p class="text-sm text-gray-300 mb-3 text-center">Enter 6-digit OTP sent to your phone</p>
+                <input type="number" id="otp-input" placeholder="000000" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500 text-center tracking-[0.5em] font-bold text-2xl mb-4">
+                <button id="btn-verify-otp" class="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold transition click-anim shadow-lg">
+                    Verify & Login
+                </button>
+                <button onclick="window.location.reload()" class="w-full py-2 mt-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+            </div>
+
+            <!-- Invisible Recaptcha Container for Phone Auth -->
+            <div id="recaptcha-container" class="mt-4"></div>
+
+            <div id="auth-loading" class="hidden mt-6 flex flex-col items-center">
+                <div class="loader mb-2"></div>
+                <span id="auth-status-text" class="text-sm text-gray-400 mt-2">Connecting securely...</span>
+            </div>
         </div>
 
         <!-- ======================= -->
@@ -96,7 +112,6 @@
         <!-- ======================= -->
         <div id="main-app" class="hidden flex-col h-full w-full">
             
-            <!-- HEADER -->
             <header class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700 shrink-0 shadow-md z-10">
                 <h1 class="text-xl font-bold tracking-wider">RK<span class="text-red-500">_E</span></h1>
                 <div class="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-700">
@@ -105,40 +120,31 @@
                 </div>
             </header>
 
-            <!-- SCROLLABLE CONTENT AREA -->
             <div class="flex-1 overflow-y-auto p-4 pb-20">
                 
                 <!-- 🎮 1. TOURNAMENTS (HOME) VIEW -->
                 <div id="view-home" class="view-section active space-y-4">
                     <h2 class="text-lg font-bold border-l-4 border-red-500 pl-2 mb-4">Upcoming Matches</h2>
                     <div id="tournaments-list" class="space-y-4">
-                        <!-- Matches will load here via JS -->
-                        <div class="text-center text-gray-500 py-10 flex flex-col items-center">
-                            <div class="loader mb-2"></div>Loading...
-                        </div>
+                        <div class="text-center text-gray-500 py-10 flex flex-col items-center"><div class="loader mb-2"></div>Loading Matches...</div>
                     </div>
                 </div>
 
                 <!-- 💰 2. WALLET VIEW -->
                 <div id="view-wallet" class="view-section space-y-5">
-                    <!-- Balance Card -->
                     <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-center shadow-lg">
                         <p class="text-red-200 text-sm mb-1">Available Balance</p>
                         <h2 id="wallet-balance-display" class="text-4xl font-bold text-white tracking-wide">₹0</h2>
                     </div>
 
-                    <!-- Deposit Card -->
                     <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 shadow-md">
-                        <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
-                            <i class="fas fa-arrow-down text-green-500"></i> Add Money
-                        </h3>
+                        <h3 class="font-bold text-lg mb-2 flex items-center gap-2"><i class="fas fa-arrow-down text-green-500"></i> Add Money</h3>
                         <p class="text-xs text-gray-400 mb-4">Pay via UPI to: <strong class="text-white user-select-all">rk_esports@upi</strong></p>
                         
                         <div class="space-y-3">
                             <input type="number" id="dep-amount" placeholder="Amount (Min ₹10)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500">
                             <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500">
                             
-                            <!-- Custom File Upload -->
                             <label class="block w-full text-center py-4 bg-slate-900 border border-slate-600 border-dashed rounded-lg cursor-pointer hover:bg-slate-700 transition">
                                 <i class="fas fa-cloud-upload-alt text-gray-400 text-xl mb-1"></i> <br>
                                 <span class="text-sm text-gray-400" id="file-name-display">Upload Payment Screenshot</span>
@@ -151,11 +157,8 @@
                         </div>
                     </div>
 
-                    <!-- Withdraw Card -->
                     <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 shadow-md">
-                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
-                            <i class="fas fa-arrow-up text-red-500"></i> Withdraw Winnings
-                        </h3>
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2"><i class="fas fa-arrow-up text-red-500"></i> Withdraw Winnings</h3>
                         <input type="number" id="with-amount" placeholder="Amount (₹)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500 mb-3">
                         <input type="text" id="with-upi" placeholder="Your UPI ID" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500 mb-3">
                         <button onclick="window.submitWithdraw(this)" class="w-full py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold click-anim transition">
@@ -170,16 +173,12 @@
                         <img id="prof-img" src="https://via.placeholder.com/150" class="w-16 h-16 rounded-full border-2 border-red-500 object-cover">
                         <div>
                             <h2 id="prof-name" class="font-bold text-xl">Player</h2>
-                            <p id="prof-email" class="text-xs text-gray-400">email@example.com</p>
+                            <p id="prof-email" class="text-xs text-gray-400">Loading...</p>
                         </div>
                     </div>
                     
                     <div class="space-y-2 mt-4">
-                        <button onclick="alert('Match history feature coming soon!')" class="w-full bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700 hover:bg-slate-700 click-anim">
-                            <span class="font-medium"><i class="fas fa-history text-gray-400 w-6"></i> My Matches</span>
-                            <i class="fas fa-chevron-right text-gray-500 text-sm"></i>
-                        </button>
-                        <button onclick="alert('Contact Support: support@rkesports.com')" class="w-full bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700 hover:bg-slate-700 click-anim">
+                        <button onclick="alert('Contact Support: rkapnastore@gmail.com')" class="w-full bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700 hover:bg-slate-700 click-anim">
                             <span class="font-medium"><i class="fas fa-headset text-gray-400 w-6"></i> Customer Support</span>
                             <i class="fas fa-chevron-right text-gray-500 text-sm"></i>
                         </button>
@@ -187,13 +186,11 @@
                             <i class="fas fa-sign-out-alt mr-2"></i> Log Out
                         </button>
                     </div>
-
                     <div class="text-center text-xs text-gray-600 mt-8">
-                        <p>RK_Esports v1.0 (User App)</p>
+                        <p>RK_Esports v1.2 (User App)</p>
                         <p>Founder: Krishn Gupta | RKApnaStore</p>
                     </div>
                 </div>
-
             </div>
 
             <!-- BOTTOM NAVIGATION -->
@@ -208,25 +205,18 @@
                     <i class="fas fa-user text-xl"></i><span class="text-[10px] font-medium">Profile</span>
                 </button>
             </nav>
-            
-            <style>
-                .nav-btn.active { color: #ef4444; } /* Red color for active tab */
-            </style>
+            <style>.nav-btn.active { color: #ef4444; }</style>
         </div>
     </div>
 
     <!-- Firebase & Logic (Module) -->
     <script type="module">
-        // ----------------------------------------------------------------------
         // 1. FIREBASE IMPORTS (v12.10.0 CDN)
-        // ----------------------------------------------------------------------
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-        // ----------------------------------------------------------------------
         // 2. CONFIGURATIONS
-        // ----------------------------------------------------------------------
         const firebaseConfig = {
             apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
             authDomain: "rk-esports1.firebaseapp.com",
@@ -237,20 +227,16 @@
             appId: "1:640016800272:web:c2b86d7b11b1e6b8f04895"
         };
 
-        const cloudinaryConfig = {
-            cloud_name: "dymlr54h",
-            upload_preset: "rk_upload" // MUST be set to "Unsigned" in Cloudinary settings
-        };
+        const cloudinaryConfig = { cloud_name: "dymlr54h", upload_preset: "rk_upload" };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         let currentUserData = null;
+        let confirmationResult = null; // For Phone OTP
 
-        // ----------------------------------------------------------------------
         // 3. UI NAVIGATION
-        // ----------------------------------------------------------------------
         window.switchTab = (tabId) => {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -258,17 +244,72 @@
             document.querySelector(`.nav-btn[data-target="${tabId}"]`).classList.add('active');
         };
 
-        // ----------------------------------------------------------------------
-        // 4. AUTHENTICATION
-        // ----------------------------------------------------------------------
+        // ---------------------------------------------------------
+        // 4. AUTHENTICATION LOGIC (GOOGLE + PHONE)
+        // ---------------------------------------------------------
+
+        // A. Google Login
         document.getElementById('btn-google-login').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
-            document.getElementById('auth-loading').classList.remove('hidden');
+            showLoading("Logging in with Google...");
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
-                alert("Login Failed: " + error.message);
-                document.getElementById('auth-loading').classList.add('hidden');
+                alert("Google Login Failed: " + error.message);
+                hideLoading();
+            }
+        });
+
+        // B. Setup Recaptcha for Phone
+        function setupRecaptcha() {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'btn-send-otp', {
+                    'size': 'invisible',
+                    'callback': (response) => { console.log("Recaptcha verified"); }
+                });
+            }
+        }
+
+        // C. Send OTP
+        document.getElementById('btn-send-otp').addEventListener('click', async () => {
+            const phone = document.getElementById('phone-number').value;
+            if (phone.length !== 10) return alert("Enter valid 10-digit number");
+            
+            const btn = document.getElementById('btn-send-otp');
+            btn.innerText = "Sending OTP...";
+            btn.disabled = true;
+
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+            const phoneNumber = "+91" + phone;
+
+            try {
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+                document.getElementById('login-buttons').classList.add('hidden');
+                document.getElementById('otp-section').classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                alert("SMS Failed: " + error.message);
+                btn.innerText = "Get OTP";
+                btn.disabled = false;
+            }
+        });
+
+        // D. Verify OTP
+        document.getElementById('btn-verify-otp').addEventListener('click', async () => {
+            const otp = document.getElementById('otp-input').value;
+            if (otp.length !== 6) return alert("Enter valid 6-digit OTP");
+
+            showLoading("Verifying OTP...");
+            document.getElementById('otp-section').classList.add('hidden');
+
+            try {
+                await confirmationResult.confirm(otp);
+                // Note: onAuthStateChanged will trigger automatically on success
+            } catch (error) {
+                alert("Invalid OTP! Try again.");
+                hideLoading();
+                document.getElementById('otp-section').classList.remove('hidden');
             }
         });
 
@@ -277,39 +318,70 @@
             window.location.reload();
         };
 
+        function showLoading(msg) {
+            document.getElementById('login-buttons').classList.add('hidden');
+            document.getElementById('otp-section').classList.add('hidden');
+            document.getElementById('auth-loading').classList.remove('hidden');
+            document.getElementById('auth-status-text').innerText = msg;
+        }
+        function hideLoading() {
+            document.getElementById('auth-loading').classList.add('hidden');
+            document.getElementById('login-buttons').classList.remove('hidden');
+        }
+
+        // ---------------------------------------------------------
+        // 5. USER STATE OBSERVER & DATABASE LOGIC (Fixing the Spinning Issue)
+        // ---------------------------------------------------------
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                showLoading("Fetching account details...");
+                
                 const userRef = doc(db, "users", user.uid);
                 
-                // Realtime Wallet Listener
-                onSnapshot(userRef, async (docSnap) => {
-                    if (!docSnap.exists()) {
-                        // First time signup
+                try {
+                    // This block fixes the infinite loading if Database Rules are not set
+                    const userSnap = await getDoc(userRef);
+                    
+                    if (!userSnap.exists()) {
                         currentUserData = {
                             uid: user.uid,
-                            username: user.displayName || "Gamer",
-                            email: user.email,
+                            username: user.displayName || "Gamer " + Math.floor(Math.random()*1000),
+                            email: user.email || user.phoneNumber,
+                            phone: user.phoneNumber || "",
                             role: "user",
                             wallet_balance: 0,
-                            photo_url: user.photoURL || "https://via.placeholder.com/150",
+                            photo_url: user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.uid,
                             created_at: new Date()
                         };
-                        await setDoc(userRef, currentUserData);
+                        await setDoc(userRef, currentUserData); // Will fail here if Rules are bad
                     } else {
-                        currentUserData = docSnap.data();
+                        currentUserData = userSnap.data();
                     }
-                    updateUI();
-                });
 
-                // Start fetching tournaments
-                fetchTournaments();
+                    // Setup Realtime Balance Listener
+                    onSnapshot(userRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            currentUserData = docSnap.data();
+                            updateUI();
+                        }
+                    });
 
-                // Show App
-                document.getElementById('auth-screen').classList.remove('active');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('flex');
+                    // Start fetching matches
+                    fetchTournaments();
+
+                    // Switch to Main App Screen
+                    document.getElementById('auth-screen').classList.remove('active');
+                    document.getElementById('main-app').classList.remove('hidden');
+                    document.getElementById('main-app').classList.add('flex');
+
+                } catch (dbError) {
+                    console.error("Firestore Error:", dbError);
+                    alert("⚠️ DATABASE ERROR: Aapne abhi tak Firebase console mein 'Firestore Rules' update nahi kiye hain isliye loading atak gaya. Kripya Firestore rules ko change karein.");
+                    hideLoading();
+                    await signOut(auth); // Force signout so they can try again after fixing rules
+                }
             } else {
-                // Show Login Screen
+                hideLoading();
                 document.getElementById('auth-screen').classList.add('active');
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('flex');
@@ -318,20 +390,17 @@
 
         function updateUI() {
             if(!currentUserData) return;
-            // Wallet
             const bal = currentUserData.wallet_balance || 0;
             document.getElementById('header-wallet-balance').innerText = `₹${bal}`;
             document.getElementById('wallet-balance-display').innerText = `₹${bal}`;
-            
-            // Profile
             document.getElementById('prof-img').src = currentUserData.photo_url || "https://via.placeholder.com/150";
             document.getElementById('prof-name').innerText = currentUserData.username;
-            document.getElementById('prof-email').innerText = currentUserData.email;
+            document.getElementById('prof-email').innerText = currentUserData.email || currentUserData.phone;
         }
 
-        // ----------------------------------------------------------------------
-        // 5. TOURNAMENT LOGIC
-        // ----------------------------------------------------------------------
+        // ---------------------------------------------------------
+        // 6. TOURNAMENT LIST & JOINING
+        // ---------------------------------------------------------
         function fetchTournaments() {
             const q = query(collection(db, "tournaments"), orderBy("matchTime", "asc"));
             onSnapshot(q, (snapshot) => {
@@ -339,7 +408,7 @@
                 list.innerHTML = "";
                 
                 if(snapshot.empty) {
-                    list.innerHTML = `<div class="text-center text-gray-500 py-10">No active tournaments right now.</div>`;
+                    list.innerHTML = `<div class="text-center text-gray-500 py-10">No active matches right now.</div>`;
                     return;
                 }
 
@@ -357,13 +426,11 @@
                             <div class="absolute top-0 right-0 ${t.status === 'upcoming'?'bg-green-500':(t.status==='live'?'bg-red-500':'bg-gray-500')} text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">${t.status}</div>
                             <h3 class="font-bold text-lg text-white mb-2 mt-2">${t.name}</h3>
                             <div class="flex justify-between bg-slate-900 p-3 rounded-lg text-sm mb-3 border border-slate-700">
-                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Entry Fee</p><p class="font-bold text-yellow-400">₹${t.entryFee}</p></div>
-                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Prize Pool</p><p class="font-bold text-green-400">₹${t.prizePool}</p></div>
+                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Entry</p><p class="font-bold text-yellow-400">₹${t.entryFee}</p></div>
+                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Prize</p><p class="font-bold text-green-400">₹${t.prizePool}</p></div>
                                 <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Time</p><p class="font-bold text-blue-400 text-xs mt-0.5">${timeStr}</p></div>
                             </div>
-                            <!-- Room Details (Only shows if populated by admin) -->
                             ${t.roomId ? `<div class="bg-green-900/30 border border-green-500/30 p-2 rounded mb-3 text-center text-xs"><p class="text-green-400 font-bold">Room ID: <span class="text-white user-select-all">${t.roomId}</span> | Pass: <span class="text-white user-select-all">${t.roomPass}</span></p></div>` : ''}
-                            
                             <button onclick="window.joinTournament('${tId}', ${t.entryFee})" class="w-full py-2.5 rounded-lg font-bold text-white click-anim transition ${btnClass}" ${t.status !== 'upcoming' ? 'disabled' : ''}>
                                 ${btnText}
                             </button>
@@ -375,124 +442,71 @@
 
         window.joinTournament = async (tId, fee) => {
             if(currentUserData.wallet_balance < fee) {
-                alert("Insufficient wallet balance. Please add money to your wallet.");
+                alert("Insufficient wallet balance. Please add money first.");
                 window.switchTab('wallet');
                 return;
             }
-            
             const ign = prompt("Enter your Free Fire In-Game Name (IGN) to join:");
             if(!ign) return;
-
             try {
-                // Send pending join request to Admin
                 await addDoc(collection(db, "participants"), {
-                    uid: auth.currentUser.uid,
-                    tournamentId: tId,
-                    inGameName: ign,
-                    status: "pending", // Admin handles wallet deduction securely
-                    timestamp: new Date()
+                    uid: auth.currentUser.uid, tournamentId: tId, inGameName: ign, status: "pending", timestamp: new Date()
                 });
-                alert("Join request sent! Admin will deduct entry fee and confirm your slot.");
-            } catch (e) {
-                alert("Error joining tournament.");
-                console.error(e);
-            }
+                alert("Join request sent! Admin will deduct entry fee & confirm your slot.");
+            } catch (e) { alert("Error: " + e.message); }
         };
 
-        // ----------------------------------------------------------------------
-        // 6. WALLET LOGIC (CLOUDINARY + FIRESTORE)
-        // ----------------------------------------------------------------------
+        // ---------------------------------------------------------
+        // 7. WALLET DEPOSIT / WITHDRAW
+        // ---------------------------------------------------------
         async function uploadToCloudinary(file) {
             const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", cloudinaryConfig.upload_preset);
-
+            formData.append("file", file); formData.append("upload_preset", cloudinaryConfig.upload_preset);
             try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloud_name}/image/upload`, {
-                    method: "POST",
-                    body: formData
-                });
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloud_name}/image/upload`, { method: "POST", body: formData });
                 const data = await res.json();
-                if(data.secure_url) return data.secure_url;
-                throw new Error("Upload failed");
-            } catch (error) {
-                console.error(error);
-                return null;
-            }
+                return data.secure_url ? data.secure_url : null;
+            } catch (error) { return null; }
         }
 
         window.submitDeposit = async (btn) => {
-            const amount = document.getElementById('dep-amount').value;
-            const utr = document.getElementById('dep-utr').value;
-            const fileInput = document.getElementById('dep-file');
-
+            const amount = document.getElementById('dep-amount').value, utr = document.getElementById('dep-utr').value, fileInput = document.getElementById('dep-file');
             if (!amount || amount < 10) return alert("Minimum deposit is ₹10");
             if (!utr || utr.length < 12) return alert("Enter valid 12-digit UTR");
-            if (!fileInput.files.length) return alert("Please upload payment screenshot");
+            if (!fileInput.files.length) return alert("Upload payment screenshot");
 
-            btn.innerText = "Uploading... Wait";
-            btn.disabled = true;
-            btn.classList.add("opacity-50");
-
+            btn.innerText = "Uploading... Wait"; btn.disabled = true; btn.classList.add("opacity-50");
             const proofUrl = await uploadToCloudinary(fileInput.files[0]);
 
             if (proofUrl) {
                 try {
                     await addDoc(collection(db, "deposits"), {
-                        uid: auth.currentUser.uid,
-                        username: currentUserData.username,
-                        amount: Number(amount),
-                        utr: utr,
-                        proof_url: proofUrl,
-                        status: "pending",
-                        timestamp: new Date()
+                        uid: auth.currentUser.uid, username: currentUserData.username, amount: Number(amount), utr: utr, proof_url: proofUrl, status: "pending", timestamp: new Date()
                     });
-                    alert("Deposit Request Sent! Admin will verify and add funds shortly.");
-                    document.getElementById('dep-amount').value = '';
-                    document.getElementById('dep-utr').value = '';
-                    document.getElementById('file-name-display').innerText = 'Upload Payment Screenshot';
-                    fileInput.value = '';
-                } catch (e) {
-                    alert("Error submitting deposit.");
-                }
-            } else {
-                alert("Image upload failed. Please check Cloudinary config.");
-            }
+                    alert("Deposit Request Sent! Admin will add funds shortly.");
+                    document.getElementById('dep-amount').value = ''; document.getElementById('dep-utr').value = '';
+                    document.getElementById('file-name-display').innerText = 'Upload Payment Screenshot'; fileInput.value = '';
+                } catch (e) { alert("Error: " + e.message); }
+            } else { alert("Image upload failed. Check Cloudinary settings."); }
             
-            btn.innerText = "Submit Deposit Request";
-            btn.disabled = false;
-            btn.classList.remove("opacity-50");
+            btn.innerText = "Submit Deposit Request"; btn.disabled = false; btn.classList.remove("opacity-50");
         };
 
         window.submitWithdraw = async (btn) => {
-            const amount = document.getElementById('with-amount').value;
-            const upi = document.getElementById('with-upi').value;
-            
+            const amount = document.getElementById('with-amount').value, upi = document.getElementById('with-upi').value;
             if(!amount || !upi) return alert("Fill all fields");
             if(Number(amount) < 50) return alert("Minimum withdrawal is ₹50");
             if(Number(amount) > currentUserData.wallet_balance) return alert("Insufficient balance!");
 
-            btn.innerText = "Processing...";
-            btn.disabled = true;
-
+            btn.innerText = "Processing..."; btn.disabled = true;
             try {
                 await addDoc(collection(db, "withdrawals"), {
-                    uid: auth.currentUser.uid,
-                    username: currentUserData.username,
-                    amount: Number(amount),
-                    upi_id: upi,
-                    status: "pending",
-                    timestamp: new Date()
+                    uid: auth.currentUser.uid, username: currentUserData.username, amount: Number(amount), upi_id: upi, status: "pending", timestamp: new Date()
                 });
-                alert("Withdrawal requested! Amount will be sent to your UPI manually by Admin.");
-                document.getElementById('with-amount').value = '';
-                document.getElementById('with-upi').value = '';
-            } catch (e) {
-                alert("Error submitting request.");
-            }
-
-            btn.innerText = "Request Withdrawal";
-            btn.disabled = false;
+                alert("Withdrawal requested! Admin will transfer money manually.");
+                document.getElementById('with-amount').value = ''; document.getElementById('with-upi').value = '';
+            } catch (e) { alert("Error: " + e.message); }
+            btn.innerText = "Request Withdrawal"; btn.disabled = false;
         };
     </script>
 </body>
