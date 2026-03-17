@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- SEO Meta Tags -->
+    <title>RK_Esports | Play & Win</title>
+    <meta name="description" content="Join RK_Esports Free Fire Tournaments. Founder: Krishn Gupta. Parent: RKApnaStore.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Mobile App Reset & Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Pure black background for outside container */
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* App Container - Acts like a mobile screen on Desktop */
+        #app-container {
+            width: 100%;
+            max-width: 400px; /* Mobile width */
+            height: 100%;
+            background-color: #0f172a; /* Slate 900 */
+            color: #ffffff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar { display: none; }
+
+        /* Animations */
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .click-anim:active { transform: scale(0.95); }
+
+        /* Loader */
+        .loader {
+            border: 3px solid #1e293b; border-top: 3px solid #ef4444;
+            border-radius: 50%; width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <!-- ======================= -->
+        <!-- 🔐 AUTHENTICATION SCREEN -->
+        <!-- ======================= -->
+        <div id="auth-screen" class="view-section active absolute inset-0 bg-slate-900 z-50 flex flex-col justify-center items-center p-6">
+            <div class="text-center mb-10">
+                <i class="fas fa-gamepad text-6xl text-red-500 mb-4 drop-shadow-lg"></i>
+                <h1 class="text-3xl font-bold tracking-wider">RK<span class="text-red-500">_ESPORTS</span></h1>
+                <p class="text-gray-400 text-sm mt-2">By RKApnaStore</p>
+            </div>
+            
+            <div class="w-full space-y-4">
+                <button id="btn-google-login" class="w-full py-3 px-4 bg-white text-gray-900 rounded-lg font-bold flex items-center justify-center gap-3 click-anim transition">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                    Continue with Google
+                </button>
+                <button onclick="alert('Phone login setup required in Firebase Console. Use Google Login for now.')" class="w-full py-3 px-4 bg-slate-800 text-white border border-slate-700 rounded-lg font-bold flex items-center justify-center gap-3 click-anim transition">
+                    <i class="fas fa-phone text-green-500"></i>
+                    Login with Phone
+                </button>
+            </div>
+            <div id="auth-loading" class="hidden mt-6"><div class="loader"></div></div>
+        </div>
+
+        <!-- ======================= -->
+        <!-- 📱 MAIN APPLICATION UI -->
+        <!-- ======================= -->
+        <div id="main-app" class="hidden flex-col h-full w-full">
+            
+            <!-- HEADER -->
+            <header class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700 shrink-0 shadow-md z-10">
+                <h1 class="text-xl font-bold tracking-wider">RK<span class="text-red-500">_E</span></h1>
+                <div class="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fas fa-wallet text-yellow-400"></i>
+                    <span id="header-wallet-balance" class="font-bold text-sm">₹0</span>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE CONTENT AREA -->
+            <div class="flex-1 overflow-y-auto p-4 pb-20">
+                
+                <!-- 🎮 1. TOURNAMENTS (HOME) VIEW -->
+                <div id="view-home" class="view-section active space-y-4">
+                    <h2 class="text-lg font-bold border-l-4 border-red-500 pl-2 mb-4">Upcoming Matches</h2>
+                    <div id="tournaments-list" class="space-y-4">
+                        <!-- Matches will load here via JS -->
+                        <div class="text-center text-gray-500 py-10 flex flex-col items-center">
+                            <div class="loader mb-2"></div>Loading...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 💰 2. WALLET VIEW -->
+                <div id="view-wallet" class="view-section space-y-5">
+                    <!-- Balance Card -->
+                    <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-center shadow-lg">
+                        <p class="text-red-200 text-sm mb-1">Available Balance</p>
+                        <h2 id="wallet-balance-display" class="text-4xl font-bold text-white tracking-wide">₹0</h2>
+                    </div>
+
+                    <!-- Deposit Card -->
+                    <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 shadow-md">
+                        <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+                            <i class="fas fa-arrow-down text-green-500"></i> Add Money
+                        </h3>
+                        <p class="text-xs text-gray-400 mb-4">Pay via UPI to: <strong class="text-white user-select-all">rk_esports@upi</strong></p>
+                        
+                        <div class="space-y-3">
+                            <input type="number" id="dep-amount" placeholder="Amount (Min ₹10)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500">
+                            <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500">
+                            
+                            <!-- Custom File Upload -->
+                            <label class="block w-full text-center py-4 bg-slate-900 border border-slate-600 border-dashed rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-xl mb-1"></i> <br>
+                                <span class="text-sm text-gray-400" id="file-name-display">Upload Payment Screenshot</span>
+                                <input type="file" id="dep-file" class="hidden" accept="image/*" onchange="document.getElementById('file-name-display').innerText = 'Screenshot Selected ✅'">
+                            </label>
+
+                            <button onclick="window.submitDeposit(this)" class="w-full py-3 bg-red-600 hover:bg-red-700 rounded-lg font-bold click-anim transition shadow-lg">
+                                Submit Deposit Request
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Withdraw Card -->
+                    <div class="bg-slate-800 rounded-xl p-5 border border-slate-700 shadow-md">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <i class="fas fa-arrow-up text-red-500"></i> Withdraw Winnings
+                        </h3>
+                        <input type="number" id="with-amount" placeholder="Amount (₹)" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500 mb-3">
+                        <input type="text" id="with-upi" placeholder="Your UPI ID" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-red-500 mb-3">
+                        <button onclick="window.submitWithdraw(this)" class="w-full py-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold click-anim transition">
+                            Request Withdrawal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 👤 3. PROFILE VIEW -->
+                <div id="view-profile" class="view-section space-y-4">
+                    <div class="bg-slate-800 p-6 rounded-xl flex items-center gap-4 border border-slate-700 shadow-md">
+                        <img id="prof-img" src="https://via.placeholder.com/150" class="w-16 h-16 rounded-full border-2 border-red-500 object-cover">
+                        <div>
+                            <h2 id="prof-name" class="font-bold text-xl">Player</h2>
+                            <p id="prof-email" class="text-xs text-gray-400">email@example.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 mt-4">
+                        <button onclick="alert('Match history feature coming soon!')" class="w-full bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700 hover:bg-slate-700 click-anim">
+                            <span class="font-medium"><i class="fas fa-history text-gray-400 w-6"></i> My Matches</span>
+                            <i class="fas fa-chevron-right text-gray-500 text-sm"></i>
+                        </button>
+                        <button onclick="alert('Contact Support: support@rkesports.com')" class="w-full bg-slate-800 p-4 rounded-lg flex justify-between items-center border border-slate-700 hover:bg-slate-700 click-anim">
+                            <span class="font-medium"><i class="fas fa-headset text-gray-400 w-6"></i> Customer Support</span>
+                            <i class="fas fa-chevron-right text-gray-500 text-sm"></i>
+                        </button>
+                        <button onclick="window.logoutUser()" class="w-full mt-6 py-4 bg-red-500/10 text-red-500 border border-red-500/30 rounded-lg font-bold click-anim hover:bg-red-500/20 transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+                        </button>
+                    </div>
+
+                    <div class="text-center text-xs text-gray-600 mt-8">
+                        <p>RK_Esports v1.0 (User App)</p>
+                        <p>Founder: Krishn Gupta | RKApnaStore</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BOTTOM NAVIGATION -->
+            <nav class="absolute bottom-0 w-full bg-slate-900 border-t border-slate-800 flex justify-around items-center py-2 shadow-[0_-5px_15px_rgba(0,0,0,0.5)] z-40">
+                <button onclick="window.switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-gray-500 hover:text-white transition w-20 py-1" data-target="home">
+                    <i class="fas fa-gamepad text-xl"></i><span class="text-[10px] font-medium">Matches</span>
+                </button>
+                <button onclick="window.switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 text-gray-500 hover:text-white transition w-20 py-1" data-target="wallet">
+                    <i class="fas fa-wallet text-xl"></i><span class="text-[10px] font-medium">Wallet</span>
+                </button>
+                <button onclick="window.switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 text-gray-500 hover:text-white transition w-20 py-1" data-target="profile">
+                    <i class="fas fa-user text-xl"></i><span class="text-[10px] font-medium">Profile</span>
+                </button>
+            </nav>
+            
+            <style>
+                .nav-btn.active { color: #ef4444; } /* Red color for active tab */
+            </style>
+        </div>
+    </div>
+
+    <!-- Firebase & Logic (Module) -->
+    <script type="module">
+        // ----------------------------------------------------------------------
+        // 1. FIREBASE IMPORTS (v12.10.0 CDN)
+        // ----------------------------------------------------------------------
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+        // ----------------------------------------------------------------------
+        // 2. CONFIGURATIONS
+        // ----------------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
+            authDomain: "rk-esports1.firebaseapp.com",
+            databaseURL: "https://rk-esports1-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "rk-esports1",
+            storageBucket: "rk-esports1.firebasestorage.app",
+            messagingSenderId: "640016800272",
+            appId: "1:640016800272:web:c2b86d7b11b1e6b8f04895"
+        };
+
+        const cloudinaryConfig = {
+            cloud_name: "dymlr54h",
+            upload_preset: "rk_upload" // MUST be set to "Unsigned" in Cloudinary settings
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserData = null;
+
+        // ----------------------------------------------------------------------
+        // 3. UI NAVIGATION
+        // ----------------------------------------------------------------------
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+            document.querySelector(`.nav-btn[data-target="${tabId}"]`).classList.add('active');
+        };
+
+        // ----------------------------------------------------------------------
+        // 4. AUTHENTICATION
+        // ----------------------------------------------------------------------
+        document.getElementById('btn-google-login').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            document.getElementById('auth-loading').classList.remove('hidden');
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+                document.getElementById('auth-loading').classList.add('hidden');
+            }
+        });
+
+        window.logoutUser = async () => {
+            await signOut(auth);
+            window.location.reload();
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                
+                // Realtime Wallet Listener
+                onSnapshot(userRef, async (docSnap) => {
+                    if (!docSnap.exists()) {
+                        // First time signup
+                        currentUserData = {
+                            uid: user.uid,
+                            username: user.displayName || "Gamer",
+                            email: user.email,
+                            role: "user",
+                            wallet_balance: 0,
+                            photo_url: user.photoURL || "https://via.placeholder.com/150",
+                            created_at: new Date()
+                        };
+                        await setDoc(userRef, currentUserData);
+                    } else {
+                        currentUserData = docSnap.data();
+                    }
+                    updateUI();
+                });
+
+                // Start fetching tournaments
+                fetchTournaments();
+
+                // Show App
+                document.getElementById('auth-screen').classList.remove('active');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('flex');
+            } else {
+                // Show Login Screen
+                document.getElementById('auth-screen').classList.add('active');
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('flex');
+            }
+        });
+
+        function updateUI() {
+            if(!currentUserData) return;
+            // Wallet
+            const bal = currentUserData.wallet_balance || 0;
+            document.getElementById('header-wallet-balance').innerText = `₹${bal}`;
+            document.getElementById('wallet-balance-display').innerText = `₹${bal}`;
+            
+            // Profile
+            document.getElementById('prof-img').src = currentUserData.photo_url || "https://via.placeholder.com/150";
+            document.getElementById('prof-name').innerText = currentUserData.username;
+            document.getElementById('prof-email').innerText = currentUserData.email;
+        }
+
+        // ----------------------------------------------------------------------
+        // 5. TOURNAMENT LOGIC
+        // ----------------------------------------------------------------------
+        function fetchTournaments() {
+            const q = query(collection(db, "tournaments"), orderBy("matchTime", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('tournaments-list');
+                list.innerHTML = "";
+                
+                if(snapshot.empty) {
+                    list.innerHTML = `<div class="text-center text-gray-500 py-10">No active tournaments right now.</div>`;
+                    return;
+                }
+
+                snapshot.forEach(docSnap => {
+                    const t = docSnap.data();
+                    const tId = docSnap.id;
+                    const dateObj = new Date(t.matchTime);
+                    const timeStr = dateObj.toLocaleString([], { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+                    const btnText = t.status === 'upcoming' ? 'JOIN NOW' : (t.status === 'live' ? 'LIVE NOW' : 'COMPLETED');
+                    const btnClass = t.status === 'upcoming' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 cursor-not-allowed';
+
+                    list.innerHTML += `
+                        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md relative overflow-hidden">
+                            <div class="absolute top-0 right-0 ${t.status === 'upcoming'?'bg-green-500':(t.status==='live'?'bg-red-500':'bg-gray-500')} text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">${t.status}</div>
+                            <h3 class="font-bold text-lg text-white mb-2 mt-2">${t.name}</h3>
+                            <div class="flex justify-between bg-slate-900 p-3 rounded-lg text-sm mb-3 border border-slate-700">
+                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Entry Fee</p><p class="font-bold text-yellow-400">₹${t.entryFee}</p></div>
+                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Prize Pool</p><p class="font-bold text-green-400">₹${t.prizePool}</p></div>
+                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Time</p><p class="font-bold text-blue-400 text-xs mt-0.5">${timeStr}</p></div>
+                            </div>
+                            <!-- Room Details (Only shows if populated by admin) -->
+                            ${t.roomId ? `<div class="bg-green-900/30 border border-green-500/30 p-2 rounded mb-3 text-center text-xs"><p class="text-green-400 font-bold">Room ID: <span class="text-white user-select-all">${t.roomId}</span> | Pass: <span class="text-white user-select-all">${t.roomPass}</span></p></div>` : ''}
+                            
+                            <button onclick="window.joinTournament('${tId}', ${t.entryFee})" class="w-full py-2.5 rounded-lg font-bold text-white click-anim transition ${btnClass}" ${t.status !== 'upcoming' ? 'disabled' : ''}>
+                                ${btnText}
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        window.joinTournament = async (tId, fee) => {
+            if(currentUserData.wallet_balance < fee) {
+                alert("Insufficient wallet balance. Please add money to your wallet.");
+                window.switchTab('wallet');
+                return;
+            }
+            
+            const ign = prompt("Enter your Free Fire In-Game Name (IGN) to join:");
+            if(!ign) return;
+
+            try {
+                // Send pending join request to Admin
+                await addDoc(collection(db, "participants"), {
+                    uid: auth.currentUser.uid,
+                    tournamentId: tId,
+                    inGameName: ign,
+                    status: "pending", // Admin handles wallet deduction securely
+                    timestamp: new Date()
+                });
+                alert("Join request sent! Admin will deduct entry fee and confirm your slot.");
+            } catch (e) {
+                alert("Error joining tournament.");
+                console.error(e);
+            }
+        };
+
+        // ----------------------------------------------------------------------
+        // 6. WALLET LOGIC (CLOUDINARY + FIRESTORE)
+        // ----------------------------------------------------------------------
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", cloudinaryConfig.upload_preset);
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloud_name}/image/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+                if(data.secure_url) return data.secure_url;
+                throw new Error("Upload failed");
+            } catch (error) {
+                console.error(error);
+                return null;
+            }
+        }
+
+        window.submitDeposit = async (btn) => {
+            const amount = document.getElementById('dep-amount').value;
+            const utr = document.getElementById('dep-utr').value;
+            const fileInput = document.getElementById('dep-file');
+
+            if (!amount || amount < 10) return alert("Minimum deposit is ₹10");
+            if (!utr || utr.length < 12) return alert("Enter valid 12-digit UTR");
+            if (!fileInput.files.length) return alert("Please upload payment screenshot");
+
+            btn.innerText = "Uploading... Wait";
+            btn.disabled = true;
+            btn.classList.add("opacity-50");
+
+            const proofUrl = await uploadToCloudinary(fileInput.files[0]);
+
+            if (proofUrl) {
+                try {
+                    await addDoc(collection(db, "deposits"), {
+                        uid: auth.currentUser.uid,
+                        username: currentUserData.username,
+                        amount: Number(amount),
+                        utr: utr,
+                        proof_url: proofUrl,
+                        status: "pending",
+                        timestamp: new Date()
+                    });
+                    alert("Deposit Request Sent! Admin will verify and add funds shortly.");
+                    document.getElementById('dep-amount').value = '';
+                    document.getElementById('dep-utr').value = '';
+                    document.getElementById('file-name-display').innerText = 'Upload Payment Screenshot';
+                    fileInput.value = '';
+                } catch (e) {
+                    alert("Error submitting deposit.");
+                }
+            } else {
+                alert("Image upload failed. Please check Cloudinary config.");
+            }
+            
+            btn.innerText = "Submit Deposit Request";
+            btn.disabled = false;
+            btn.classList.remove("opacity-50");
+        };
+
+        window.submitWithdraw = async (btn) => {
+            const amount = document.getElementById('with-amount').value;
+            const upi = document.getElementById('with-upi').value;
+            
+            if(!amount || !upi) return alert("Fill all fields");
+            if(Number(amount) < 50) return alert("Minimum withdrawal is ₹50");
+            if(Number(amount) > currentUserData.wallet_balance) return alert("Insufficient balance!");
+
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    uid: auth.currentUser.uid,
+                    username: currentUserData.username,
+                    amount: Number(amount),
+                    upi_id: upi,
+                    status: "pending",
+                    timestamp: new Date()
+                });
+                alert("Withdrawal requested! Amount will be sent to your UPI manually by Admin.");
+                document.getElementById('with-amount').value = '';
+                document.getElementById('with-upi').value = '';
+            } catch (e) {
+                alert("Error submitting request.");
+            }
+
+            btn.innerText = "Request Withdrawal";
+            btn.disabled = false;
+        };
+    </script>
+</body>
+</html>
