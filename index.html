@@ -1,308 +1,123 @@
-<!-- Firebase & Logic (Module) -->
-    <script type="module">
-        // 1. FIREBASE IMPORTS (v12.10.0 CDN)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RK_Esports</title>
 
-        // 2. CONFIGURATIONS
-        const firebaseConfig = {
-            apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
-            authDomain: "rk-esports1.firebaseapp.com",
-            databaseURL: "https://rk-esports1-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "rk-esports1",
-            storageBucket: "rk-esports1.firebasestorage.app",
-            messagingSenderId: "640016800272",
-            appId: "1:640016800272:web:c2b86d7b11b1e6b8f04895"
-        };
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        const cloudinaryConfig = { cloud_name: "dymlr54h", upload_preset: "rk_upload" };
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+<body class="bg-gray-900 text-white">
 
-        let currentUserData = null;
-        let confirmationResult = null; // For Phone OTP
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="h-screen flex flex-col justify-center items-center">
+  <h1 class="text-3xl font-bold mb-6">RK_ESPORTS</h1>
 
-        // 3. UI NAVIGATION
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${tabId}`).classList.add('active');
-            document.querySelector(`.nav-btn[data-target="${tabId}"]`).classList.add('active');
-        };
+  <button onclick="login()" 
+    class="bg-white text-black px-6 py-3 rounded-lg flex items-center gap-2">
+    <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20">
+    Continue with Google
+  </button>
 
-        // ---------------------------------------------------------
-        // 4. AUTHENTICATION LOGIC (GOOGLE + PHONE)
-        // ---------------------------------------------------------
+  <div id="loader" class="mt-6 hidden">
+    <div class="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+</div>
 
-        // A. Google Login
-        document.getElementById('btn-google-login').addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            showLoading("Logging in with Google...");
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                alert("Google Login Failed: " + error.message);
-                hideLoading();
-            }
-        });
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden p-4">
+  <h2 class="text-xl font-bold mb-2">Welcome</h2>
+  <p id="username"></p>
 
-        // B. Setup Recaptcha for Phone
-        function setupRecaptcha() {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'btn-send-otp', {
-                    'size': 'invisible',
-                    'callback': (response) => { console.log("Recaptcha verified"); }
-                });
-            }
-        }
+  <div class="mt-4 bg-gray-800 p-4 rounded-lg">
+    <p>Wallet Balance</p>
+    <h1 class="text-2xl font-bold">₹ <span id="wallet">0</span></h1>
+  </div>
 
-        // C. Send OTP
-        document.getElementById('btn-send-otp').addEventListener('click', async () => {
-            const phone = document.getElementById('phone-number').value;
-            if (phone.length !== 10) return alert("Enter valid 10-digit number");
-            
-            const btn = document.getElementById('btn-send-otp');
-            btn.innerText = "Sending OTP...";
-            btn.disabled = true;
+  <button onclick="logout()" 
+    class="mt-6 bg-red-500 px-4 py-2 rounded">
+    Logout
+  </button>
+</div>
 
-            setupRecaptcha();
-            const appVerifier = window.recaptchaVerifier;
-            const phoneNumber = "+91" + phone;
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
+  authDomain: "rk-esports1.firebaseapp.com",
+  databaseURL: "https://rk-esports1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rk-esports1",
+  storageBucket: "rk-esports1.firebasestorage.app",
+  messagingSenderId: "640016800272",
+  appId: "1:640016800272:web:c2b86d7b11b1e6b8f04895"
+};
 
-            try {
-                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-                document.getElementById('login-buttons').classList.add('hidden');
-                document.getElementById('otp-section').classList.remove('hidden');
-            } catch (error) {
-                console.error(error);
-                alert("SMS Failed: " + error.message);
-                btn.innerText = "Get OTP";
-                btn.disabled = false;
-            }
-        });
+firebase.initializeApp(firebaseConfig);
 
-        // D. Verify OTP
-        document.getElementById('btn-verify-otp').addEventListener('click', async () => {
-            const otp = document.getElementById('otp-input').value;
-            if (otp.length !== 6) return alert("Enter valid 6-digit OTP");
+const auth = firebase.auth();
+const db = firebase.firestore();
+const rtdb = firebase.database();
 
-            showLoading("Verifying OTP...");
-            document.getElementById('otp-section').classList.add('hidden');
+// LOGIN
+function login() {
+  document.getElementById("loader").classList.remove("hidden");
 
-            try {
-                await confirmationResult.confirm(otp);
-            } catch (error) {
-                alert("Invalid OTP! Try again.");
-                hideLoading();
-                document.getElementById('otp-section').classList.remove('hidden');
-            }
-        });
+  const provider = new firebase.auth.GoogleAuthProvider();
 
-        window.logoutUser = async () => {
-            await signOut(auth);
-            window.location.reload();
-        };
+  auth.signInWithPopup(provider).then(res => {
+    const user = res.user;
 
-        function showLoading(msg) {
-            document.getElementById('login-buttons').classList.add('hidden');
-            document.getElementById('otp-section').classList.add('hidden');
-            document.getElementById('auth-loading').classList.remove('hidden');
-            document.getElementById('auth-status-text').innerText = msg;
-        }
-        function hideLoading() {
-            document.getElementById('auth-loading').classList.add('hidden');
-            document.getElementById('login-buttons').classList.remove('hidden');
-        }
+    // Firestore save
+    db.collection("users").doc(user.uid).set({
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      wallet: 0,
+      role: "user",
+      createdAt: new Date()
+    }, { merge: true });
 
-        // ---------------------------------------------------------
-        // 5. USER STATE OBSERVER & REDIRECT LOGIC (FIXED)
-        // ---------------------------------------------------------
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                showLoading("Fetching account details...");
-                
-                const userRef = doc(db, "users", user.uid);
-                
-                try {
-                    const userSnap = await getDoc(userRef);
-                    
-                    if (!userSnap.exists()) {
-                        currentUserData = {
-                            uid: user.uid,
-                            username: user.displayName || "Gamer " + Math.floor(Math.random()*1000),
-                            email: user.email || user.phoneNumber || "",
-                            phone: user.phoneNumber || "",
-                            role: "user",
-                            wallet_balance: 0,
-                            photo_url: user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.uid,
-                            created_at: new Date()
-                        };
-                        await setDoc(userRef, currentUserData); 
-                    } else {
-                        currentUserData = userSnap.data();
-                    }
+  }).catch(err => {
+    alert("Login Error");
+    console.log(err);
+  });
+}
 
-                    // Setup Realtime Balance Listener
-                    onSnapshot(userRef, (docSnap) => {
-                        if (docSnap.exists()) {
-                            currentUserData = docSnap.data();
-                            updateUI();
-                        }
-                    });
+// AUTH STATE
+auth.onAuthStateChanged(user => {
+  document.getElementById("loader").classList.add("hidden");
 
-                    fetchTournaments();
+  if (user) {
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
 
-                    // ✅ FIX: Screen Redirect Logic Properly Hiding the Auth Screen
-                    const authScreen = document.getElementById('auth-screen');
-                    const mainApp = document.getElementById('main-app');
-                    
-                    authScreen.classList.remove('flex'); // Remove flex so it can hide
-                    authScreen.classList.add('hidden');  // Hide Login Screen completely
-                    
-                    mainApp.classList.remove('hidden');  // Show App Content
-                    mainApp.classList.add('flex');       // Make App visible
+    document.getElementById("username").innerText = user.displayName;
 
-                } catch (dbError) {
-                    console.error("Firestore Error:", dbError);
-                    alert("Database Error! Please check rules.");
-                    hideLoading();
-                    await signOut(auth); 
-                }
-            } else {
-                hideLoading();
-                // Show Login Screen if not logged in
-                const authScreen = document.getElementById('auth-screen');
-                const mainApp = document.getElementById('main-app');
-                
-                authScreen.classList.remove('hidden');
-                authScreen.classList.add('flex');
-                
-                mainApp.classList.add('hidden');
-                mainApp.classList.remove('flex');
-            }
-        });
+    // fetch wallet
+    db.collection("users").doc(user.uid).get().then(doc => {
+      if (doc.exists) {
+        document.getElementById("wallet").innerText = doc.data().wallet;
+      }
+    });
 
-        function updateUI() {
-            if(!currentUserData) return;
-            const bal = currentUserData.wallet_balance || 0;
-            document.getElementById('header-wallet-balance').innerText = `₹${bal}`;
-            document.getElementById('wallet-balance-display').innerText = `₹${bal}`;
-            document.getElementById('prof-img').src = currentUserData.photo_url || "https://via.placeholder.com/150";
-            document.getElementById('prof-name').innerText = currentUserData.username;
-            document.getElementById('prof-email').innerText = currentUserData.email || currentUserData.phone || "No Email linked";
-        }
+  } else {
+    document.getElementById("loginScreen").classList.remove("hidden");
+    document.getElementById("dashboard").classList.add("hidden");
+  }
+});
 
-        // ---------------------------------------------------------
-        // 6. TOURNAMENT LIST & JOINING
-        // ---------------------------------------------------------
-        function fetchTournaments() {
-            const q = query(collection(db, "tournaments"), orderBy("matchTime", "asc"));
-            onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('tournaments-list');
-                list.innerHTML = "";
-                
-                if(snapshot.empty) {
-                    list.innerHTML = `<div class="text-center text-gray-500 py-10">No active matches right now.</div>`;
-                    return;
-                }
+// LOGOUT
+function logout() {
+  auth.signOut();
+}
+</script>
 
-                snapshot.forEach(docSnap => {
-                    const t = docSnap.data();
-                    const tId = docSnap.id;
-                    const dateObj = new Date(t.matchTime);
-                    const timeStr = dateObj.toLocaleString([], { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-                    const btnText = t.status === 'upcoming' ? 'JOIN NOW' : (t.status === 'live' ? 'LIVE NOW' : 'COMPLETED');
-                    const btnClass = t.status === 'upcoming' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 cursor-not-allowed';
-
-                    list.innerHTML += `
-                        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-md relative overflow-hidden">
-                            <div class="absolute top-0 right-0 ${t.status === 'upcoming'?'bg-green-500':(t.status==='live'?'bg-red-500':'bg-gray-500')} text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">${t.status}</div>
-                            <h3 class="font-bold text-lg text-white mb-2 mt-2">${t.name}</h3>
-                            <div class="flex justify-between bg-slate-900 p-3 rounded-lg text-sm mb-3 border border-slate-700">
-                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Entry</p><p class="font-bold text-yellow-400">₹${t.entryFee}</p></div>
-                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Prize</p><p class="font-bold text-green-400">₹${t.prizePool}</p></div>
-                                <div class="text-center"><p class="text-gray-400 text-[10px] uppercase">Time</p><p class="font-bold text-blue-400 text-xs mt-0.5">${timeStr}</p></div>
-                            </div>
-                            ${t.roomId ? `<div class="bg-green-900/30 border border-green-500/30 p-2 rounded mb-3 text-center text-xs"><p class="text-green-400 font-bold">Room ID: <span class="text-white user-select-all">${t.roomId}</span> | Pass: <span class="text-white user-select-all">${t.roomPass}</span></p></div>` : ''}
-                            <button onclick="window.joinTournament('${tId}', ${t.entryFee})" class="w-full py-2.5 rounded-lg font-bold text-white click-anim transition ${btnClass}" ${t.status !== 'upcoming' ? 'disabled' : ''}>
-                                ${btnText}
-                            </button>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        window.joinTournament = async (tId, fee) => {
-            if(currentUserData.wallet_balance < fee) {
-                alert("Insufficient wallet balance. Please add money first.");
-                window.switchTab('wallet');
-                return;
-            }
-            const ign = prompt("Enter your Free Fire In-Game Name (IGN) to join:");
-            if(!ign) return;
-            try {
-                await addDoc(collection(db, "participants"), {
-                    uid: auth.currentUser.uid, tournamentId: tId, inGameName: ign, status: "pending", timestamp: new Date()
-                });
-                alert("Join request sent! Admin will deduct entry fee & confirm your slot.");
-            } catch (e) { alert("Error: " + e.message); }
-        };
-
-        // ---------------------------------------------------------
-        // 7. WALLET DEPOSIT / WITHDRAW
-        // ---------------------------------------------------------
-        async function uploadToCloudinary(file) {
-            const formData = new FormData();
-            formData.append("file", file); formData.append("upload_preset", cloudinaryConfig.upload_preset);
-            try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloud_name}/image/upload`, { method: "POST", body: formData });
-                const data = await res.json();
-                return data.secure_url ? data.secure_url : null;
-            } catch (error) { return null; }
-        }
-
-        window.submitDeposit = async (btn) => {
-            const amount = document.getElementById('dep-amount').value, utr = document.getElementById('dep-utr').value, fileInput = document.getElementById('dep-file');
-            if (!amount || amount < 10) return alert("Minimum deposit is ₹10");
-            if (!utr || utr.length < 12) return alert("Enter valid 12-digit UTR");
-            if (!fileInput.files.length) return alert("Upload payment screenshot");
-
-            btn.innerText = "Uploading... Wait"; btn.disabled = true; btn.classList.add("opacity-50");
-            const proofUrl = await uploadToCloudinary(fileInput.files[0]);
-
-            if (proofUrl) {
-                try {
-                    await addDoc(collection(db, "deposits"), {
-                        uid: auth.currentUser.uid, username: currentUserData.username, amount: Number(amount), utr: utr, proof_url: proofUrl, status: "pending", timestamp: new Date()
-                    });
-                    alert("Deposit Request Sent! Admin will add funds shortly.");
-                    document.getElementById('dep-amount').value = ''; document.getElementById('dep-utr').value = '';
-                    document.getElementById('file-name-display').innerText = 'Upload Payment Screenshot'; fileInput.value = '';
-                } catch (e) { alert("Error: " + e.message); }
-            } else { alert("Image upload failed. Check Cloudinary settings."); }
-            
-            btn.innerText = "Submit Deposit Request"; btn.disabled = false; btn.classList.remove("opacity-50");
-        };
-
-        window.submitWithdraw = async (btn) => {
-            const amount = document.getElementById('with-amount').value, upi = document.getElementById('with-upi').value;
-            if(!amount || !upi) return alert("Fill all fields");
-            if(Number(amount) < 50) return alert("Minimum withdrawal is ₹50");
-            if(Number(amount) > currentUserData.wallet_balance) return alert("Insufficient balance!");
-
-            btn.innerText = "Processing..."; btn.disabled = true;
-            try {
-                await addDoc(collection(db, "withdrawals"), {
-                    uid: auth.currentUser.uid, username: currentUserData.username, amount: Number(amount), upi_id: upi, status: "pending", timestamp: new Date()
-                });
-                alert("Withdrawal requested! Admin will transfer money manually.");
-                document.getElementById('with-amount').value = ''; document.getElementById('with-upi').value = '';
-            } catch (e) { alert("Error: " + e.message); }
-            btn.innerText = "Request Withdrawal"; btn.disabled = false;
-        };
-    </script>
+</body>
+</html>
