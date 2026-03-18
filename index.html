@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDK (Compat Version as requested) -->
+    <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -35,12 +35,12 @@
             color: var(--text-light);
             font-family: 'Montserrat', sans-serif;
             overflow-x: hidden;
-            padding-bottom: 70px; /* Space for bottom nav */
+            padding-bottom: 70px;
         }
 
         h1, h2, h3, h4, .esports-font { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
 
-        /* --- LOGO STRICT RULE --- */
+        /* --- LOGO RULES --- */
         .rk-logo {
             width: 120px;
             height: 120px;
@@ -53,38 +53,29 @@
             width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 10px rgba(234, 43, 43, 0.4); object-fit: cover;
         }
 
-        /* --- LAYOUT & NAVIGATION --- */
+        /* --- LAYOUT & NAVIGATION (FIXED OVERLAP ISSUE) --- */
         .screen { display: none; animation: fadeIn 0.3s ease; padding: 20px; }
         .screen.active { display: block; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .top-bar {
-            display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg-main); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-color);
-        }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg-main); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-color); }
 
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom));
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+        
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-red); }
 
         /* --- BUTTONS & INPUTS --- */
-        .btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; border-radius: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; transition: 0.2s; text-transform: uppercase; font-size: 14px;
-        }
+        .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; border-radius: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; transition: 0.2s; text-transform: uppercase; font-size: 14px; }
         .btn-red { background: var(--primary-red); color: white; }
         .btn-red:active { background: var(--primary-red-hover); transform: scale(0.98); }
         .btn-white { background: white; color: black; }
         .btn-outline { background: transparent; border: 1px solid var(--border-color); color: white; }
         .btn-outline-red { background: transparent; border: 1px solid var(--primary-red); color: var(--primary-red); }
 
-        input, select {
-            width: 100%; padding: 15px; background: #111; border: 1px solid var(--border-color); color: white; border-radius: 8px; margin-bottom: 15px; font-family: inherit; outline: none;
-        }
+        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid var(--border-color); color: white; border-radius: 8px; margin-bottom: 15px; font-family: inherit; outline: none; }
         input:focus { border-color: var(--primary-red); }
 
         /* --- UTILITY CLASSES --- */
@@ -95,13 +86,23 @@
         .text-green { color: #4caf50; }
         .mt-20 { margin-top: 20px; }
         .mb-20 { margin-bottom: 20px; }
-        .gold-card {
-            background: var(--gold-gradient); color: black; border-radius: 16px; padding: 20px; position: relative; overflow: hidden;
-        }
+        .gold-card { background: var(--gold-gradient); color: black; border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
 
-        /* --- SCREEN SPECIFIC STYLES --- */
-        /* Login */
-        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 30px; padding-bottom: 0; background: radial-gradient(circle at center, #2a0808 0%, var(--bg-main) 60%); }
+        /* --- LOGIN SCREEN FIX (Problem solved here) --- */
+        #login-screen { 
+            display: none; /* Changed from flex so it actually hides */
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 30px; 
+            padding-bottom: 0; 
+            background: radial-gradient(circle at center, #2a0808 0%, var(--bg-main) 60%); 
+        }
+        #login-screen.active { 
+            display: flex; /* Only flex when class is 'active' */
+        }
+        
         .login-box { background: var(--bg-panel); border: 1px solid var(--gold); border-radius: 12px; padding: 25px; width: 100%; max-width: 400px; margin-top: 30px; }
         .phone-input-group { display: flex; gap: 10px; }
         .phone-input-group select { width: 80px; }
@@ -125,8 +126,6 @@
         .t-image img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
         .t-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 5px 8px; border-radius: 4px; color: var(--gold); }
         .t-details { padding: 15px; }
-        .t-stat-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
-        .t-stat-val { color: white; font-weight: 600; }
 
         /* Wallet */
         .tx-list { margin-top: 20px; }
@@ -142,7 +141,6 @@
         .badge i { color: var(--primary-red); }
         .menu-list { background: var(--bg-panel); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
         .menu-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); color: white; text-decoration: none; font-size: 14px; }
-        .menu-item:last-child { border-bottom: none; }
         .menu-item i:first-child { width: 30px; color: var(--text-muted); }
 
         /* Modals */
@@ -163,8 +161,8 @@
 
     <!-- ================= LOGIN SCREEN ================= -->
     <div id="login-screen" class="screen active">
-        <!-- Logo Image Reference Provided By User -->
-        <img src="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg" alt="RK_ESPORTS Logo" class="rk-logo">
+        <!-- Logo Image -->
+        <img src="" alt="RK_ESPORTS Logo" class="rk-logo my-app-logo">
         
         <h1 class="esports-font mt-20" style="font-size: 28px; text-align: center; line-height: 1.2;">
             WELCOME TO <br> <span class="text-gold">RK_ESPORTS</span>
@@ -189,10 +187,6 @@
         <button class="btn btn-white" style="max-width: 400px;" id="google-login-btn">
             <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20" alt="G"> CONTINUE WITH GOOGLE
         </button>
-
-        <p class="text-muted mt-20" style="font-size: 11px; text-align: center; max-width: 300px;">
-            By continuing, you agree to our <br> <span class="text-gold">Terms of Service</span> & <span class="text-gold">Privacy Policy</span>
-        </p>
     </div>
 
     <!-- MAIN APP WRAPPER (Hidden until login) -->
@@ -201,7 +195,7 @@
         <!-- TOP BAR (Shared) -->
         <div class="top-bar">
             <div class="flex-row" style="gap: 15px;">
-                <img src="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg" alt="Logo" class="rk-logo-small">
+                <img src="" alt="Logo" class="rk-logo-small my-app-logo">
                 <h2 class="esports-font" style="font-size: 20px;">RK_<span class="text-red">ESPORTS</span></h2>
             </div>
             <i class="fa-solid fa-bell text-gold" style="font-size: 20px;"></i>
@@ -302,7 +296,7 @@
         <!-- ================= PROFILE SCREEN ================= -->
         <div id="profile-screen" class="screen">
             <div class="profile-header">
-                <img src="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg" alt="Profile" class="rk-logo mb-20">
+                <img src="" alt="Profile" class="rk-logo mb-20 my-app-logo">
                 <h2 class="esports-font" style="font-size: 24px;" id="profile-name">Player Name</h2>
                 <p class="text-gold" style="font-size: 14px; font-weight: 600; margin-top: 5px;">UID: <span id="profile-uid">00000000</span> <i class="fa-solid fa-circle-check"></i></p>
                 <div class="badge"><i class="fa-solid fa-medal"></i> ELITE RANK • TIER 4</div>
@@ -343,9 +337,7 @@
 
     </div>
 
-    <!-- ================= MODALS ================= -->
-    
-    <!-- Deposit Modal -->
+    <!-- Modals -->
     <div class="modal-overlay" id="deposit-modal">
         <div class="modal-content">
             <div class="flex-between mb-20">
@@ -364,7 +356,6 @@
         </div>
     </div>
 
-    <!-- Withdraw Modal -->
     <div class="modal-overlay" id="withdraw-modal">
         <div class="modal-content">
             <div class="flex-between mb-20">
@@ -380,9 +371,19 @@
         </div>
     </div>
 
-    <!-- Javascript Logic -->
     <script>
-        // --- 1. FIREBASE INITIALIZATION (COMPAT) ---
+        // ==========================================
+        // 🛠️ YAHAN APNA LOGO LINK SET KAREN 🛠️
+        // ==========================================
+        // Agar aapko ibb.co ka image lagana hai, toh aapko Direct Image link chahiye hota hai jo .jpg ya .png me end ho.
+        // Maine abhi ek default esports placeholder daal diya hai taaki toota hua image na dikhe.
+        const MY_LOGO_URL = "https://placehold.co/200x200/161616/e2b022?text=RK\nESPORTS&font=Montserrat"; 
+        
+        document.querySelectorAll('.my-app-logo').forEach(img => {
+            img.src = MY_LOGO_URL;
+        });
+        // ==========================================
+
         const firebaseConfig = {
             apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
             authDomain: "rk-esports1.firebaseapp.com",
@@ -398,11 +399,9 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Global State
         let currentUser = null;
         let userData = null;
 
-        // --- 2. UI HELPERS ---
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
@@ -426,12 +425,10 @@
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
         
-        // Handle mock phone login ui as requested
         function handlePhoneLoginUI() {
-            showToast("Please use Google Login for real authentication.");
+            showToast("Please use Google Login for authentication.");
         }
 
-        // --- 3. AUTHENTICATION LOGIC ---
         document.getElementById('google-login-btn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).catch(error => showToast(error.message));
@@ -439,9 +436,11 @@
 
         function logout() { auth.signOut(); }
 
+        // Jab user Login hoga ya already logged in hoga tab ye chalega
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
+                // Yahan login screen poori tarah hide ho jayegi
                 document.getElementById('login-screen').classList.remove('active');
                 document.getElementById('main-app').style.display = 'block';
                 switchTab('home');
@@ -456,14 +455,11 @@
 
         async function syncUserToFirestore(user) {
             const userRef = db.collection('users').doc(user.uid);
-            
-            // Listen to real-time updates for wallet balance
             userRef.onSnapshot((doc) => {
                 if (doc.exists) {
                     userData = doc.data();
                     updateUIWithUserData();
                 } else {
-                    // Create new user
                     const newUserData = {
                         uid: user.uid,
                         name: user.displayName || 'Player',
@@ -482,14 +478,13 @@
             document.getElementById('home-username').textContent = `Welcome, ${userData.name.split(' ')[0]}!`;
             document.getElementById('home-balance').textContent = bal;
             document.getElementById('wallet-main-balance').textContent = bal;
-            document.getElementById('wallet-unutilized').textContent = bal; // Simplification for demo
+            document.getElementById('wallet-unutilized').textContent = bal; 
             document.getElementById('withdraw-max-val').textContent = bal;
             
             document.getElementById('profile-name').textContent = userData.name;
             document.getElementById('profile-uid').textContent = userData.uid.substring(0,8).toUpperCase();
         }
 
-        // --- 4. TOURNAMENT SYSTEM ---
         async function loadTournaments() {
             const list = document.getElementById('tournament-list');
             list.innerHTML = '<div class="loader"></div>';
@@ -567,7 +562,6 @@
             btn.disabled = true;
 
             try {
-                // Real Firestore Transaction logic for safe joining
                 await db.runTransaction(async (transaction) => {
                     const userRef = db.collection('users').doc(currentUser.uid);
                     const tourneyRef = db.collection('tournaments').doc(tournamentId);
@@ -578,24 +572,20 @@
                     if(userDoc.data().wallet_balance < fee) throw "Insufficient balance during transaction";
                     if(tourneyDoc.data().joined_count >= tourneyDoc.data().total_slots) throw "Tournament filled up!";
 
-                    // Deduct balance
                     transaction.update(userRef, {
                         wallet_balance: firebase.firestore.FieldValue.increment(-fee)
                     });
 
-                    // Update tournament count
                     transaction.update(tourneyRef, {
                         joined_count: firebase.firestore.FieldValue.increment(1)
                     });
 
-                    // Add participant record
                     const participantRef = db.collection('tournaments').doc(tournamentId).collection('participants').doc(currentUser.uid);
                     transaction.set(participantRef, {
                         joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         name: userData.name
                     });
 
-                    // Log transaction
                     if(fee > 0) {
                         const txRef = db.collection('transactions').doc();
                         transaction.set(txRef, {
@@ -609,7 +599,7 @@
                 });
 
                 showToast("Joined Successfully! Check Matches section.");
-                loadTournaments(); // Refresh
+                loadTournaments();
             } catch (error) {
                 showToast(typeof error === 'string' ? error : "Error joining match.");
                 btn.innerHTML = 'JOIN NOW';
@@ -617,7 +607,6 @@
             }
         }
 
-        // --- 5. WALLET & CLOUDINARY SYSTEM ---
         async function loadTransactions() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = '<div class="loader"></div>';
@@ -680,7 +669,6 @@
             btn.disabled = true;
 
             try {
-                // 1. Upload to Cloudinary
                 const file = fileInput.files[0];
                 const formData = new FormData();
                 formData.append('file', file);
@@ -695,7 +683,6 @@
                 
                 if(!data.secure_url) throw new Error("Upload failed");
 
-                // 2. Save to Firestore
                 await db.collection('deposits').add({
                     user_id: currentUser.uid,
                     amount: Number(amount),
@@ -705,7 +692,6 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Add to transactions list for visual feedback
                 await db.collection('transactions').add({
                     user_id: currentUser.uid,
                     amount: Number(amount),
@@ -743,9 +729,7 @@
             btn.disabled = true;
 
             try {
-                // Deduct balance and create request via batch
                 const batch = db.batch();
-                
                 const userRef = db.collection('users').doc(currentUser.uid);
                 batch.update(userRef, { wallet_balance: firebase.firestore.FieldValue.increment(-amount) });
 
@@ -783,7 +767,6 @@
                 btn.disabled = false;
             }
         }
-
     </script>
 </body>
 </html>
