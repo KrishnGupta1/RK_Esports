@@ -14,8 +14,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
-    <!-- PRELOAD LOGO FOR INSTANT LOADING -->
-    <link rel="preload" as="image" href="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg">
+    <!-- PRELOAD DIRECT IMAGE LINK FOR 0-SECOND INSTANT LOADING -->
+    <link rel="preload" as="image" href="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png">
 
     <style>
         :root {
@@ -36,7 +36,7 @@
         body { background-color: var(--bg-main); color: var(--text-light); font-family: 'Montserrat', sans-serif; overflow-x: hidden; padding-bottom: 70px; }
         h1, h2, h3, h4, .esports-font { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
 
-        /* --- LOGO STYLES --- */
+        /* --- EXACT LOGO RULES --- */
         .rk-logo { width: 120px; height: 120px; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 20px rgba(234, 43, 43, 0.6); object-fit: cover; }
         .rk-logo-small { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 10px rgba(234, 43, 43, 0.4); object-fit: cover; }
 
@@ -138,8 +138,8 @@
 
     <!-- ================= LOGIN SCREEN ================= -->
     <div id="login-screen" class="screen active">
-        <!-- Optimized High-Priority Logo Image -->
-        <img src="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg" fetchpriority="high" loading="eager" alt="RK_ESPORTS Logo" class="rk-logo">
+        <!-- DIRECT LOGO URL INSERTED -->
+        <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" fetchpriority="high" loading="eager" alt="RK_ESPORTS Logo" class="rk-logo">
         
         <h1 class="esports-font mt-20" style="font-size: 28px; text-align: center; line-height: 1.2;">
             WELCOME TO <br> <span class="text-gold">RK_ESPORTS</span>
@@ -172,7 +172,8 @@
         <!-- TOP BAR -->
         <div class="top-bar">
             <div class="flex-row" style="gap: 15px;">
-                <img src="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg" alt="Logo" class="rk-logo-small">
+                <!-- DIRECT LOGO URL INSERTED -->
+                <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
                 <h2 class="esports-font" style="font-size: 20px;">RK_<span class="text-red">ESPORTS</span></h2>
             </div>
             <i class="fa-solid fa-bell text-gold" style="font-size: 20px; cursor: pointer;" onclick="showToast('No new notifications')"></i>
@@ -259,13 +260,13 @@
         <!-- ================= PROFILE SCREEN ================= -->
         <div id="profile-screen" class="screen">
             <div class="profile-header">
-                <img src="https://storage.googleapis.com/chat-engine-ephemeral-bucket/2026-03-18/12db35ff-fcf2-4bc9-befd-9efb4c6e9ed0/0.jpeg" alt="Profile" class="rk-logo mb-20">
+                <!-- DIRECT LOGO URL INSERTED -->
+                <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Profile" class="rk-logo mb-20">
                 <h2 class="esports-font" style="font-size: 24px;" id="profile-name">Player Name</h2>
                 <p class="text-gold" style="font-size: 14px; font-weight: 600; margin-top: 5px;">UID: <span id="profile-uid">00000000</span> <i class="fa-solid fa-circle-check"></i></p>
                 <div class="badge"><i class="fa-solid fa-medal"></i> ELITE RANK • TIER 4</div>
             </div>
 
-            <!-- REAL AI BUTTON -->
             <div style="background: #1a1515; border: 1px solid #3a1515; border-radius: 16px; padding: 20px; position: relative; overflow: hidden; margin-bottom: 25px;">
                 <h3 class="flex-row" style="font-size: 16px; margin-bottom: 10px; gap: 10px;"><i class="fa-solid fa-brain text-red"></i> AI Strategist</h3>
                 <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; max-width: 70%;">Analyze your last match and receive custom tactical drills using Groq AI.</p>
@@ -321,7 +322,7 @@
         </div>
     </div>
 
-    <!-- Deposit Modal (Real QR Code Generation) -->
+    <!-- Deposit Modal (Dynamic QR + Deep Link) -->
     <div class="modal-overlay" id="deposit-modal">
         <div class="modal-content">
             <div class="flex-between mb-20">
@@ -329,22 +330,38 @@
                 <i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i>
             </div>
             
-            <!-- Exact Provided UPI ID & Auto-Generated QR -->
-            <div style="background: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-                <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR" alt="UPI QR" style="width: 150px; height: 150px; display: block; margin: 0 auto;">
-                <p style="color: black; font-weight: bold; font-size: 14px; margin-top: 10px;">guptakrishn258@oksbi</p>
-                <p style="color: #666; font-size: 11px;">Scan to pay with any UPI app</p>
+            <!-- DYNAMIC QR CODE SECTION -->
+            <div style="background: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <img id="upi-qr" src="https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR" alt="UPI QR" style="width: 150px; height: 150px; display: block; margin: 0 auto; border: 2px solid #eee; border-radius: 8px;">
+                <p style="color: black; font-weight: 800; font-size: 15px; margin-top: 12px;" id="upi-id-text">guptakrishn258@oksbi</p>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                    <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 8px 12px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="copyUPI()">
+                        <i class="fa-solid fa-copy" style="color: var(--primary-red);"></i> COPY UPI
+                    </button>
+                    <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 8px 12px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="downloadQR()">
+                        <i class="fa-solid fa-download" style="color: var(--primary-red);"></i> SAVE QR
+                    </button>
+                </div>
             </div>
 
-            <p class="text-muted" style="font-size: 12px; margin-bottom: 15px; text-align: center;">Transfer to the UPI above and upload screenshot below.</p>
+            <!-- AMOUNT & PAY NOW -->
+            <input type="number" id="dep-amount" placeholder="Enter Amount (₹)" required oninput="updateQR()" style="font-size: 16px; font-weight: bold; text-align: center;">
+            <button type="button" class="btn btn-red mb-20" id="btn-pay-now" onclick="payNow()">
+                <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
+            </button>
+
+            <!-- 5 MINUTE TIMER (Hidden till user clicks Pay) -->
+            <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 20px; background: #222; padding: 10px; border-radius: 8px; border: 1px solid var(--primary-red);">
+                <p style="color: white; font-size: 14px;">Complete your payment in</p>
+                <p style="color: var(--gold); font-size: 24px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Upload UTR & Screenshot below after payment.</p>
+            </div>
             
-            <input type="number" id="dep-amount" placeholder="Amount (₹)" required>
             <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" required>
-            
             <label style="display: block; margin-bottom: 10px; font-size: 12px; color: var(--gold);">Upload Screenshot</label>
             <input type="file" id="dep-file" accept="image/*" style="padding: 10px; background: #222;" required>
             
-            <button class="btn btn-red mt-20" id="btn-submit-deposit" onclick="submitDeposit()">Submit Details</button>
+            <button type="button" class="btn btn-red mt-20" id="btn-submit-deposit" onclick="submitDeposit()">SUBMIT DETAILS</button>
         </div>
     </div>
 
@@ -355,7 +372,7 @@
             <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">Available to withdraw: ₹<span id="withdraw-max-val">0</span></p>
             <input type="number" id="with-amount" placeholder="Amount (₹)" required>
             <input type="text" id="with-upi" placeholder="Your UPI ID" required>
-            <button class="btn btn-red mt-20" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
+            <button type="button" class="btn btn-red mt-20" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
         </div>
     </div>
 
@@ -366,9 +383,9 @@
             <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
                 <p>Welcome to RK_ESPORTS. We collect basic user information such as Email and UID solely for account management and tournament verification.</p><br>
                 <p>Payment information is processed securely. We do not store your UPI pins or bank passwords. Screenshots are used only for transaction verification.</p><br>
-                <p>If you have any queries, contact our support team.</p>
+                <p>If you have any queries, contact our support team on WhatsApp or Email.</p>
             </div>
-            <button class="btn btn-outline mt-20" onclick="closeModals()">CLOSE</button>
+            <button type="button" class="btn btn-outline mt-20" onclick="closeModals()">CLOSE</button>
         </div>
     </div>
 
@@ -377,16 +394,16 @@
         <div class="modal-content">
             <div class="flex-between mb-20"><h2 class="esports-font">Terms & Conditions</h2><i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i></div>
             <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
-                <p>1. Hackers or emulator players in mobile tournaments will be banned permanently.</p><br>
-                <p>2. Registration fees are non-refundable once the bracket is generated.</p><br>
-                <p>3. Winnings will be processed within 24-48 hours to the provided UPI ID.</p><br>
-                <p>4. RK_ESPORTS reserves the right to cancel or postpone matches due to technical issues.</p>
+                <p>1. Hackers or emulator players in mobile tournaments will be banned permanently without any refund.</p><br>
+                <p>2. Registration fees are non-refundable once the tournament bracket is generated.</p><br>
+                <p>3. Winnings will be processed within 24-48 hours to your registered UPI ID.</p><br>
+                <p>4. RK_ESPORTS reserves the right to cancel or postpone matches due to technical server issues.</p>
             </div>
-            <button class="btn btn-outline mt-20" onclick="closeModals()">I AGREE</button>
+            <button type="button" class="btn btn-outline mt-20" onclick="closeModals()">I AGREE</button>
         </div>
     </div>
 
-
+    <!-- APP LOGIC & SCRIPTS -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
@@ -405,7 +422,7 @@
         let currentUser = null;
         let userData = null;
 
-        // --- GROQ API KEY INJECTED AS REQUESTED ---
+        // --- NEW: GROQ API KEY FOR AI ---
         const GROQ_API_KEY = "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";
 
         // --- FALLBACK DUMMY DATA FOR EMPTY DATABASE ---
@@ -427,7 +444,7 @@
             const t = document.getElementById('toast');
             t.textContent = msg;
             t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
+            setTimeout(() => t.style.display = 'none', 3500);
         }
 
         function switchTab(tabId) {
@@ -455,7 +472,7 @@
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
         
-        // --- REAL GROQ AI LOGIC ---
+        // --- REAL GROQ AI LOGIC (LLAMA-3 70B) ---
         async function askGroqAI() {
             const inputField = document.getElementById('ai-input');
             const message = inputField.value.trim();
@@ -463,11 +480,9 @@
 
             const chatBox = document.getElementById('ai-chat-box');
             
-            // Append User Message
             chatBox.innerHTML += `<div class="ai-msg user">${message}</div>`;
             inputField.value = '';
             
-            // Append Loader
             const loaderId = 'loader-' + Date.now();
             chatBox.innerHTML += `<div class="ai-msg bot" id="${loaderId}"><i class="fa-solid fa-circle-notch fa-spin text-red"></i> Strategizing...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -475,12 +490,9 @@
             try {
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${GROQ_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "llama3-8b-8192", // Fast Free Model
+                        model: "llama3-70b-8192", // Best Free Model Requested
                         messages:[
                             { role: "system", content: "You are the RK_ESPORTS AI Strategist. Give 2-3 line very short, smart, and hype tactical advice for esports games like BGMI or Free Fire. Talk like a pro gamer." },
                             { role: "user", content: message }
@@ -495,10 +507,70 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
             } catch (err) {
                 document.getElementById(loaderId).remove();
-                chatBox.innerHTML += `<div class="ai-msg bot" style="color:var(--primary-red);">Server error. I'm rebooting my systems! Try again.</div>`;
-                console.error(err);
+                chatBox.innerHTML += `<div class="ai-msg bot" style="color:var(--primary-red);">System overload! Please try asking again.</div>`;
             }
         }
+
+        // --- DYNAMIC QR CODE & PAYMENT LOGIC ---
+        function copyUPI() {
+            navigator.clipboard.writeText("guptakrishn258@oksbi");
+            showToast("UPI ID Copied Successfully!");
+        }
+
+        function downloadQR() {
+            const imgUrl = document.getElementById('upi-qr').src;
+            fetch(imgUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = "RK_ESPORTS_QR.png";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    showToast("QR Code Downloaded!");
+                })
+                .catch(() => {
+                    window.open(imgUrl, '_blank');
+                });
+        }
+
+        function updateQR() {
+            const amt = document.getElementById('dep-amount').value;
+            const base = "upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&cu=INR";
+            const finalUpi = amt ? `${base}&am=${amt}` : base;
+            document.getElementById('upi-qr').src = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(finalUpi)}`;
+        }
+
+        let paymentTimer;
+        function payNow() {
+            const amt = document.getElementById('dep-amount').value;
+            if(!amt || amt < 10) { showToast("Please enter an amount of ₹10 or more"); return; }
+            
+            // Open user's UPI App directly with amount
+            const upiLink = `upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&am=${amt}&cu=INR`;
+            window.location.href = upiLink;
+            
+            // Start 5-min timer
+            const timerSection = document.getElementById('payment-timer-section');
+            timerSection.style.display = 'block';
+            
+            let timeLeft = 300; 
+            clearInterval(paymentTimer);
+            paymentTimer = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer-text').innerText = `0${m}:${s < 10 ? '0'+s : s}`;
+                
+                if(timeLeft <= 0) {
+                    clearInterval(paymentTimer);
+                    document.getElementById('timer-text').innerText = "00:00";
+                    showToast("Time limit reached! Upload screenshot if already paid.");
+                }
+            }, 1000);
+        }
+
 
         // --- AUTH & LOGIN ---
         function handlePhoneLoginUI() {
@@ -512,13 +584,13 @@
             setTimeout(() => {
                 btn.innerHTML = 'LOGIN WITH MOBILE NUMBER';
                 btn.disabled = false;
-                showToast("OTP Verification is manual. Please use Google Login.");
+                showToast("OTP Verification manual mode. Please click CONTINUE WITH GOOGLE.");
             }, 2000);
         }
 
         document.getElementById('google-login-btn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' }); // Forces Account Selection
+            provider.setCustomParameters({ prompt: 'select_account' }); 
             
             auth.signInWithPopup(provider).then(() => {
                 showToast("Login Successful!");
@@ -678,6 +750,9 @@
                 showToast("Deposit request submitted successfully!");
                 closeModals();
                 document.getElementById('dep-amount').value = ''; document.getElementById('dep-utr').value = ''; fileInput.value = '';
+                document.getElementById('payment-timer-section').style.display = 'none';
+                clearInterval(paymentTimer);
+                
                 loadTransactions();
             } catch (error) {
                 showToast("Error processing deposit. Try again.");
