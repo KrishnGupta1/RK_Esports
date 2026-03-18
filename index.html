@@ -80,9 +80,28 @@
         .home-banner { background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop') center/cover; height: 160px; border-radius: 12px; position: relative; margin-top: 20px; border: 1px solid var(--border-color); }
         .home-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.9), transparent); border-radius: 12px; }
         .banner-content { position: absolute; bottom: 20px; left: 20px; z-index: 2; }
-        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 25px; }
-        .action-btn { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); cursor: pointer;}
-        .action-btn i { color: var(--gold); font-size: 24px; }
+        
+        /* --- NEW QUICK ACTIONS DESIGN --- */
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 15px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .action-icon-box { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 16px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--gold); transition: 0.2s; }
+        .action-btn:active .action-icon-box { background: #222; transform: scale(0.95); }
+        .action-text { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+        /* --- NEW LIVE NOW SECTION --- */
+        .live-section { margin-top: 30px; margin-bottom: 20px; }
+        .live-card { background: var(--bg-panel); border: 1px solid rgba(234, 43, 43, 0.4); border-radius: 20px; padding: 15px; display: flex; gap: 15px; align-items: center; margin-top: 15px; box-shadow: 0 4px 15px rgba(234, 43, 43, 0.05); }
+        .live-thumb { width: 120px; height: 85px; background: #eee; border-radius: 12px; position: relative; overflow: hidden; flex-shrink: 0; }
+        .live-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+        .live-badge { position: absolute; top: 6px; left: 6px; background: var(--primary-red); color: white; font-size: 9px; font-weight: 800; padding: 3px 6px; border-radius: 6px; z-index: 2; letter-spacing: 0.5px; }
+        .live-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+        .live-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: white; line-height: 1.2; }
+        .live-subtitle { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+        .btn-watch { background: var(--primary-red); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; text-transform: uppercase; transition: 0.2s; }
+        .btn-watch:active { transform: scale(0.95); }
+        
+        .blinking-dot { width: 8px; height: 8px; background-color: var(--primary-red); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
         .tab { flex: 1; text-align: center; padding: 15px 0; color: var(--text-muted); font-weight: 600; font-size: 13px; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.3s; }
@@ -138,7 +157,6 @@
 
     <!-- ================= LOGIN SCREEN ================= -->
     <div id="login-screen" class="screen active">
-        <!-- DIRECT LOGO URL INSERTED -->
         <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" fetchpriority="high" loading="eager" alt="RK_ESPORTS Logo" class="rk-logo">
         
         <h1 class="esports-font mt-20" style="font-size: 28px; text-align: center; line-height: 1.2;">
@@ -172,7 +190,6 @@
         <!-- TOP BAR -->
         <div class="top-bar">
             <div class="flex-row" style="gap: 15px;">
-                <!-- DIRECT LOGO URL INSERTED -->
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
                 <h2 class="esports-font" style="font-size: 20px;">RK_<span class="text-red">ESPORTS</span></h2>
             </div>
@@ -202,13 +219,52 @@
 
             <div class="mt-20">
                 <h3 class="esports-font" style="font-size: 16px; border-left: 4px solid var(--primary-red); padding-left: 10px;">QUICK ACTIONS</h3>
+                
+                <!-- NEW QUICK ACTIONS EXACTLY LIKE SCREENSHOT -->
                 <div class="quick-actions">
-                    <div class="action-btn" onclick="switchTab('tournaments')"><i class="fa-solid fa-trophy text-gold"></i> Leagues</div>
-                    <div class="action-btn" onclick="showToast('Clans feature coming in Season 2!')"><i class="fa-solid fa-users text-gold"></i> Clans</div>
-                    <div class="action-btn" onclick="switchTab('wallet')"><i class="fa-solid fa-clock-rotate-left text-gold"></i> History</div>
-                    <div class="action-btn" onclick="openModal('ai-modal')"><i class="fa-solid fa-robot text-gold"></i> AI Helper</div>
+                    <div class="action-btn" onclick="switchTab('tournaments')">
+                        <div class="action-icon-box"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="action-text">Leagues</div>
+                    </div>
+                    <div class="action-btn" onclick="showToast('Clans feature coming in Season 2!')">
+                        <div class="action-icon-box"><i class="fa-solid fa-users"></i></div>
+                        <div class="action-text">Clans</div>
+                    </div>
+                    <div class="action-btn" onclick="switchTab('wallet')">
+                        <div class="action-icon-box"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <div class="action-text">History</div>
+                    </div>
+                    <div class="action-btn" onclick="openModal('ai-modal')">
+                        <div class="action-icon-box"><i class="fa-solid fa-robot"></i></div>
+                        <div class="action-text">AI Helper</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- NEW LIVE NOW SECTION EXACTLY LIKE SCREENSHOT -->
+            <div class="live-section">
+                <div class="flex-between">
+                    <h3 class="esports-font" style="font-size: 16px; border-left: 4px solid var(--primary-red); padding-left: 10px;">LIVE NOW</h3>
+                    <span style="color: var(--primary-red); font-size: 10px; font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px;">
+                        <span class="blinking-dot"></span> 1.2K VIEWERS
+                    </span>
+                </div>
+                
+                <div class="live-card">
+                    <div class="live-thumb">
+                        <div class="live-badge">LIVE</div>
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" alt="Live Match">
+                    </div>
+                    <div class="live-info">
+                        <div>
+                            <div class="live-title">Grand Finals: RK Invitational</div>
+                            <div class="live-subtitle">FF Championship 2024</div>
+                        </div>
+                        <button class="btn-watch" onclick="window.open('https://youtube.com', '_blank')"><i class="fa-solid fa-circle-play"></i> WATCH NOW</button>
+                    </div>
+                </div>
+            </div>
+            
         </div>
 
         <!-- ================= TOURNAMENTS SCREEN ================= -->
@@ -260,7 +316,6 @@
         <!-- ================= PROFILE SCREEN ================= -->
         <div id="profile-screen" class="screen">
             <div class="profile-header">
-                <!-- DIRECT LOGO URL INSERTED -->
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Profile" class="rk-logo mb-20">
                 <h2 class="esports-font" style="font-size: 24px;" id="profile-name">Player Name</h2>
                 <p class="text-gold" style="font-size: 14px; font-weight: 600; margin-top: 5px;">UID: <span id="profile-uid">00000000</span> <i class="fa-solid fa-circle-check"></i></p>
@@ -330,7 +385,6 @@
                 <i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i>
             </div>
             
-            <!-- DYNAMIC QR CODE SECTION -->
             <div style="background: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <img id="upi-qr" src="https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR" alt="UPI QR" style="width: 150px; height: 150px; display: block; margin: 0 auto; border: 2px solid #eee; border-radius: 8px;">
                 <p style="color: black; font-weight: 800; font-size: 15px; margin-top: 12px;" id="upi-id-text">guptakrishn258@oksbi</p>
@@ -344,13 +398,11 @@
                 </div>
             </div>
 
-            <!-- AMOUNT & PAY NOW -->
             <input type="number" id="dep-amount" placeholder="Enter Amount (₹)" required oninput="updateQR()" style="font-size: 16px; font-weight: bold; text-align: center;">
             <button type="button" class="btn btn-red mb-20" id="btn-pay-now" onclick="payNow()">
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
 
-            <!-- 5 MINUTE TIMER (Hidden till user clicks Pay) -->
             <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 20px; background: #222; padding: 10px; border-radius: 8px; border: 1px solid var(--primary-red);">
                 <p style="color: white; font-size: 14px;">Complete your payment in</p>
                 <p style="color: var(--gold); font-size: 24px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
@@ -422,10 +474,8 @@
         let currentUser = null;
         let userData = null;
 
-        // --- NEW: GROQ API KEY FOR AI ---
         const GROQ_API_KEY = "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";
 
-        // --- FALLBACK DUMMY DATA FOR EMPTY DATABASE ---
         const dummyTournamentsHTML = `
             <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> BATTLE ROYALE</div><img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font mb-20" style="font-size: 18px;">GRAND MASTERS CUP</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Entry Fee</p><p style="font-size: 14px; font-weight: bold;">₹50</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Prize Pool</p><p style="font-size: 14px; font-weight: bold; color: var(--gold);">₹2000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Time</p><p style="font-size: 14px; font-weight: bold;">18:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Slots</p><p style="font-size: 14px; font-weight: bold; color: white">40/48</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 15px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 83%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds in Wallet.')">JOIN NOW</button></div></div>
             <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> CLASH SQUAD</div><img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font mb-20" style="font-size: 18px;">ELITE SCRIMS V8</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Entry Fee</p><p style="font-size: 14px; font-weight: bold;">₹100</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Prize Pool</p><p style="font-size: 14px; font-weight: bold; color: var(--gold);">₹5000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Time</p><p style="font-size: 14px; font-weight: bold;">20:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Slots</p><p style="font-size: 14px; font-weight: bold; color: var(--primary-red)">8/16</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 15px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 50%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds in Wallet.')">JOIN NOW</button></div></div>
@@ -439,7 +489,6 @@
             <div class="tx-item"><div class="flex-row" style="gap: 15px;"><div class="tx-icon withdraw"><i class="fa-solid fa-building-columns"></i></div><div><p style="font-size: 14px; font-weight: 600;">Withdrawal to Bank</p><p style="font-size: 11px; color: var(--text-muted);">Oct 21, 2023 • 11:10 AM • PENDING</p></div></div><div style="text-align: right;"><p style="font-size: 16px; font-weight: bold; color: white;">- ₹1,000.00</p></div></div>
         `;
 
-        // --- UI FUNCTIONS ---
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
@@ -472,7 +521,6 @@
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
         
-        // --- REAL GROQ AI LOGIC (LLAMA-3 70B) ---
         async function askGroqAI() {
             const inputField = document.getElementById('ai-input');
             const message = inputField.value.trim();
@@ -492,7 +540,7 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "llama3-70b-8192", // Best Free Model Requested
+                        model: "llama3-70b-8192",
                         messages:[
                             { role: "system", content: "You are the RK_ESPORTS AI Strategist. Give 2-3 line very short, smart, and hype tactical advice for esports games like BGMI or Free Fire. Talk like a pro gamer." },
                             { role: "user", content: message }
@@ -511,7 +559,6 @@
             }
         }
 
-        // --- DYNAMIC QR CODE & PAYMENT LOGIC ---
         function copyUPI() {
             navigator.clipboard.writeText("guptakrishn258@oksbi");
             showToast("UPI ID Copied Successfully!");
@@ -547,11 +594,9 @@
             const amt = document.getElementById('dep-amount').value;
             if(!amt || amt < 10) { showToast("Please enter an amount of ₹10 or more"); return; }
             
-            // Open user's UPI App directly with amount
             const upiLink = `upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&am=${amt}&cu=INR`;
             window.location.href = upiLink;
             
-            // Start 5-min timer
             const timerSection = document.getElementById('payment-timer-section');
             timerSection.style.display = 'block';
             
@@ -571,8 +616,6 @@
             }, 1000);
         }
 
-
-        // --- AUTH & LOGIN ---
         function handlePhoneLoginUI() {
             const phone = document.getElementById('phone-input').value;
             if(!phone || phone.length < 10) { showToast("Please enter a valid 10-digit mobile number"); return; }
@@ -639,7 +682,6 @@
             document.getElementById('profile-uid').textContent = userData.uid.substring(0,8).toUpperCase();
         }
 
-        // --- DATA LOADING & TRANSACTIONS ---
         async function loadTournaments() {
             const list = document.getElementById('tournament-list');
             list.innerHTML = '<div class="loader"></div>';
@@ -728,7 +770,6 @@
 
             if(!amount || !utr || fileInput.files.length === 0) { showToast("Please fill all fields and upload screenshot."); return; }
 
-            // LIVE UPLOADING ANIMATION EXACTLY LIKE SCREENSHOT
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:18px;"></i> UPLOADING...';
             btn.disabled = true;
 
