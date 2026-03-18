@@ -6,7 +6,7 @@
     <title>RK_ESPORTS</title>
     
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Firebase SDK -->
@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
-    <!-- PRELOAD DIRECT IMAGE LINK FOR 0-SECOND INSTANT LOADING -->
+    <!-- PRELOAD DIRECT IMAGE LINK -->
     <link rel="preload" as="image" href="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png">
 
     <style>
@@ -33,122 +33,125 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        body { background-color: var(--bg-main); color: var(--text-light); font-family: 'Montserrat', sans-serif; overflow-x: hidden; padding-bottom: 70px; }
+        body { background-color: var(--bg-main); color: var(--text-light); font-family: 'Montserrat', sans-serif; overflow-x: hidden; padding-bottom: 60px; }
         h1, h2, h3, h4, .esports-font { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
 
-        /* --- EXACT LOGO RULES --- */
-        .rk-logo { width: 120px; height: 120px; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 20px rgba(234, 43, 43, 0.6); object-fit: cover; }
-        .rk-logo-small { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 10px rgba(234, 43, 43, 0.4); object-fit: cover; }
+        /* --- SIZES REDUCED FOR COMPACT UI --- */
+        .rk-logo { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(234, 43, 43, 0.5); object-fit: cover; }
+        .rk-logo-small { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 8px rgba(234, 43, 43, 0.4); object-fit: cover; }
 
-        /* --- LAYOUT --- */
-        .screen { display: none; animation: fadeIn 0.3s ease; padding: 20px; }
+        .screen { display: none; animation: fadeIn 0.3s ease; padding: 15px; }
         .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg-main); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-color); }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg-main); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-color); }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 9px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .nav-item i { font-size: 18px; margin-bottom: 3px; }
         .nav-item.active { color: var(--primary-red); }
 
-        /* --- BUTTONS & INPUTS --- */
-        .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; border-radius: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; transition: 0.2s; text-transform: uppercase; font-size: 14px; }
+        /* --- COMPACT BUTTONS & INPUTS --- */
+        .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; transition: 0.2s; text-transform: uppercase; font-size: 12px; }
         .btn-red { background: var(--primary-red); color: white; }
         .btn-red:active { background: var(--primary-red-hover); transform: scale(0.98); }
         .btn-white { background: white; color: black; }
         .btn-outline { background: transparent; border: 1px solid var(--border-color); color: white; }
         .btn-outline-red { background: transparent; border: 1px solid var(--primary-red); color: var(--primary-red); }
 
-        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid var(--border-color); color: white; border-radius: 8px; margin-bottom: 15px; font-family: inherit; outline: none; }
+        input, select { width: 100%; padding: 12px; background: #111; border: 1px solid var(--border-color); color: white; border-radius: 8px; margin-bottom: 12px; font-family: inherit; font-size: 13px; outline: none; }
         input:focus { border-color: var(--primary-red); }
 
         .flex-row { display: flex; align-items: center; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .text-gold { color: var(--gold); }
         .text-red { color: var(--primary-red); }
-        .mt-20 { margin-top: 20px; }
-        .mb-20 { margin-bottom: 20px; }
-        .gold-card { background: var(--gold-gradient); color: black; border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+        .mt-15 { margin-top: 15px; }
+        .mb-15 { margin-bottom: 15px; }
+        .gold-card { background: var(--gold-gradient); color: black; border-radius: 12px; padding: 16px; position: relative; overflow: hidden; }
 
-        /* --- SCREENS --- */
-        #login-screen { display: none; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 30px; padding-bottom: 0; background: radial-gradient(circle at center, #2a0808 0%, var(--bg-main) 60%); }
+        /* --- LOGIN SCREEN --- */
+        #login-screen { display: none; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 25px; padding-bottom: 0; background: radial-gradient(circle at center, #2a0808 0%, var(--bg-main) 60%); }
         #login-screen.active { display: flex; }
-        .login-box { background: var(--bg-panel); border: 1px solid var(--gold); border-radius: 12px; padding: 25px; width: 100%; max-width: 400px; margin-top: 30px; }
-        .phone-input-group { display: flex; gap: 10px; }
-        .phone-input-group select { width: 80px; }
+        .login-box { background: var(--bg-panel); border: 1px solid var(--gold); border-radius: 10px; padding: 20px; width: 100%; max-width: 360px; margin-top: 25px; }
+        .phone-input-group { display: flex; gap: 8px; }
+        .phone-input-group select { width: 70px; }
 
-        .home-banner { background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop') center/cover; height: 160px; border-radius: 12px; position: relative; margin-top: 20px; border: 1px solid var(--border-color); }
-        .home-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.9), transparent); border-radius: 12px; }
-        .banner-content { position: absolute; bottom: 20px; left: 20px; z-index: 2; }
+        /* --- BANNER SLIDER (SWIPE FEATURE ADDED) --- */
+        .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 5px; scrollbar-width: none; margin-top: 15px; }
+        .slider-container::-webkit-scrollbar { display: none; }
+        .home-banner { flex: 0 0 100%; scroll-snap-align: center; height: 135px; background-size: cover; background-position: center; border-radius: 12px; position: relative; border: 1px solid var(--border-color); }
+        .home-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.1)); border-radius: 12px; }
+        .banner-content { position: absolute; bottom: 15px; left: 15px; z-index: 2; }
+        .badge-red { background: var(--primary-red); padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; color: white;}
         
-        /* --- NEW QUICK ACTIONS DESIGN --- */
-        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 15px; }
-        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-        .action-icon-box { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 16px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--gold); transition: 0.2s; }
+        /* --- COMPACT QUICK ACTIONS --- */
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+        .action-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+        .action-icon-box { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--gold); transition: 0.2s; }
         .action-btn:active .action-icon-box { background: #222; transform: scale(0.95); }
-        .action-text { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .action-text { font-size: 10px; color: var(--text-muted); font-weight: 500; }
 
-        /* --- NEW LIVE NOW SECTION --- */
-        .live-section { margin-top: 30px; margin-bottom: 20px; }
-        .live-card { background: var(--bg-panel); border: 1px solid rgba(234, 43, 43, 0.4); border-radius: 20px; padding: 15px; display: flex; gap: 15px; align-items: center; margin-top: 15px; box-shadow: 0 4px 15px rgba(234, 43, 43, 0.05); }
-        .live-thumb { width: 120px; height: 85px; background: #eee; border-radius: 12px; position: relative; overflow: hidden; flex-shrink: 0; }
+        /* --- COMPACT LIVE NOW SECTION --- */
+        .live-section { margin-top: 25px; margin-bottom: 15px; }
+        .live-card { background: var(--bg-panel); border: 1px solid rgba(234, 43, 43, 0.4); border-radius: 16px; padding: 12px; display: flex; gap: 12px; align-items: center; margin-top: 12px; }
+        .live-thumb { width: 100px; height: 70px; background: #eee; border-radius: 10px; position: relative; overflow: hidden; flex-shrink: 0; }
         .live-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-        .live-badge { position: absolute; top: 6px; left: 6px; background: var(--primary-red); color: white; font-size: 9px; font-weight: 800; padding: 3px 6px; border-radius: 6px; z-index: 2; letter-spacing: 0.5px; }
+        .live-badge { position: absolute; top: 4px; left: 4px; background: var(--primary-red); color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; z-index: 2; }
         .live-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
-        .live-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: white; line-height: 1.2; }
-        .live-subtitle { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
-        .btn-watch { background: var(--primary-red); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; text-transform: uppercase; transition: 0.2s; }
-        .btn-watch:active { transform: scale(0.95); }
-        
-        .blinking-dot { width: 8px; height: 8px; background-color: var(--primary-red); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.2s infinite; }
+        .live-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; color: white; line-height: 1.2; }
+        .live-subtitle { font-size: 10px; color: var(--text-muted); margin-bottom: 8px; }
+        .btn-watch { background: var(--primary-red); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; text-transform: uppercase; }
+
+        .blinking-dot { width: 6px; height: 6px; background-color: var(--primary-red); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.2s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-        .tab { flex: 1; text-align: center; padding: 15px 0; color: var(--text-muted); font-weight: 600; font-size: 13px; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.3s; }
+        /* --- COMPACT TOURNAMENTS GRID --- */
+        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
+        .tab { flex: 1; text-align: center; padding: 12px 0; color: var(--text-muted); font-weight: 600; font-size: 12px; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.3s; }
         .tab.active { color: white; border-bottom-color: var(--primary-red); }
-        .tournaments-grid { display: grid; grid-template-columns: 1fr; gap: 20px; transition: opacity 0.3s; }
-        .t-card { background: var(--bg-panel); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); }
-        .t-image { height: 140px; background: #222; position: relative; }
+        .tournaments-grid { display: grid; grid-template-columns: 1fr; gap: 15px; transition: opacity 0.3s; }
+        .t-card { background: var(--bg-panel); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+        .t-image { height: 120px; background: #222; position: relative; }
         .t-image img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .t-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 5px 8px; border-radius: 4px; color: var(--gold); font-size: 10px; font-weight: 800;}
-        .t-details { padding: 15px; }
+        .t-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); padding: 4px 6px; border-radius: 4px; color: var(--gold); font-size: 9px; font-weight: 800;}
+        .t-details { padding: 12px; }
 
-        .tx-list { margin-top: 20px; }
-        .tx-item { background: var(--bg-panel); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .tx-icon { width: 40px; height: 40px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        /* --- COMPACT WALLET & TX LIST --- */
+        .tx-list { margin-top: 15px; }
+        .tx-item { background: var(--bg-panel); border-radius: 10px; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .tx-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .tx-icon.deposit { color: #4caf50; background: rgba(76, 175, 80, 0.1); }
         .tx-icon.withdraw { color: white; background: rgba(255, 255, 255, 0.1); }
         .tx-icon.game { color: var(--primary-red); background: rgba(234, 43, 43, 0.1); }
 
-        .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; }
-        .badge { background: #222; border: 1px solid var(--border-color); padding: 5px 15px; border-radius: 20px; font-size: 11px; margin-top: 10px; display: inline-flex; align-items: center; gap: 5px; }
-        .badge i { color: var(--primary-red); }
-        .menu-list { background: var(--bg-panel); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
-        .menu-item { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); color: white; text-decoration: none; font-size: 14px; cursor: pointer; }
+        .profile-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 25px; }
+        .badge { background: #222; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 20px; font-size: 10px; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; }
+        .menu-list { background: var(--bg-panel); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        .menu-item { padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); color: white; text-decoration: none; font-size: 13px; cursor: pointer; }
         
-        .social-connect { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .social-btn { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 15px; border-radius: 12px; text-align: center; color: white; text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; }
-        .social-btn i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--primary-red); }
+        .social-connect { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .social-btn { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; text-align: center; color: white; text-decoration: none; font-size: 11px; font-weight: 500; cursor: pointer; }
+        .social-btn i { font-size: 20px; margin-bottom: 6px; display: block; color: var(--primary-red); }
 
-        /* --- MODALS --- */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: flex-end; backdrop-filter: blur(5px); }
+        /* --- COMPACT MODALS --- */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
         .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--bg-panel); width: 100%; border-radius: 20px 20px 0 0; padding: 25px; border-top: 1px solid var(--border-color); transform: translateY(100%); transition: 0.3s; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: var(--bg-panel); width: 100%; border-radius: 16px 16px 0 0; padding: 20px; border-top: 1px solid var(--border-color); transform: translateY(100%); transition: 0.3s; max-height: 85vh; overflow-y: auto; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .loader { border: 3px solid #333; border-top: 3px solid var(--primary-red); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        .loader { border: 2px solid #333; border-top: 2px solid var(--primary-red); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary-red); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; font-weight: 600; display: none; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center;}
+        #toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: var(--primary-red); color: white; padding: 10px 20px; border-radius: 6px; z-index: 9999; font-weight: 600; display: none; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; width: max-content; max-width: 90%;}
 
-        /* --- AI CHAT MODAL STYLES --- */
-        .ai-chat-box { background: #0b0b0b; height: 300px; border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; overflow-y: auto; margin-bottom: 15px; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
-        .ai-msg { padding: 10px 15px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
+        /* --- COMPACT AI CHAT --- */
+        .ai-chat-box { background: #0b0b0b; height: 250px; border-radius: 10px; border: 1px solid var(--border-color); padding: 12px; overflow-y: auto; margin-bottom: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .ai-msg { padding: 8px 12px; border-radius: 10px; max-width: 85%; line-height: 1.4; }
         .ai-msg.user { background: var(--primary-red); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .ai-msg.bot { background: #222; color: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); }
-        .ai-input-wrapper { display: flex; gap: 10px; }
-        .ai-input-wrapper input { margin-bottom: 0; flex: 1; }
-        .ai-input-wrapper button { width: 50px; background: var(--primary-red); color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .ai-input-wrapper { display: flex; gap: 8px; }
+        .ai-input-wrapper input { margin-bottom: 0; flex: 1; padding: 10px; font-size: 12px;}
+        .ai-input-wrapper button { width: 45px; background: var(--primary-red); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -159,13 +162,13 @@
     <div id="login-screen" class="screen active">
         <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" fetchpriority="high" loading="eager" alt="RK_ESPORTS Logo" class="rk-logo">
         
-        <h1 class="esports-font mt-20" style="font-size: 28px; text-align: center; line-height: 1.2;">
+        <h1 class="esports-font mt-20" style="font-size: 24px; text-align: center; line-height: 1.2;">
             WELCOME TO <br> <span class="text-gold">RK_ESPORTS</span>
         </h1>
-        <p class="text-muted mt-20" style="font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">The Arena Awaits</p>
+        <p class="text-muted mt-15" style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">The Arena Awaits</p>
 
         <div class="login-box">
-            <p style="font-size: 12px; font-weight: 600; color: var(--gold); margin-bottom: 15px;">ACCESS VIA MOBILE</p>
+            <p style="font-size: 10px; font-weight: 600; color: var(--gold); margin-bottom: 12px;">ACCESS VIA MOBILE</p>
             <div class="phone-input-group">
                 <select id="country-code"><option>+91</option></select>
                 <input type="tel" id="phone-input" placeholder="Enter Mobile Number">
@@ -173,14 +176,14 @@
             <button class="btn btn-red" id="mobile-login-btn" onclick="handlePhoneLoginUI()">LOGIN WITH MOBILE NUMBER</button>
         </div>
 
-        <div style="display: flex; align-items: center; width: 100%; max-width: 400px; margin: 25px 0;">
+        <div style="display: flex; align-items: center; width: 100%; max-width: 360px; margin: 20px 0;">
             <div style="flex: 1; height: 1px; background: #333;"></div>
-            <span style="padding: 0 15px; color: var(--text-muted); font-size: 12px;">OR</span>
+            <span style="padding: 0 12px; color: var(--text-muted); font-size: 11px;">OR</span>
             <div style="flex: 1; height: 1px; background: #333;"></div>
         </div>
 
-        <button class="btn btn-white" style="max-width: 400px;" id="google-login-btn">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20" alt="G"> CONTINUE WITH GOOGLE
+        <button class="btn btn-white" style="max-width: 360px;" id="google-login-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="16" alt="G"> CONTINUE WITH GOOGLE
         </button>
     </div>
 
@@ -189,38 +192,57 @@
         
         <!-- TOP BAR -->
         <div class="top-bar">
-            <div class="flex-row" style="gap: 15px;">
+            <div class="flex-row" style="gap: 12px;">
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
-                <h2 class="esports-font" style="font-size: 20px;">RK_<span class="text-red">ESPORTS</span></h2>
+                <h2 class="esports-font" style="font-size: 18px;">RK_<span class="text-red">ESPORTS</span></h2>
             </div>
-            <i class="fa-solid fa-bell text-gold" style="font-size: 20px; cursor: pointer;" onclick="showToast('No new notifications')"></i>
+            <i class="fa-solid fa-bell text-gold" style="font-size: 18px; cursor: pointer;" onclick="showToast('No new notifications')"></i>
         </div>
 
         <!-- ================= HOME SCREEN ================= -->
         <div id="home-screen" class="screen">
             <div class="gold-card">
-                <p style="font-size: 11px; font-weight: 700; opacity: 0.8; letter-spacing: 1px; margin-bottom: 5px;">ELITE MEMBER</p>
-                <h2 class="esports-font" style="font-size: 26px; margin-bottom: 20px;" id="home-username">Welcome, Legend!</h2>
+                <p style="font-size: 10px; font-weight: 700; opacity: 0.8; letter-spacing: 1px; margin-bottom: 4px;">ELITE MEMBER</p>
+                <h2 class="esports-font" style="font-size: 22px; margin-bottom: 15px;" id="home-username">Welcome, Legend!</h2>
                 
-                <p style="font-size: 10px; opacity: 0.7;">CURRENT BALANCE</p>
+                <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
                 <div class="flex-between">
-                    <h1 class="esports-font" style="font-size: 36px;">₹<span id="home-balance">0.00</span></h1>
-                    <button class="btn btn-outline" style="width: auto; padding: 10px 20px; background: black; border: none; font-size: 12px;" onclick="switchTab('wallet')">+ Add Money</button>
+                    <h1 class="esports-font" style="font-size: 28px;">₹<span id="home-balance">0.00</span></h1>
+                    <button class="btn btn-outline" style="width: auto; padding: 8px 16px; background: black; border: none; font-size: 11px;" onclick="switchTab('wallet')">+ Add Money</button>
                 </div>
-                <i class="fa-solid fa-medal" style="position: absolute; top: 20px; right: 20px; font-size: 30px; opacity: 0.8;"></i>
+                <i class="fa-solid fa-medal" style="position: absolute; top: 15px; right: 15px; font-size: 26px; opacity: 0.8;"></i>
             </div>
 
-            <div class="home-banner">
-                <div class="banner-content">
-                    <span style="background: var(--primary-red); padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 800;">MEGA EVENT</span>
-                    <h2 class="esports-font mt-20" style="font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Pro League Season 12</h2>
+            <!-- NEW SWIPEABLE SLIDER BANNER -->
+            <div class="slider-container">
+                <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');">
+                    <div class="banner-content">
+                        <span class="badge-red">MEGA EVENT</span>
+                        <h2 class="esports-font mt-10" style="font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 8px;">Pro League Season 12</h2>
+                    </div>
+                </div>
+                <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop');">
+                    <div class="banner-content">
+                        <span class="badge-red">NEW SCRIMS</span>
+                        <h2 class="esports-font mt-10" style="font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 8px;">Clash Squad Ranked</h2>
+                    </div>
+                </div>
+                <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop');">
+                    <div class="banner-content">
+                        <span class="badge-red">GIVEAWAY</span>
+                        <h2 class="esports-font mt-10" style="font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 8px;">Win 5000 Diamonds</h2>
+                    </div>
                 </div>
             </div>
+            <!-- Slider dots visual hint -->
+            <div style="display:flex; justify-content:center; gap: 4px; margin-top: 8px;">
+                <div style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%;"></div>
+                <div style="width: 6px; height: 6px; background: #333; border-radius: 50%;"></div>
+                <div style="width: 6px; height: 6px; background: #333; border-radius: 50%;"></div>
+            </div>
 
-            <div class="mt-20">
-                <h3 class="esports-font" style="font-size: 16px; border-left: 4px solid var(--primary-red); padding-left: 10px;">QUICK ACTIONS</h3>
-                
-                <!-- NEW QUICK ACTIONS EXACTLY LIKE SCREENSHOT -->
+            <div class="mt-15">
+                <h3 class="esports-font" style="font-size: 14px; border-left: 3px solid var(--primary-red); padding-left: 8px;">QUICK ACTIONS</h3>
                 <div class="quick-actions">
                     <div class="action-btn" onclick="switchTab('tournaments')">
                         <div class="action-icon-box"><i class="fa-solid fa-trophy"></i></div>
@@ -241,15 +263,13 @@
                 </div>
             </div>
 
-            <!-- NEW LIVE NOW SECTION EXACTLY LIKE SCREENSHOT -->
             <div class="live-section">
                 <div class="flex-between">
-                    <h3 class="esports-font" style="font-size: 16px; border-left: 4px solid var(--primary-red); padding-left: 10px;">LIVE NOW</h3>
-                    <span style="color: var(--primary-red); font-size: 10px; font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px;">
+                    <h3 class="esports-font" style="font-size: 14px; border-left: 3px solid var(--primary-red); padding-left: 8px;">LIVE NOW</h3>
+                    <span style="color: var(--primary-red); font-size: 9px; font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px;">
                         <span class="blinking-dot"></span> 1.2K VIEWERS
                     </span>
                 </div>
-                
                 <div class="live-card">
                     <div class="live-thumb">
                         <div class="live-badge">LIVE</div>
@@ -275,39 +295,39 @@
                 <div class="tab" onclick="filterTabs(this)">LONE WOLF</div>
             </div>
 
-            <div class="flex-between mb-20">
-                <h3 class="esports-font" style="font-size: 18px; border-left: 4px solid var(--primary-red); padding-left: 10px;">ACTIVE TOURNAMENTS</h3>
-                <span style="border: 1px solid var(--gold); color: var(--gold); padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold;">LIVE NOW</span>
+            <div class="flex-between mb-15">
+                <h3 class="esports-font" style="font-size: 16px; border-left: 3px solid var(--primary-red); padding-left: 8px;">ACTIVE TOURNAMENTS</h3>
+                <span style="border: 1px solid var(--gold); color: var(--gold); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold;">LIVE NOW</span>
             </div>
 
             <div class="tournaments-grid" id="tournament-list">
-                <div style="text-align: center; padding: 40px; color: var(--text-muted);"><div class="loader"></div><br><br>Loading Arena...</div>
+                <div style="text-align: center; padding: 30px; color: var(--text-muted);"><div class="loader"></div><br><br>Loading Arena...</div>
             </div>
         </div>
 
         <!-- ================= WALLET SCREEN ================= -->
         <div id="wallet-screen" class="screen">
-            <div class="gold-card mb-20">
-                <div class="flex-between mb-20">
-                    <p style="font-size: 12px; font-weight: 700; letter-spacing: 1px;">RK_ESPORTS GOLD WALLET</p>
-                    <i class="fa-solid fa-money-bill-wave text-gold"></i>
+            <div class="gold-card mb-15">
+                <div class="flex-between mb-15">
+                    <p style="font-size: 11px; font-weight: 700; letter-spacing: 1px;">RK_ESPORTS GOLD WALLET</p>
+                    <i class="fa-solid fa-money-bill-wave text-gold" style="font-size: 14px;"></i>
                 </div>
-                <h1 class="esports-font" style="font-size: 42px;">₹<span id="wallet-main-balance">0.00</span></h1>
-                <p style="font-size: 12px; opacity: 0.8; margin-bottom: 25px;">Total Withdrawable Balance</p>
-                <div style="display: flex; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
-                    <div style="flex: 1;"><p style="font-size: 10px; font-weight: 700; opacity: 0.7;">UNUTILIZED</p><p style="font-size: 16px; font-weight: 700;">₹<span id="wallet-unutilized">0</span></p></div>
-                    <div style="flex: 1;"><p style="font-size: 10px; font-weight: 700; opacity: 0.7;">WINNINGS</p><p style="font-size: 16px; font-weight: 700;">₹<span id="wallet-winnings">0</span></p></div>
-                    <button style="background: black; color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;" onclick="showToast('Your wallet is fully verified.')">Details</button>
+                <h1 class="esports-font" style="font-size: 34px;">₹<span id="wallet-main-balance">0.00</span></h1>
+                <p style="font-size: 10px; opacity: 0.8; margin-bottom: 20px;">Total Withdrawable Balance</p>
+                <div style="display: flex; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px;">
+                    <div style="flex: 1;"><p style="font-size: 9px; font-weight: 700; opacity: 0.7;">UNUTILIZED</p><p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-unutilized">0</span></p></div>
+                    <div style="flex: 1;"><p style="font-size: 9px; font-weight: 700; opacity: 0.7;">WINNINGS</p><p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-winnings">0</span></p></div>
+                    <button style="background: black; color: white; border: none; padding: 6px 12px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer;" onclick="showToast('Your wallet is fully verified.')">Details</button>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 15px; margin-bottom: 30px;">
-                <button class="btn btn-red" onclick="openModal('deposit-modal')"><i class="fa-solid fa-wallet"></i> Deposit (UPI)</button>
+            <div style="display: flex; gap: 12px; margin-bottom: 25px;">
+                <button class="btn btn-red" onclick="openModal('deposit-modal')"><i class="fa-solid fa-wallet"></i> Deposit</button>
                 <button class="btn btn-outline" style="border-color: #333;" onclick="openModal('withdraw-modal')"><i class="fa-solid fa-building-columns text-red"></i> Withdraw</button>
             </div>
 
-            <div class="flex-between mb-20">
-                <h3 class="esports-font" style="font-size: 18px;">Recent Transactions</h3>
+            <div class="flex-between mb-15">
+                <h3 class="esports-font" style="font-size: 15px;">Recent Transactions</h3>
             </div>
 
             <div class="tx-list" id="transaction-list"></div>
@@ -316,34 +336,34 @@
         <!-- ================= PROFILE SCREEN ================= -->
         <div id="profile-screen" class="screen">
             <div class="profile-header">
-                <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Profile" class="rk-logo mb-20">
-                <h2 class="esports-font" style="font-size: 24px;" id="profile-name">Player Name</h2>
-                <p class="text-gold" style="font-size: 14px; font-weight: 600; margin-top: 5px;">UID: <span id="profile-uid">00000000</span> <i class="fa-solid fa-circle-check"></i></p>
+                <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Profile" class="rk-logo mb-15">
+                <h2 class="esports-font" style="font-size: 20px;" id="profile-name">Player Name</h2>
+                <p class="text-gold" style="font-size: 12px; font-weight: 600; margin-top: 4px;">UID: <span id="profile-uid">00000000</span> <i class="fa-solid fa-circle-check"></i></p>
                 <div class="badge"><i class="fa-solid fa-medal"></i> ELITE RANK • TIER 4</div>
             </div>
 
-            <div style="background: #1a1515; border: 1px solid #3a1515; border-radius: 16px; padding: 20px; position: relative; overflow: hidden; margin-bottom: 25px;">
-                <h3 class="flex-row" style="font-size: 16px; margin-bottom: 10px; gap: 10px;"><i class="fa-solid fa-brain text-red"></i> AI Strategist</h3>
-                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px; max-width: 70%;">Analyze your last match and receive custom tactical drills using Groq AI.</p>
-                <button class="btn btn-red" style="padding: 10px; font-size: 12px; width: auto; min-width: 150px;" onclick="openModal('ai-modal')"><i class="fa-solid fa-bolt"></i> ASK AI</button>
-                <i class="fa-solid fa-robot" style="position: absolute; right: 10px; top: 20px; font-size: 80px; opacity: 0.1;"></i>
+            <div style="background: #1a1515; border: 1px solid #3a1515; border-radius: 12px; padding: 15px; position: relative; overflow: hidden; margin-bottom: 20px;">
+                <h3 class="flex-row" style="font-size: 14px; margin-bottom: 8px; gap: 8px;"><i class="fa-solid fa-brain text-red"></i> AI Strategist</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; max-width: 75%;">Analyze your last match and receive custom tactical drills using Groq AI.</p>
+                <button class="btn btn-red" style="padding: 8px; font-size: 11px; width: auto; min-width: 120px;" onclick="openModal('ai-modal')"><i class="fa-solid fa-bolt"></i> ASK AI</button>
+                <i class="fa-solid fa-robot" style="position: absolute; right: 5px; top: 15px; font-size: 60px; opacity: 0.1;"></i>
             </div>
 
-            <p style="font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 10px;">SOCIAL CONNECT</p>
+            <p style="font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">SOCIAL CONNECT</p>
             <div class="social-connect">
                 <a href="https://chat.whatsapp.com/H6QE7np6vVdBDuNAE0VW4B?mode=gi_t" target="_blank" class="social-btn"><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> WhatsApp</a>
                 <a href="mailto:guptakrishn258@gmail.com" class="social-btn"><i class="fa-solid fa-envelope" style="color:white;"></i> Email</a>
                 <a href="https://chat.whatsapp.com/H6QE7np6vVdBDuNAE0VW4B?mode=gi_t" target="_blank" class="social-btn"><i class="fa-solid fa-headset" style="color:var(--gold);"></i> Support</a>
             </div>
 
-            <p style="font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 10px;">SYSTEM & SUPPORT</p>
+            <p style="font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 8px;">SYSTEM & SUPPORT</p>
             <div class="menu-list">
-                <a href="mailto:guptakrishn258@gmail.com?subject=Bug Report RK Esports" class="menu-item"><div class="flex-row"><i class="fa-solid fa-bug"></i> Report a Bug</div> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: #555;"></i></a>
-                <div class="menu-item" onclick="openModal('privacy-modal')"><div class="flex-row"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</div> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: #555;"></i></div>
-                <div class="menu-item" onclick="openModal('terms-modal')"><div class="flex-row"><i class="fa-solid fa-file-contract"></i> Terms & Conditions</div> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: #555;"></i></div>
+                <a href="mailto:guptakrishn258@gmail.com?subject=Bug Report RK Esports" class="menu-item"><div class="flex-row"><i class="fa-solid fa-bug"></i> Report a Bug</div> <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #555;"></i></a>
+                <div class="menu-item" onclick="openModal('privacy-modal')"><div class="flex-row"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</div> <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #555;"></i></div>
+                <div class="menu-item" onclick="openModal('terms-modal')"><div class="flex-row"><i class="fa-solid fa-file-contract"></i> Terms & Conditions</div> <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #555;"></i></div>
             </div>
 
-            <button class="btn btn-outline-red mt-20" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> LOGOUT FROM SYSTEM</button>
+            <button class="btn btn-outline-red mt-15" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> LOGOUT FROM SYSTEM</button>
         </div>
 
         <!-- BOTTOM NAVIGATION -->
@@ -358,18 +378,16 @@
 
     <!-- ================= MODALS ================= -->
     
-    <!-- Real AI Chat Modal (Groq API) -->
+    <!-- Real AI Chat Modal -->
     <div class="modal-overlay" id="ai-modal">
         <div class="modal-content" style="height: 80vh; display: flex; flex-direction: column;">
-            <div class="flex-between mb-20">
-                <h2 class="esports-font"><i class="fa-solid fa-robot text-red"></i> RK AI Strategist</h2>
-                <i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i>
+            <div class="flex-between mb-15">
+                <h2 class="esports-font" style="font-size: 18px;"><i class="fa-solid fa-robot text-red"></i> RK AI Strategist</h2>
+                <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i>
             </div>
-            
             <div class="ai-chat-box" id="ai-chat-box">
                 <div class="ai-msg bot">Hello Legend! I am the RK AI powered by Groq (Llama-3). Ask me for tactical drills, loadout advice, or strategies for your next match!</div>
             </div>
-
             <div class="ai-input-wrapper">
                 <input type="text" id="ai-input" placeholder="Ask a strategy (e.g. Best loadout for Clash Squad)..." onkeypress="if(event.key === 'Enter') askGroqAI()">
                 <button onclick="askGroqAI()"><i class="fa-solid fa-paper-plane"></i></button>
@@ -377,81 +395,79 @@
         </div>
     </div>
 
-    <!-- Deposit Modal (Dynamic QR + Deep Link) -->
+    <!-- Deposit Modal (Dynamic QR) -->
     <div class="modal-overlay" id="deposit-modal">
         <div class="modal-content">
-            <div class="flex-between mb-20">
-                <h2 class="esports-font">Add Funds</h2>
-                <i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i>
+            <div class="flex-between mb-15">
+                <h2 class="esports-font" style="font-size: 20px;">Add Funds</h2>
+                <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i>
             </div>
             
-            <div style="background: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                <img id="upi-qr" src="https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR" alt="UPI QR" style="width: 150px; height: 150px; display: block; margin: 0 auto; border: 2px solid #eee; border-radius: 8px;">
-                <p style="color: black; font-weight: 800; font-size: 15px; margin-top: 12px;" id="upi-id-text">guptakrishn258@oksbi</p>
-                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
-                    <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 8px 12px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="copyUPI()">
+            <div style="background: white; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <img id="upi-qr" src="https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR" alt="UPI QR" style="width: 130px; height: 130px; display: block; margin: 0 auto; border: 2px solid #eee; border-radius: 6px;">
+                <p style="color: black; font-weight: 800; font-size: 13px; margin-top: 10px;" id="upi-id-text">guptakrishn258@oksbi</p>
+                <div style="display: flex; justify-content: center; gap: 8px; margin-top: 12px;">
+                    <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 6px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="copyUPI()">
                         <i class="fa-solid fa-copy" style="color: var(--primary-red);"></i> COPY UPI
                     </button>
-                    <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 8px 12px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="downloadQR()">
+                    <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 6px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="downloadQR()">
                         <i class="fa-solid fa-download" style="color: var(--primary-red);"></i> SAVE QR
                     </button>
                 </div>
             </div>
 
-            <input type="number" id="dep-amount" placeholder="Enter Amount (₹)" required oninput="updateQR()" style="font-size: 16px; font-weight: bold; text-align: center;">
-            <button type="button" class="btn btn-red mb-20" id="btn-pay-now" onclick="payNow()">
+            <input type="number" id="dep-amount" placeholder="Enter Amount (₹)" required oninput="updateQR()" style="font-size: 14px; font-weight: bold; text-align: center;">
+            <button type="button" class="btn btn-red mb-15" id="btn-pay-now" onclick="payNow()">
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
 
-            <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 20px; background: #222; padding: 10px; border-radius: 8px; border: 1px solid var(--primary-red);">
-                <p style="color: white; font-size: 14px;">Complete your payment in</p>
-                <p style="color: var(--gold); font-size: 24px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">Upload UTR & Screenshot below after payment.</p>
+            <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 15px; background: #222; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-red);">
+                <p style="color: white; font-size: 12px;">Complete payment in</p>
+                <p style="color: var(--gold); font-size: 20px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
+                <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Upload UTR & Screenshot below after payment.</p>
             </div>
             
             <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" required>
-            <label style="display: block; margin-bottom: 10px; font-size: 12px; color: var(--gold);">Upload Screenshot</label>
-            <input type="file" id="dep-file" accept="image/*" style="padding: 10px; background: #222;" required>
+            <label style="display: block; margin-bottom: 8px; font-size: 11px; color: var(--gold);">Upload Screenshot</label>
+            <input type="file" id="dep-file" accept="image/*" style="padding: 8px; background: #222;" required>
             
-            <button type="button" class="btn btn-red mt-20" id="btn-submit-deposit" onclick="submitDeposit()">SUBMIT DETAILS</button>
+            <button type="button" class="btn btn-red mt-15" id="btn-submit-deposit" onclick="submitDeposit()">SUBMIT DETAILS</button>
         </div>
     </div>
 
     <!-- Withdraw Modal -->
     <div class="modal-overlay" id="withdraw-modal">
         <div class="modal-content">
-            <div class="flex-between mb-20"><h2 class="esports-font">Withdraw Winnings</h2><i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i></div>
-            <p class="text-muted" style="font-size: 13px; margin-bottom: 20px;">Available to withdraw: ₹<span id="withdraw-max-val">0</span></p>
+            <div class="flex-between mb-15"><h2 class="esports-font" style="font-size: 20px;">Withdraw</h2><i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i></div>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Available to withdraw: ₹<span id="withdraw-max-val">0</span></p>
             <input type="number" id="with-amount" placeholder="Amount (₹)" required>
             <input type="text" id="with-upi" placeholder="Your UPI ID" required>
-            <button type="button" class="btn btn-red mt-20" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
+            <button type="button" class="btn btn-red mt-15" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
         </div>
     </div>
 
     <!-- Privacy Policy Modal -->
     <div class="modal-overlay" id="privacy-modal">
         <div class="modal-content">
-            <div class="flex-between mb-20"><h2 class="esports-font">Privacy Policy</h2><i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i></div>
-            <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
-                <p>Welcome to RK_ESPORTS. We collect basic user information such as Email and UID solely for account management and tournament verification.</p><br>
-                <p>Payment information is processed securely. We do not store your UPI pins or bank passwords. Screenshots are used only for transaction verification.</p><br>
-                <p>If you have any queries, contact our support team on WhatsApp or Email.</p>
+            <div class="flex-between mb-15"><h2 class="esports-font" style="font-size: 18px;">Privacy Policy</h2><i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i></div>
+            <div style="font-size: 12px; color: #ccc; line-height: 1.5;">
+                <p>Welcome to RK_ESPORTS. We collect basic user information such as Email and UID solely for account management.</p><br>
+                <p>Payment information is processed securely. We do not store your UPI pins or bank passwords.</p>
             </div>
-            <button type="button" class="btn btn-outline mt-20" onclick="closeModals()">CLOSE</button>
+            <button type="button" class="btn btn-outline mt-15" onclick="closeModals()">CLOSE</button>
         </div>
     </div>
 
     <!-- Terms Modal -->
     <div class="modal-overlay" id="terms-modal">
         <div class="modal-content">
-            <div class="flex-between mb-20"><h2 class="esports-font">Terms & Conditions</h2><i class="fa-solid fa-xmark" style="font-size: 24px; cursor: pointer;" onclick="closeModals()"></i></div>
-            <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
-                <p>1. Hackers or emulator players in mobile tournaments will be banned permanently without any refund.</p><br>
-                <p>2. Registration fees are non-refundable once the tournament bracket is generated.</p><br>
-                <p>3. Winnings will be processed within 24-48 hours to your registered UPI ID.</p><br>
-                <p>4. RK_ESPORTS reserves the right to cancel or postpone matches due to technical server issues.</p>
+            <div class="flex-between mb-15"><h2 class="esports-font" style="font-size: 18px;">Terms & Conditions</h2><i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i></div>
+            <div style="font-size: 12px; color: #ccc; line-height: 1.5;">
+                <p>1. Hackers or emulator players will be banned permanently without any refund.</p><br>
+                <p>2. Registration fees are non-refundable once bracket is generated.</p><br>
+                <p>3. Winnings will be processed within 24-48 hours.</p>
             </div>
-            <button type="button" class="btn btn-outline mt-20" onclick="closeModals()">I AGREE</button>
+            <button type="button" class="btn btn-outline mt-15" onclick="closeModals()">I AGREE</button>
         </div>
     </div>
 
@@ -476,17 +492,18 @@
 
         const GROQ_API_KEY = "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";
 
+        // Compact Dummy Tournaments Data matched to new CSS rules
         const dummyTournamentsHTML = `
-            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> BATTLE ROYALE</div><img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font mb-20" style="font-size: 18px;">GRAND MASTERS CUP</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Entry Fee</p><p style="font-size: 14px; font-weight: bold;">₹50</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Prize Pool</p><p style="font-size: 14px; font-weight: bold; color: var(--gold);">₹2000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Time</p><p style="font-size: 14px; font-weight: bold;">18:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Slots</p><p style="font-size: 14px; font-weight: bold; color: white">40/48</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 15px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 83%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds in Wallet.')">JOIN NOW</button></div></div>
-            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> CLASH SQUAD</div><img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font mb-20" style="font-size: 18px;">ELITE SCRIMS V8</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Entry Fee</p><p style="font-size: 14px; font-weight: bold;">₹100</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Prize Pool</p><p style="font-size: 14px; font-weight: bold; color: var(--gold);">₹5000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Time</p><p style="font-size: 14px; font-weight: bold;">20:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Slots</p><p style="font-size: 14px; font-weight: bold; color: var(--primary-red)">8/16</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 15px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 50%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds in Wallet.')">JOIN NOW</button></div></div>
-            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> LONE WOLF</div><img src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font mb-20" style="font-size: 18px;">LONE WOLF SOLO</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Entry Fee</p><p style="font-size: 14px; font-weight: bold;">₹20</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Prize Pool</p><p style="font-size: 14px; font-weight: bold; color: var(--gold);">₹500</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Time</p><p style="font-size: 14px; font-weight: bold;">21:30</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Slots</p><p style="font-size: 14px; font-weight: bold; color: white">12/20</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 15px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 60%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds in Wallet.')">JOIN NOW</button></div></div>
+            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> BATTLE ROYALE</div><img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">GRAND MASTERS CUP</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">₹50</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹2000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">18:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: white">40/48</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 83%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds.')">JOIN NOW</button></div></div>
+            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> CLASH SQUAD</div><img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">ELITE SCRIMS V8</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">₹100</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹5000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">20:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: var(--primary-red)">8/16</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 50%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds.')">JOIN NOW</button></div></div>
+            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> LONE WOLF</div><img src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">LONE WOLF SOLO</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">₹20</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹500</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">21:30</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: white">12/20</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 60%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds.')">JOIN NOW</button></div></div>
         `;
 
         const dummyTransactionsHTML = `
-            <div class="tx-item"><div class="flex-row" style="gap: 15px;"><div class="tx-icon deposit"><i class="fa-solid fa-plus"></i></div><div><p style="font-size: 14px; font-weight: 600;">Deposit via UPI</p><p style="font-size: 11px; color: var(--text-muted);">Oct 24, 2023 • 14:20 PM • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 16px; font-weight: bold; color: #4caf50;">+ ₹500.00</p></div></div>
-            <div class="tx-item"><div class="flex-row" style="gap: 15px;"><div class="tx-icon game"><i class="fa-solid fa-gamepad"></i></div><div><p style="font-size: 14px; font-weight: 600;">Entry Fee: BGMI Pro League</p><p style="font-size: 11px; color: var(--text-muted);">Oct 23, 2023 • 09:15 AM • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 16px; font-weight: bold; color: white;">- ₹150.00</p></div></div>
-            <div class="tx-item"><div class="flex-row" style="gap: 15px;"><div class="tx-icon deposit"><i class="fa-solid fa-trophy"></i></div><div><p style="font-size: 14px; font-weight: 600;">Tournament Winnings</p><p style="font-size: 11px; color: var(--text-muted);">Oct 22, 2023 • 18:45 PM • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 16px; font-weight: bold; color: var(--gold);">+ ₹2,200.00</p></div></div>
-            <div class="tx-item"><div class="flex-row" style="gap: 15px;"><div class="tx-icon withdraw"><i class="fa-solid fa-building-columns"></i></div><div><p style="font-size: 14px; font-weight: 600;">Withdrawal to Bank</p><p style="font-size: 11px; color: var(--text-muted);">Oct 21, 2023 • 11:10 AM • PENDING</p></div></div><div style="text-align: right;"><p style="font-size: 16px; font-weight: bold; color: white;">- ₹1,000.00</p></div></div>
+            <div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon deposit"><i class="fa-solid fa-plus"></i></div><div><p style="font-size: 13px; font-weight: 600;">Deposit via UPI</p><p style="font-size: 10px; color: var(--text-muted);">Oct 24, 2023 • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: #4caf50;">+ ₹500.00</p></div></div>
+            <div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon game"><i class="fa-solid fa-gamepad"></i></div><div><p style="font-size: 13px; font-weight: 600;">Entry Fee: BGMI Pro</p><p style="font-size: 10px; color: var(--text-muted);">Oct 23, 2023 • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: white;">- ₹150.00</p></div></div>
+            <div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon deposit"><i class="fa-solid fa-trophy"></i></div><div><p style="font-size: 13px; font-weight: 600;">Tournament Winnings</p><p style="font-size: 10px; color: var(--text-muted);">Oct 22, 2023 • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: var(--gold);">+ ₹2,200.00</p></div></div>
+            <div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon withdraw"><i class="fa-solid fa-building-columns"></i></div><div><p style="font-size: 13px; font-weight: 600;">Withdrawal to Bank</p><p style="font-size: 10px; color: var(--text-muted);">Oct 21, 2023 • PENDING</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: white;">- ₹1,000.00</p></div></div>
         `;
 
         function showToast(msg) {
@@ -694,7 +711,7 @@
                 snapshot.forEach(doc => {
                     const t = doc.data();
                     const isFull = t.joined_count >= t.total_slots;
-                    html += `<div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> ${t.mode || 'BATTLE ROYALE'}</div><img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1000&auto=format&fit=crop" alt="Game"></div><div class="t-details"><h3 class="esports-font mb-20" style="font-size: 18px;">${t.title}</h3><div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Entry Fee</p><p style="font-size: 14px; font-weight: bold;">${t.entry_fee === 0 ? '<span class="text-green">FREE</span>' : '₹'+t.entry_fee}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Prize Pool</p><p style="font-size: 14px; font-weight: bold; color: var(--gold);">₹${t.prize_pool}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Time</p><p style="font-size: 14px; font-weight: bold;">${t.match_time}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 11px; color: var(--text-muted);">Slots</p><p style="font-size: 14px; font-weight: bold; color: ${isFull ? 'var(--primary-red)' : 'white'}">${t.joined_count}/${t.total_slots}</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 15px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: ${(t.joined_count/t.total_slots)*100}%;"></div></div><button class="btn ${isFull ? 'btn-outline' : 'btn-red'}" onclick="joinTournament('${doc.id}', ${t.entry_fee}, ${isFull})" ${isFull ? 'disabled' : ''}>${isFull ? 'MATCH FULL' : 'JOIN NOW'}</button></div></div>`;
+                    html += `<div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> ${t.mode || 'BATTLE ROYALE'}</div><img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1000&auto=format&fit=crop" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">${t.title}</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">${t.entry_fee === 0 ? '<span class="text-green">FREE</span>' : '₹'+t.entry_fee}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹${t.prize_pool}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">${t.match_time}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: ${isFull ? 'var(--primary-red)' : 'white'}">${t.joined_count}/${t.total_slots}</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: ${(t.joined_count/t.total_slots)*100}%;"></div></div><button class="btn ${isFull ? 'btn-outline' : 'btn-red'}" onclick="joinTournament('${doc.id}', ${t.entry_fee}, ${isFull})" ${isFull ? 'disabled' : ''}>${isFull ? 'MATCH FULL' : 'JOIN NOW'}</button></div></div>`;
                 });
                 list.innerHTML = html;
             } catch (error) { list.innerHTML = '<p class="text-red">Arena connection failed.</p>'; }
@@ -756,7 +773,7 @@
                     if(tx.type === 'winning') { icon = 'fa-trophy'; colorClass = 'deposit'; sign = '+'; amountColor = 'var(--gold)'; }
                     const date = tx.createdAt ? tx.createdAt.toDate().toLocaleDateString() : 'Just now';
 
-                    html += `<div class="tx-item"><div class="flex-row" style="gap: 15px;"><div class="tx-icon ${colorClass}"><i class="fa-solid ${icon}"></i></div><div><p style="font-size: 14px; font-weight: 600;">${tx.title || tx.type.toUpperCase()}</p><p style="font-size: 11px; color: var(--text-muted);">${date} • ${tx.status || 'SUCCESS'}</p></div></div><div style="text-align: right;"><p style="font-size: 16px; font-weight: bold; color: ${amountColor};">${sign} ₹${tx.amount}</p></div></div>`;
+                    html += `<div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon ${colorClass}"><i class="fa-solid ${icon}"></i></div><div><p style="font-size: 13px; font-weight: 600;">${tx.title || tx.type.toUpperCase()}</p><p style="font-size: 10px; color: var(--text-muted);">${date} • ${tx.status || 'SUCCESS'}</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: ${amountColor};">${sign} ₹${tx.amount}</p></div></div>`;
                 });
                 list.innerHTML = html;
             } catch(e) { list.innerHTML = ''; }
@@ -770,7 +787,7 @@
 
             if(!amount || !utr || fileInput.files.length === 0) { showToast("Please fill all fields and upload screenshot."); return; }
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:18px;"></i> UPLOADING...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:16px;"></i> &nbsp; UPLOADING...';
             btn.disabled = true;
 
             try {
@@ -812,7 +829,7 @@
             if(amount > userData.wallet_balance) { showToast("Insufficient balance!"); return; }
 
             const btn = document.getElementById('btn-submit-withdraw');
-            btn.innerHTML = '<div class="loader"></div>';
+            btn.innerHTML = '<div class="loader" style="width: 16px; height: 16px;"></div>';
             btn.disabled = true;
 
             try {
