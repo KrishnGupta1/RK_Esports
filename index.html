@@ -213,8 +213,8 @@
                 <i class="fa-solid fa-medal" style="position: absolute; top: 15px; right: 15px; font-size: 26px; opacity: 0.8;"></i>
             </div>
 
-            <!-- NEW SWIPEABLE SLIDER BANNER -->
-            <div class="slider-container">
+            <!-- NEW SWIPEABLE SLIDER BANNER (Fix Applied Here: id & onscroll added) -->
+            <div class="slider-container" id="banner-slider" onscroll="updateSliderDots()">
                 <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');">
                     <div class="banner-content">
                         <span class="badge-red">MEGA EVENT</span>
@@ -234,11 +234,11 @@
                     </div>
                 </div>
             </div>
-            <!-- Slider dots visual hint -->
+            <!-- Slider dots visual hint (Fix Applied Here: Added classes for JS targeting) -->
             <div style="display:flex; justify-content:center; gap: 4px; margin-top: 8px;">
-                <div style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%;"></div>
-                <div style="width: 6px; height: 6px; background: #333; border-radius: 50%;"></div>
-                <div style="width: 6px; height: 6px; background: #333; border-radius: 50%;"></div>
+                <div class="slider-dot" style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%; transition: 0.3s;"></div>
+                <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
+                <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
             </div>
 
             <div class="mt-15">
@@ -248,7 +248,8 @@
                         <div class="action-icon-box"><i class="fa-solid fa-trophy"></i></div>
                         <div class="action-text">Leagues</div>
                     </div>
-                    <div class="action-btn" onclick="showToast('Clans feature coming in Season 2!')">
+                    <!-- Fix Applied Here: Changed onclick to switchTab('clans') -->
+                    <div class="action-btn" onclick="switchTab('clans')">
                         <div class="action-icon-box"><i class="fa-solid fa-users"></i></div>
                         <div class="action-text">Clans</div>
                     </div>
@@ -285,6 +286,47 @@
                 </div>
             </div>
             
+        </div>
+
+        <!-- ================= CLANS SCREEN (New Add) ================= -->
+        <div id="clans-screen" class="screen">
+            <div class="flex-between mb-15">
+                <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-users text-red"></i> CLANS (BETA)</h2>
+                <button class="btn btn-outline" style="width: auto; padding: 6px 12px; font-size: 10px;" onclick="switchTab('home')">BACK</button>
+            </div>
+            
+            <div class="gold-card mb-15" style="text-align: center;">
+                <h3 class="esports-font" style="font-size: 18px; margin-bottom: 5px;">Form Your Squad</h3>
+                <p style="font-size: 10px; opacity: 0.8; margin-bottom: 12px; color: black;">Dominate the leaderboards and join scrims together.</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn btn-red" style="width: auto; padding: 8px 15px;" onclick="showToast('Creating a clan requires an Elite Pass. Coming Soon!')"><i class="fa-solid fa-plus"></i> CREATE</button>
+                    <button class="btn btn-outline" style="background: black; width: auto; padding: 8px 15px; border:none;" onclick="showToast('Searching open clans...')"><i class="fa-solid fa-magnifying-glass"></i> JOIN</button>
+                </div>
+            </div>
+
+            <h3 class="esports-font" style="font-size: 14px; border-left: 3px solid var(--primary-red); padding-left: 8px; margin-bottom: 15px;">TOP RANKED CLANS</h3>
+            <div class="tx-list">
+                <div class="tx-item">
+                    <div class="flex-row" style="gap: 12px;">
+                        <div class="tx-icon game"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div>
+                            <p style="font-size: 13px; font-weight: 600;">Team RK Elite</p>
+                            <p style="font-size: 10px; color: var(--text-muted);">Members: 48/50 • Lvl 10</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-red" style="width: auto; padding: 6px 12px; font-size: 9px;" onclick="showToast('Join Request Sent!')">REQUEST</button>
+                </div>
+                <div class="tx-item">
+                    <div class="flex-row" style="gap: 12px;">
+                        <div class="tx-icon withdraw"><i class="fa-solid fa-skull"></i></div>
+                        <div>
+                            <p style="font-size: 13px; font-weight: 600;">Gods of War</p>
+                            <p style="font-size: 10px; color: var(--text-muted);">Members: 45/50 • Lvl 8</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-red" style="width: auto; padding: 6px 12px; font-size: 9px;" onclick="showToast('Join Request Sent!')">REQUEST</button>
+                </div>
+            </div>
         </div>
 
         <!-- ================= TOURNAMENTS SCREEN ================= -->
@@ -513,16 +555,33 @@
             setTimeout(() => t.style.display = 'none', 3500);
         }
 
+        // Fix Applied Here: JS modified to handle screens not in bottom nav smoothly
         function switchTab(tabId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(tabId + '-screen').classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('nav-' + tabId).classList.add('active');
+            const navItem = document.getElementById('nav-' + tabId);
+            if(navItem) navItem.classList.add('active');
 
             if(tabId === 'tournaments') loadTournaments();
             if(tabId === 'wallet') loadTransactions();
             window.scrollTo(0, 0);
+        }
+
+        // Fix Applied Here: New function to make slider dots active on swipe
+        function updateSliderDots() {
+            const slider = document.getElementById('banner-slider');
+            const dots = document.querySelectorAll('.slider-dot');
+            const index = Math.round(slider.scrollLeft / slider.clientWidth);
+            
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.style.background = 'var(--primary-red)';
+                } else {
+                    dot.style.background = '#333';
+                }
+            });
         }
 
         function filterTabs(element) {
