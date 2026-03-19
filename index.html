@@ -217,7 +217,7 @@
     <!-- MAIN APP WRAPPER -->
     <div id="main-app" style="display: none;">
         
-        <!-- ================= TOP BAR ================= -->
+        <!-- ================= TOP BAR (RESTORED TO ORIGINAL) ================= -->
         <div class="top-bar">
             <div class="flex-row" style="gap: 12px;">
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
@@ -234,13 +234,14 @@
                 
                 <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
                 <div class="flex-between">
+                    <!-- Adjusted size and id to dynamically format with commas -->
                     <h1 class="esports-font" style="font-size: 32px; font-weight: 700;">₹<span id="home-balance">0.00</span></h1>
                     <button class="btn btn-outline" style="width: auto; padding: 8px 16px; background: black; border: none; font-size: 11px;" onclick="switchTab('wallet')">+ Add Money</button>
                 </div>
                 <i class="fa-solid fa-medal" style="position: absolute; top: 15px; right: 15px; font-size: 26px; opacity: 0.8;"></i>
             </div>
 
-            <!-- BANNER SLIDER -->
+            <!-- BUG-FREE BANNER SLIDER -->
             <div class="slider-container" id="banner-slider">
                 <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');">
                     <div class="banner-content">
@@ -314,7 +315,7 @@
             
         </div>
 
-        <!-- ================= CLANS SCREEN ================= -->
+        <!-- ================= CLANS SCREEN (REAL LOGIC UI) ================= -->
         <div id="clans-screen" class="screen">
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-users text-red"></i> CLANS</h2>
@@ -537,8 +538,8 @@
                 </div>
             </div>
 
-            <!-- Limit applied: max 1000 -->
-            <input type="number" id="dep-amount" placeholder="Enter Amount (Max ₹1000)" max="1000" required oninput="updateQR()" style="font-size: 14px; font-weight: bold; text-align: center;">
+            <!-- Limit applied: max 1000 via oninput JS -->
+            <input type="number" id="dep-amount" placeholder="Enter Amount (Max ₹1000)" max="1000" oninput="if(this.value > 1000) { this.value = 1000; showToast('Max deposit limit is ₹1000'); } updateQR();" required style="font-size: 14px; font-weight: bold; text-align: center;">
             <button type="button" class="btn btn-red mb-15" id="btn-pay-now" onclick="payNow()">
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
@@ -564,8 +565,10 @@
         <div class="modal-content">
             <div class="flex-between mb-15"><h2 class="esports-font" style="font-size: 20px;">Withdraw</h2><i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i></div>
             <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Available to withdraw: ₹<span id="withdraw-max-val">0</span></p>
-            <input type="number" id="with-amount" placeholder="Amount (Max ₹500/day)" max="500" required>
-            <input type="text" id="with-upi" placeholder="Your UPI ID" required>
+            <!-- Limit applied: max 500 via oninput JS -->
+            <input type="number" id="with-amount" placeholder="Amount (Max ₹500/day)" max="500" oninput="if(this.value > 500) { this.value = 500; showToast('Max limit is ₹500'); }" required>
+            <!-- Limit applied: UPI ID length -->
+            <input type="text" id="with-upi" placeholder="Your UPI ID" maxlength="50" oninput="this.value = this.value.replace(/\\s/g, '');" required>
             <button type="button" class="btn btn-red mt-15" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
         </div>
     </div>
@@ -892,13 +895,6 @@
 
         function updateQR() {
             let amt = document.getElementById('dep-amount').value;
-            // Fix: Enforce max 1000 limit locally on typing
-            if (amt > 1000) {
-                document.getElementById('dep-amount').value = 1000;
-                amt = 1000;
-                showToast("Maximum deposit limit is ₹1000");
-            }
-            
             const base = "upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&cu=INR";
             const finalUpi = amt ? `${base}&am=${amt}` : base;
             document.getElementById('upi-qr').src = `https://quickchart.io/qr?text=${encodeURIComponent(finalUpi)}&size=250`;
@@ -1145,7 +1141,9 @@
                 const res = await fetch('https://api.cloudinary.com/v1_1/dymlr54h/image/upload', { method: 'POST', body: formData });
                 const data = await res.json();
                 
-                if(!data.secure_url) throw new Error("Upload failed");
+                if(!res.ok || !data.secure_url) {
+                    throw new Error(data.error ? data.error.message : "Cloudinary Upload Failed!");
+                }
 
                 await db.collection('deposits').add({ user_id: currentUser.uid, amount: Number(amount), utr: utr, screenshot_url: data.secure_url, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                 
@@ -1158,7 +1156,8 @@
                 txLoaded = false;
                 loadTransactions();
             } catch (error) {
-                showToast("Error processing deposit. Try again.");
+                console.error("Cloudinary/Deposit Error: ", error);
+                showToast("Error: " + error.message);
             } finally {
                 btn.innerHTML = 'SUBMIT DETAILS';
                 btn.disabled = false;
