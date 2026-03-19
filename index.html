@@ -6,7 +6,7 @@
     <title>RK_ESPORTS</title>
     
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,800;1,800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Firebase SDK -->
@@ -105,16 +105,42 @@
         .blinking-dot { width: 6px; height: 6px; background-color: var(--primary-red); border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.2s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* --- COMPACT TOURNAMENTS GRID --- */
-        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
-        .tab { flex: 1; text-align: center; padding: 12px 0; color: var(--text-muted); font-weight: 600; font-size: 12px; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.3s; }
+        /* ================= COMPACT MATCHES 2-COLUMN GRID ================= */
+        .tabs { display: flex; border-bottom: 1px solid #222; margin-bottom: 20px; }
+        .tab { flex: 1; text-align: center; padding: 12px 0; color: var(--text-muted); font-weight: 700; font-size: 11px; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .tab.active { color: white; border-bottom-color: var(--primary-red); }
-        .tournaments-grid { display: grid; grid-template-columns: 1fr; gap: 15px; transition: opacity 0.3s; }
-        .t-card { background: var(--bg-panel); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
-        .t-image { height: 120px; background: #222; position: relative; }
-        .t-image img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-        .t-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); padding: 4px 6px; border-radius: 4px; color: var(--gold); font-size: 9px; font-weight: 800;}
-        .t-details { padding: 12px; }
+        
+        .live-now-btn { border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 12px; font-size: 9px; font-weight: 800; background: rgba(226, 176, 34, 0.05); cursor: pointer; }
+
+        .tournaments-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; transition: opacity 0.3s; margin-bottom: 20px;}
+        
+        .t-card { background: #0f0f0f; border-radius: 16px; overflow: hidden; border: 1px solid #1f1f1f; display: flex; flex-direction: column; }
+        .t-image { height: 110px; background: #222; position: relative; }
+        .t-image img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+        .t-medal-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); padding: 4px 6px; border-radius: 6px; color: var(--gold); font-size: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(226, 176, 34, 0.3);}
+        
+        .t-details { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+        .t-title { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.5px;}
+        
+        .t-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .t-stat-item { display: flex; align-items: baseline; gap: 4px; }
+        .t-stat-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+        .t-stat-val { font-size: 11px; font-weight: 700; color: white; }
+        .t-stat-val.gold { color: var(--gold); }
+        .t-stat-val.red { color: var(--primary-red); }
+        
+        .t-progress-bg { height: 4px; background: #222; border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
+        .t-progress-fill { height: 100%; background: var(--primary-red); }
+        
+        .t-btn { background: var(--primary-red); color: white; border: none; padding: 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: 'Montserrat', sans-serif; margin-top: auto; letter-spacing: 1px; transition: 0.2s;}
+        .t-btn:active { transform: scale(0.95); }
+
+        /* Promo Banner inside Tournaments Screen */
+        .promo-banner { background: linear-gradient(135deg, #d32020 0%, #900a0a 100%); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+        .promo-banner h2 { font-family: 'Montserrat', sans-serif; font-style: italic; font-weight: 800; font-size: 18px; margin-bottom: 8px; z-index: 2; position: relative; letter-spacing: 1px;}
+        .promo-banner p { font-size: 12px; line-height: 1.4; margin-bottom: 15px; max-width: 85%; z-index: 2; position: relative; color: rgba(255,255,255,0.9); }
+        .promo-btn { background: white; color: #a01010; border: none; padding: 10px 20px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; z-index: 2; position: relative; letter-spacing: 1px;}
+        .promo-icon { position: absolute; right: -15px; bottom: -20px; font-size: 130px; color: rgba(255,255,255,0.08); z-index: 1; transform: rotate(-15deg); }
 
         /* --- COMPACT WALLET & TX LIST --- */
         .tx-list { margin-top: 15px; }
@@ -193,12 +219,10 @@
     <!-- MAIN APP WRAPPER -->
     <div id="main-app" style="display: none;">
         
-        <!-- TOP BAR -->
+        <!-- TOP BAR (Aligned to Screenshot style) -->
         <div class="top-bar">
-            <div class="flex-row" style="gap: 12px;">
-                <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
-                <h2 class="esports-font" style="font-size: 18px;">RK_<span class="text-red">ESPORTS</span></h2>
-            </div>
+            <i class="fa-solid fa-bars text-light" style="font-size: 18px; cursor: pointer;" onclick="showToast('Menu opened')"></i>
+            <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small" style="margin-left: -5px;">
             <i class="fa-solid fa-bell text-gold" style="font-size: 18px; cursor: pointer;" onclick="showToast('No new notifications')"></i>
         </div>
 
@@ -210,7 +234,6 @@
                 
                 <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
                 <div class="flex-between">
-                    <!-- Adjusted size and id to dynamically format with commas -->
                     <h1 class="esports-font" style="font-size: 32px; font-weight: 700;">₹<span id="home-balance">0.00</span></h1>
                     <button class="btn btn-outline" style="width: auto; padding: 8px 16px; background: black; border: none; font-size: 11px;" onclick="switchTab('wallet')">+ Add Money</button>
                 </div>
@@ -239,7 +262,6 @@
                 </div>
             </div>
             
-            <!-- Dynamic Dots container -->
             <div id="slider-dots-container" style="display:flex; justify-content:center; gap: 4px; margin-top: 8px;">
                 <div class="slider-dot" style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%; transition: 0.3s;"></div>
                 <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
@@ -289,10 +311,9 @@
                     </div>
                 </div>
             </div>
-            
         </div>
 
-        <!-- ================= CLANS SCREEN (REAL LOGIC UI) ================= -->
+        <!-- ================= CLANS SCREEN ================= -->
         <div id="clans-screen" class="screen">
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-users text-red"></i> CLANS</h2>
@@ -344,21 +365,32 @@
             </div>
         </div>
 
-        <!-- ================= TOURNAMENTS SCREEN ================= -->
+        <!-- ================= NEW MATCHES / TOURNAMENTS SCREEN ================= -->
         <div id="tournaments-screen" class="screen">
+            <!-- TABS -->
             <div class="tabs">
                 <div class="tab active" onclick="filterTabs(this)">BATTLE ROYALE</div>
                 <div class="tab" onclick="filterTabs(this)">CLASH SQUAD</div>
                 <div class="tab" onclick="filterTabs(this)">LONE WOLF</div>
             </div>
 
+            <!-- HEADING -->
             <div class="flex-between mb-15">
-                <h3 class="esports-font" style="font-size: 16px; border-left: 3px solid var(--primary-red); padding-left: 8px;">ACTIVE TOURNAMENTS</h3>
-                <span style="border: 1px solid var(--gold); color: var(--gold); padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold;">LIVE NOW</span>
+                <h3 class="esports-font" style="font-size: 18px; border-left: 3px solid var(--primary-red); padding-left: 8px;">ACTIVE TOURNAMENTS</h3>
+                <button class="live-now-btn">LIVE NOW</button>
             </div>
 
+            <!-- 2-COLUMN GRID -->
             <div class="tournaments-grid" id="tournament-list">
-                <div style="text-align: center; padding: 30px; color: var(--text-muted);"><div class="loader"></div><br><br>Loading Arena...</div>
+                <div style="text-align: center; padding: 30px; color: var(--text-muted); grid-column: span 2;"><div class="loader"></div><br><br>Loading Arena...</div>
+            </div>
+
+            <!-- PROMO BANNER -->
+            <div class="promo-banner">
+                <i class="fa-solid fa-trophy promo-icon"></i>
+                <h2>JOIN THE ELITE</h2>
+                <p>Daily tournaments with guaranteed prize pools. Compete with the best.</p>
+                <button class="promo-btn" onclick="showToast('Team Registration feature coming soon!')">REGISTER TEAM</button>
             </div>
         </div>
 
@@ -425,10 +457,10 @@
 
         <!-- BOTTOM NAVIGATION -->
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('home')" id="nav-home"><i class="fa-solid fa-house"></i> <span>HOME</span></div>
-            <div class="nav-item" onclick="switchTab('tournaments')" id="nav-tournaments"><i class="fa-solid fa-gamepad"></i> <span>MATCHES</span></div>
-            <div class="nav-item" onclick="switchTab('wallet')" id="nav-wallet"><i class="fa-solid fa-wallet"></i> <span>WALLET</span></div>
-            <div class="nav-item" onclick="switchTab('profile')" id="nav-profile"><i class="fa-solid fa-user"></i> <span>PROFILE</span></div>
+            <div class="nav-item active" onclick="switchTab('home')" id="nav-home"><i class="fa-solid fa-house"></i> <span style="margin-top: 3px;">HOME</span></div>
+            <div class="nav-item" onclick="switchTab('tournaments')" id="nav-tournaments"><i class="fa-solid fa-trophy"></i> <span style="margin-top: 3px;">TOURNAMENTS</span></div>
+            <div class="nav-item" onclick="switchTab('wallet')" id="nav-wallet"><i class="fa-solid fa-chart-simple"></i> <span style="margin-top: 3px;">RESULTS</span></div>
+            <div class="nav-item" onclick="switchTab('profile')" id="nav-profile"><i class="fa-solid fa-user"></i> <span style="margin-top: 3px;">PROFILE</span></div>
         </div>
 
     </div>
@@ -581,9 +613,79 @@
 
         const GROQ_API_KEY = "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";
 
+        // NEW 2-COLUMN GRID DUMMY DATA MATCHING EXACTLY WITH SCREENSHOT
         const dummyTournamentsHTML = `
-            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> BATTLE ROYALE</div><img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">GRAND MASTERS CUP</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">₹50</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹2000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">18:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: white">40/48</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 83%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds.')">JOIN NOW</button></div></div>
-            <div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> CLASH SQUAD</div><img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">ELITE SCRIMS V8</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">₹100</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹5000</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">20:00</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: var(--primary-red)">8/16</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: 50%;"></div></div><button class="btn btn-red" onclick="showToast('Insufficient Balance! Please deposit funds.')">JOIN NOW</button></div></div>
+            <div class="t-card">
+                <div class="t-image">
+                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
+                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" alt="Game">
+                </div>
+                <div class="t-details">
+                    <div class="t-title">GRAND MASTERS CUP</div>
+                    <div class="t-stats-grid">
+                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">₹50</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹2000</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">18:00</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">40/48</span></div>
+                    </div>
+                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 83%;"></div></div>
+                    <button class="t-btn" onclick="showToast('Insufficient Balance! Deposit Funds.')">JOIN NOW</button>
+                </div>
+            </div>
+
+            <div class="t-card">
+                <div class="t-image">
+                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
+                    <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=500" alt="Game">
+                </div>
+                <div class="t-details">
+                    <div class="t-title">ELITE SCRIMS V8</div>
+                    <div class="t-stats-grid">
+                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">₹100</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹5000</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">20:00</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">8/16</span></div>
+                    </div>
+                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 50%;"></div></div>
+                    <button class="t-btn" onclick="showToast('Insufficient Balance! Deposit Funds.')">JOIN NOW</button>
+                </div>
+            </div>
+
+            <div class="t-card">
+                <div class="t-image">
+                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
+                    <img src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=500" alt="Game">
+                </div>
+                <div class="t-details">
+                    <div class="t-title">LONE WOLF SOLO</div>
+                    <div class="t-stats-grid">
+                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">₹20</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹500</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">21:30</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">12/20</span></div>
+                    </div>
+                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 60%;"></div></div>
+                    <button class="t-btn" onclick="showToast('Insufficient Balance! Deposit Funds.')">JOIN NOW</button>
+                </div>
+            </div>
+
+            <div class="t-card">
+                <div class="t-image">
+                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
+                    <img src="https://images.unsplash.com/photo-1629429408209-1f912961dbd8?q=80&w=500" alt="Game">
+                </div>
+                <div class="t-details">
+                    <div class="t-title">MIDNIGHT SCRIMS</div>
+                    <div class="t-stats-grid">
+                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val text-red">FREE</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹1000</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">23:59</span></div>
+                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">32/100</span></div>
+                    </div>
+                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 32%;"></div></div>
+                    <button class="t-btn" onclick="showToast('Joined successfully!')">JOIN NOW</button>
+                </div>
+            </div>
         `;
 
         const dummyTransactionsHTML = `
@@ -865,7 +967,6 @@
             });
         }
 
-        // Fix Applied Here: Formatting exact size matching and comma formats (like ₹1,250.00)
         function updateUIWithUserData() {
             if(!userData) return;
             const formatBal = parseFloat(userData.wallet_balance || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -893,9 +994,10 @@
             }
         }
 
+        // Updated for 2-column Layout
         async function loadTournaments() {
             const list = document.getElementById('tournament-list');
-            list.innerHTML = '<div class="loader"></div>';
+            list.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted); grid-column: span 2;"><div class="loader"></div><br><br>Loading Arena...</div>';
 
             try {
                 const snapshot = await db.collection('tournaments').where('status', '==', 'active').get();
@@ -905,10 +1007,27 @@
                 snapshot.forEach(doc => {
                     const t = doc.data();
                     const isFull = t.joined_count >= t.total_slots;
-                    html += `<div class="t-card"><div class="t-image"><div class="t-badge"><i class="fa-solid fa-medal"></i> ${t.mode || 'BATTLE ROYALE'}</div><img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1000&auto=format&fit=crop" alt="Game"></div><div class="t-details"><h3 class="esports-font" style="font-size: 15px; margin-bottom: 12px;">${t.title}</h3><div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Entry Fee</p><p style="font-size: 12px; font-weight: bold;">${t.entry_fee === 0 ? '<span class="text-green">FREE</span>' : '₹'+t.entry_fee}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Prize Pool</p><p style="font-size: 12px; font-weight: bold; color: var(--gold);">₹${t.prize_pool}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Time</p><p style="font-size: 12px; font-weight: bold;">${t.match_time}</p></div><div style="flex: 1; min-width: 45%;"><p style="font-size: 10px; color: var(--text-muted); margin-bottom:2px;">Slots</p><p style="font-size: 12px; font-weight: bold; color: ${isFull ? 'var(--primary-red)' : 'white'}">${t.joined_count}/${t.total_slots}</p></div></div><div style="height: 4px; background: #333; border-radius: 2px; margin-bottom: 12px; overflow: hidden;"><div style="height: 100%; background: var(--primary-red); width: ${(t.joined_count/t.total_slots)*100}%;"></div></div><button class="btn ${isFull ? 'btn-outline' : 'btn-red'}" onclick="joinTournament('${doc.id}', ${t.entry_fee}, ${isFull})" ${isFull ? 'disabled' : ''}>${isFull ? 'MATCH FULL' : 'JOIN NOW'}</button></div></div>`;
+                    
+                    html += `<div class="t-card">
+                        <div class="t-image">
+                            <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
+                            <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" alt="Game">
+                        </div>
+                        <div class="t-details">
+                            <div class="t-title">${t.title}</div>
+                            <div class="t-stats-grid">
+                                <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">${t.entry_fee === 0 ? '<span class="text-red">FREE</span>' : '₹'+t.entry_fee}</span></div>
+                                <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹${t.prize_pool}</span></div>
+                                <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">${t.match_time}</span></div>
+                                <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">${t.joined_count}/${t.total_slots}</span></div>
+                            </div>
+                            <div class="t-progress-bg"><div class="t-progress-fill" style="width: ${(t.joined_count/t.total_slots)*100}%;"></div></div>
+                            <button class="t-btn" style="${isFull ? 'background: transparent; border: 1px solid var(--primary-red); color: var(--primary-red);' : ''}" onclick="joinTournament('${doc.id}', ${t.entry_fee}, ${isFull})" ${isFull ? 'disabled' : ''}>${isFull ? 'MATCH FULL' : 'JOIN NOW'}</button>
+                        </div>
+                    </div>`;
                 });
                 list.innerHTML = html;
-            } catch (error) { list.innerHTML = '<p class="text-red">Arena connection failed.</p>'; }
+            } catch (error) { list.innerHTML = '<p class="text-red" style="grid-column: span 2; text-align:center;">Arena connection failed.</p>'; }
         }
 
         async function joinTournament(tournamentId, fee, isFull) {
@@ -916,7 +1035,7 @@
             if(userData.wallet_balance < fee) { showToast("Insufficient Balance! Please deposit funds in Wallet."); return; }
 
             const btn = event.target;
-            btn.innerHTML = '<div class="loader" style="width: 16px; height: 16px; border-width: 2px;"></div>';
+            btn.innerHTML = '<div class="loader" style="width: 12px; height: 12px; border-width: 2px;"></div>';
             btn.disabled = true;
 
             try {
