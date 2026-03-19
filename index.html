@@ -80,7 +80,7 @@
         .phone-input-group { display: flex; gap: 8px; }
         .phone-input-group select { width: 70px; }
 
-        /* --- BANNER SLIDER (IntersectionObserver Fix) --- */
+        /* --- BANNER SLIDER --- */
         .slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 5px; scrollbar-width: none; margin-top: 15px; scroll-behavior: smooth; }
         .slider-container::-webkit-scrollbar { display: none; }
         .home-banner { flex: 0 0 100%; scroll-snap-align: center; height: 140px; background-size: cover; background-position: center; border-radius: 12px; position: relative; border: 1px solid var(--border-color); }
@@ -178,7 +178,6 @@
         .ai-input-wrapper input { margin-bottom: 0; flex: 1; padding: 10px; font-size: 12px;}
         .ai-input-wrapper button { width: 45px; background: var(--primary-red); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
 
-        /* Request Button State UI */
         .btn-requested { background: transparent; border: 1px solid var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
     </style>
 </head>
@@ -218,7 +217,7 @@
     <!-- MAIN APP WRAPPER -->
     <div id="main-app" style="display: none;">
         
-        <!-- ================= TOP BAR (RESTORED TO ORIGINAL) ================= -->
+        <!-- ================= TOP BAR ================= -->
         <div class="top-bar">
             <div class="flex-row" style="gap: 12px;">
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
@@ -235,14 +234,13 @@
                 
                 <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
                 <div class="flex-between">
-                    <!-- Adjusted size and id to dynamically format with commas -->
                     <h1 class="esports-font" style="font-size: 32px; font-weight: 700;">₹<span id="home-balance">0.00</span></h1>
                     <button class="btn btn-outline" style="width: auto; padding: 8px 16px; background: black; border: none; font-size: 11px;" onclick="switchTab('wallet')">+ Add Money</button>
                 </div>
                 <i class="fa-solid fa-medal" style="position: absolute; top: 15px; right: 15px; font-size: 26px; opacity: 0.8;"></i>
             </div>
 
-            <!-- BUG-FREE BANNER SLIDER -->
+            <!-- BANNER SLIDER -->
             <div class="slider-container" id="banner-slider">
                 <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');">
                     <div class="banner-content">
@@ -264,7 +262,6 @@
                 </div>
             </div>
             
-            <!-- Dynamic Dots container -->
             <div id="slider-dots-container" style="display:flex; justify-content:center; gap: 4px; margin-top: 8px;">
                 <div class="slider-dot" style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%; transition: 0.3s;"></div>
                 <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
@@ -317,7 +314,7 @@
             
         </div>
 
-        <!-- ================= CLANS SCREEN (REAL LOGIC UI) ================= -->
+        <!-- ================= CLANS SCREEN ================= -->
         <div id="clans-screen" class="screen">
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-users text-red"></i> CLANS</h2>
@@ -519,7 +516,7 @@
         </div>
     </div>
 
-    <!-- Deposit Modal -->
+    <!-- Deposit Modal (Limits & Dynamic QR Fix) -->
     <div class="modal-overlay" id="deposit-modal">
         <div class="modal-content">
             <div class="flex-between mb-15">
@@ -528,7 +525,7 @@
             </div>
             
             <div style="background: white; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                <img id="upi-qr" src="https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR" alt="UPI QR" style="width: 130px; height: 130px; display: block; margin: 0 auto; border: 2px solid #eee; border-radius: 6px;">
+                <img id="upi-qr" src="https://quickchart.io/qr?text=upi%3A%2F%2Fpay%3Fpa%3Dguptakrishn258%40oksbi%26pn%3DRK_ESPORTS%26cu%3DINR&size=250" alt="UPI QR" style="width: 130px; height: 130px; display: block; margin: 0 auto; border: 2px solid #eee; border-radius: 6px;">
                 <p style="color: black; font-weight: 800; font-size: 13px; margin-top: 10px;" id="upi-id-text">guptakrishn258@oksbi</p>
                 <div style="display: flex; justify-content: center; gap: 8px; margin-top: 12px;">
                     <button type="button" class="btn-outline" style="color: black; border: 1px solid #ccc; padding: 6px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer; background: #f9f9f9;" onclick="copyUPI()">
@@ -540,18 +537,21 @@
                 </div>
             </div>
 
-            <input type="number" id="dep-amount" placeholder="Enter Amount (₹)" required oninput="updateQR()" style="font-size: 14px; font-weight: bold; text-align: center;">
+            <!-- Limit applied: max 1000 -->
+            <input type="number" id="dep-amount" placeholder="Enter Amount (Max ₹1000)" max="1000" required oninput="updateQR()" style="font-size: 14px; font-weight: bold; text-align: center;">
             <button type="button" class="btn btn-red mb-15" id="btn-pay-now" onclick="payNow()">
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
 
+            <!-- Timer hidden initially -->
             <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 15px; background: #222; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-red);">
                 <p style="color: white; font-size: 12px;">Complete payment in</p>
                 <p style="color: var(--gold); font-size: 20px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
                 <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Upload UTR & Screenshot below after payment.</p>
             </div>
             
-            <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" required>
+            <!-- Strict 12 digit UTR input -->
+            <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);" maxlength="12" required>
             <label style="display: block; margin-bottom: 8px; font-size: 11px; color: var(--gold);">Upload Screenshot</label>
             <input type="file" id="dep-file" accept="image/*" style="padding: 8px; background: #222;" required>
             
@@ -564,7 +564,7 @@
         <div class="modal-content">
             <div class="flex-between mb-15"><h2 class="esports-font" style="font-size: 20px;">Withdraw</h2><i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i></div>
             <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Available to withdraw: ₹<span id="withdraw-max-val">0</span></p>
-            <input type="number" id="with-amount" placeholder="Amount (₹)" required>
+            <input type="number" id="with-amount" placeholder="Amount (Max ₹500/day)" max="500" required>
             <input type="text" id="with-upi" placeholder="Your UPI ID" required>
             <button type="button" class="btn btn-red mt-15" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
         </div>
@@ -614,7 +614,7 @@
         let currentUser = null;
         let userData = null;
         
-        // Cache variables to prevent glitchy jumps when switching tabs
+        // Cache variables
         let tournamentsLoaded = false;
         let txLoaded = false;
 
@@ -794,7 +794,7 @@
                 
                 showToast("Elite Pass Unlocked Successfully!");
                 closeModals();
-                txLoaded = false; // Reset wallet cache
+                txLoaded = false; 
                 openModal('create-clan-modal');
             } catch (error) {
                 showToast("Error processing request.");
@@ -891,19 +891,29 @@
         }
 
         function updateQR() {
-            const amt = document.getElementById('dep-amount').value;
+            let amt = document.getElementById('dep-amount').value;
+            // Fix: Enforce max 1000 limit locally on typing
+            if (amt > 1000) {
+                document.getElementById('dep-amount').value = 1000;
+                amt = 1000;
+                showToast("Maximum deposit limit is ₹1000");
+            }
+            
             const base = "upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&cu=INR";
             const finalUpi = amt ? `${base}&am=${amt}` : base;
-            document.getElementById('upi-qr').src = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(finalUpi)}`;
+            document.getElementById('upi-qr').src = `https://quickchart.io/qr?text=${encodeURIComponent(finalUpi)}&size=250`;
         }
 
         let paymentTimer;
         function payNow() {
             const amt = document.getElementById('dep-amount').value;
-            if(!amt || amt < 10) { showToast("Please enter an amount of ₹10 or more"); return; }
+            if(!amt || amt < 10) { showToast("Minimum deposit is ₹10"); return; }
+            if(amt > 1000) { showToast("Maximum deposit is ₹1000"); return; }
             
+            // Open UPI intent
             window.location.href = `upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&am=${amt}&cu=INR`;
             
+            // Start timer ONLY after clicking the button
             document.getElementById('payment-timer-section').style.display = 'block';
             let timeLeft = 300; 
             clearInterval(paymentTimer);
@@ -998,7 +1008,6 @@
             }
         }
 
-        // Cache system to prevent glitchy jumps
         async function loadTournaments(forceReload = false) {
             if (tournamentsLoaded && !forceReload) return;
 
@@ -1080,7 +1089,7 @@
 
                 showToast("Joined Successfully! Check Matches section.");
                 txLoaded = false;
-                loadTournaments(true); // Force reload strictly when they make a purchase
+                loadTournaments(true);
             } catch (error) {
                 showToast(typeof error === 'string' ? error : "Error joining match.");
                 btn.innerHTML = 'JOIN NOW'; btn.disabled = false;
@@ -1120,6 +1129,8 @@
             const btn = document.getElementById('btn-submit-deposit');
 
             if(!amount || !utr || fileInput.files.length === 0) { showToast("Please fill all fields and upload screenshot."); return; }
+            if(amount > 1000) { showToast("Maximum deposit limit is ₹1000"); return; }
+            if(utr.length !== 12) { showToast("UTR Number must be exactly 12 digits!"); return; }
 
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:16px;"></i> &nbsp; UPLOADING...';
             btn.disabled = true;
@@ -1137,9 +1148,8 @@
                 if(!data.secure_url) throw new Error("Upload failed");
 
                 await db.collection('deposits').add({ user_id: currentUser.uid, amount: Number(amount), utr: utr, screenshot_url: data.secure_url, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                await db.collection('transactions').add({ user_id: currentUser.uid, amount: Number(amount), type: 'deposit', title: 'Deposit via UPI', status: 'PENDING', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-
-                showToast("Deposit request submitted successfully!");
+                
+                showToast("Deposit request sent to admin successfully!");
                 closeModals();
                 document.getElementById('dep-amount').value = ''; document.getElementById('dep-utr').value = ''; fileInput.value = '';
                 document.getElementById('payment-timer-section').style.display = 'none';
@@ -1161,12 +1171,32 @@
             
             if(!amount || !upi) { showToast("Fill all fields"); return; }
             if(amount > userData.wallet_balance) { showToast("Insufficient balance!"); return; }
+            if(amount > 500) { showToast("Max limit per request is ₹500"); return; }
 
             const btn = document.getElementById('btn-submit-withdraw');
             btn.innerHTML = '<div class="loader" style="width: 16px; height: 16px;"></div>';
             btn.disabled = true;
 
             try {
+                // Fix: Check daily limit from Firebase (Max 500/day)
+                const startOfDay = new Date();
+                startOfDay.setHours(0,0,0,0);
+                
+                const todayWithdrawals = await db.collection('withdrawals')
+                    .where('user_id', '==', currentUser.uid)
+                    .where('createdAt', '>=', startOfDay)
+                    .get();
+
+                let dailySum = 0;
+                todayWithdrawals.forEach(doc => { dailySum += doc.data().amount; });
+
+                if ((dailySum + amount) > 500) {
+                    showToast(`Daily limit exceeded! You can only withdraw ₹${500 - dailySum} more today.`);
+                    btn.innerHTML = 'Request Withdrawal'; btn.disabled = false;
+                    return;
+                }
+
+                // If within limit, send request to admin
                 const batch = db.batch();
                 const userRef = db.collection('users').doc(currentUser.uid);
                 batch.update(userRef, { wallet_balance: firebase.firestore.FieldValue.increment(-amount) });
@@ -1174,11 +1204,8 @@
                 const withRef = db.collection('withdrawals').doc();
                 batch.set(withRef, { user_id: currentUser.uid, amount: amount, upi_id: upi, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 
-                const txRef = db.collection('transactions').doc();
-                batch.set(txRef, { user_id: currentUser.uid, amount: amount, type: 'withdraw', title: 'Withdrawal to Bank', status: 'PENDING', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-
                 await batch.commit();
-                showToast("Withdrawal requested successfully!");
+                showToast("Withdrawal request sent to admin successfully!");
                 closeModals();
                 document.getElementById('with-amount').value = ''; document.getElementById('with-upi').value = '';
                 
