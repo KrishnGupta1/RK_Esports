@@ -40,15 +40,19 @@
         .rk-logo { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(234, 43, 43, 0.5); object-fit: cover; }
         .rk-logo-small { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: 0 0 8px rgba(234, 43, 43, 0.4); object-fit: cover; }
 
-        .screen { display: none; animation: fadeIn 0.3s ease; padding: 15px; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* Smoother Screen Transitions */
+        .screen { display: none; padding: 15px; }
+        .screen.active { display: block; animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg-main); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-color); }
+        /* --- TOP BAR --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg-main); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid #1a1a1a; }
+        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 9px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .nav-item i { font-size: 18px; margin-bottom: 3px; }
+        .nav-item i { font-size: 18px; margin-bottom: 3px; transition: transform 0.2s;}
         .nav-item.active { color: var(--primary-red); }
+        .nav-item.active i { transform: scale(1.1); }
 
         /* --- COMPACT BUTTONS & INPUTS --- */
         .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; transition: 0.2s; text-transform: uppercase; font-size: 12px; }
@@ -110,9 +114,11 @@
         .tab { flex: 1; text-align: center; padding: 12px 0; color: var(--text-muted); font-weight: 700; font-size: 11px; border-bottom: 2px solid transparent; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .tab.active { color: white; border-bottom-color: var(--primary-red); }
         
-        .live-now-btn { border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 12px; font-size: 9px; font-weight: 800; background: rgba(226, 176, 34, 0.05); cursor: pointer; }
+        .live-now-btn { border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 12px; font-size: 9px; font-weight: 800; background: transparent; cursor: pointer; transition: 0.2s;}
+        .live-now-btn:active { background: rgba(226, 176, 34, 0.1); }
 
-        .tournaments-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; transition: opacity 0.3s; margin-bottom: 20px;}
+        .tournaments-container { min-height: 420px; position: relative; }
+        .tournaments-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; transition: opacity 0.2s ease-in-out; margin-bottom: 20px; align-content: start;}
         
         .t-card { background: #0f0f0f; border-radius: 16px; overflow: hidden; border: 1px solid #1f1f1f; display: flex; flex-direction: column; }
         .t-image { height: 110px; background: #222; position: relative; }
@@ -134,13 +140,6 @@
         
         .t-btn { background: var(--primary-red); color: white; border: none; padding: 10px; border-radius: 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: 'Montserrat', sans-serif; margin-top: auto; letter-spacing: 1px; transition: 0.2s;}
         .t-btn:active { transform: scale(0.95); }
-
-        /* Promo Banner inside Tournaments Screen */
-        .promo-banner { background: linear-gradient(135deg, #d32020 0%, #900a0a 100%); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
-        .promo-banner h2 { font-family: 'Montserrat', sans-serif; font-style: italic; font-weight: 800; font-size: 18px; margin-bottom: 8px; z-index: 2; position: relative; letter-spacing: 1px;}
-        .promo-banner p { font-size: 12px; line-height: 1.4; margin-bottom: 15px; max-width: 85%; z-index: 2; position: relative; color: rgba(255,255,255,0.9); }
-        .promo-btn { background: white; color: #a01010; border: none; padding: 10px 20px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; z-index: 2; position: relative; letter-spacing: 1px;}
-        .promo-icon { position: absolute; right: -15px; bottom: -20px; font-size: 130px; color: rgba(255,255,255,0.08); z-index: 1; transform: rotate(-15deg); }
 
         /* --- COMPACT WALLET & TX LIST --- */
         .tx-list { margin-top: 15px; }
@@ -165,7 +164,7 @@
         .modal-content { background: var(--bg-panel); width: 100%; border-radius: 16px 16px 0 0; padding: 20px; border-top: 1px solid var(--border-color); transform: translateY(100%); transition: 0.3s; max-height: 85vh; overflow-y: auto; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .loader { border: 2px solid #333; border-top: 2px solid var(--primary-red); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
+        .loader { border: 2px solid #333; border-top: 2px solid var(--primary-red); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         #toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: var(--primary-red); color: white; padding: 10px 20px; border-radius: 6px; z-index: 9999; font-weight: 600; display: none; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; width: max-content; max-width: 90%;}
@@ -219,10 +218,12 @@
     <!-- MAIN APP WRAPPER -->
     <div id="main-app" style="display: none;">
         
-        <!-- TOP BAR (Aligned to Screenshot style) -->
+        <!-- ================= TOP BAR (RESTORED TO ORIGINAL) ================= -->
         <div class="top-bar">
-            <i class="fa-solid fa-bars text-light" style="font-size: 18px; cursor: pointer;" onclick="showToast('Menu opened')"></i>
-            <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small" style="margin-left: -5px;">
+            <div class="flex-row" style="gap: 12px;">
+                <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
+                <h2 class="esports-font" style="font-size: 18px;">RK_<span class="text-red">ESPORTS</span></h2>
+            </div>
             <i class="fa-solid fa-bell text-gold" style="font-size: 18px; cursor: pointer;" onclick="showToast('No new notifications')"></i>
         </div>
 
@@ -234,6 +235,7 @@
                 
                 <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
                 <div class="flex-between">
+                    <!-- Adjusted size and id to dynamically format with commas -->
                     <h1 class="esports-font" style="font-size: 32px; font-weight: 700;">₹<span id="home-balance">0.00</span></h1>
                     <button class="btn btn-outline" style="width: auto; padding: 8px 16px; background: black; border: none; font-size: 11px;" onclick="switchTab('wallet')">+ Add Money</button>
                 </div>
@@ -262,6 +264,7 @@
                 </div>
             </div>
             
+            <!-- Dynamic Dots container -->
             <div id="slider-dots-container" style="display:flex; justify-content:center; gap: 4px; margin-top: 8px;">
                 <div class="slider-dot" style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%; transition: 0.3s;"></div>
                 <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
@@ -311,9 +314,10 @@
                     </div>
                 </div>
             </div>
+            
         </div>
 
-        <!-- ================= CLANS SCREEN ================= -->
+        <!-- ================= CLANS SCREEN (REAL LOGIC UI) ================= -->
         <div id="clans-screen" class="screen">
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-users text-red"></i> CLANS</h2>
@@ -380,17 +384,16 @@
                 <button class="live-now-btn">LIVE NOW</button>
             </div>
 
-            <!-- 2-COLUMN GRID -->
-            <div class="tournaments-grid" id="tournament-list">
-                <div style="text-align: center; padding: 30px; color: var(--text-muted); grid-column: span 2;"><div class="loader"></div><br><br>Loading Arena...</div>
-            </div>
-
-            <!-- PROMO BANNER -->
-            <div class="promo-banner">
-                <i class="fa-solid fa-trophy promo-icon"></i>
-                <h2>JOIN THE ELITE</h2>
-                <p>Daily tournaments with guaranteed prize pools. Compete with the best.</p>
-                <button class="promo-btn" onclick="showToast('Team Registration feature coming soon!')">REGISTER TEAM</button>
+            <!-- CONTAINER WITH MIN-HEIGHT TO PREVENT JUMPING -->
+            <div class="tournaments-container">
+                <!-- 2-COLUMN GRID -->
+                <div class="tournaments-grid" id="tournament-list">
+                    <!-- Loader State inside grid -->
+                    <div style="grid-column: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: var(--text-muted);">
+                        <div class="loader" style="width: 26px; height: 26px; border-width: 3px; border-top-color: var(--primary-red);"></div>
+                        <p style="margin-top: 15px; font-size: 12px; font-weight: 500;">Loading Arena...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -610,10 +613,13 @@
 
         let currentUser = null;
         let userData = null;
+        
+        // Cache variables to prevent glitchy jumps when switching tabs
+        let tournamentsLoaded = false;
+        let txLoaded = false;
 
         const GROQ_API_KEY = "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";
 
-        // NEW 2-COLUMN GRID DUMMY DATA MATCHING EXACTLY WITH SCREENSHOT
         const dummyTournamentsHTML = `
             <div class="t-card">
                 <div class="t-image">
@@ -700,7 +706,6 @@
             setTimeout(() => t.style.display = 'none', 3500);
         }
 
-        // --- Intersection Observer for 100% Bug-Free Slider Dots ---
         document.addEventListener("DOMContentLoaded", () => {
             const sliderContainer = document.getElementById('banner-slider');
             const slides = sliderContainer.querySelectorAll('.home-banner');
@@ -739,14 +744,12 @@
             
             const list = document.getElementById('tournament-list');
             list.style.opacity = '0.3';
-            showToast(`Loading ${element.innerText} Matches...`);
-            setTimeout(() => { list.style.opacity = '1'; }, 400);
+            setTimeout(() => { list.style.opacity = '1'; }, 150);
         }
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
         
-        // --- CLAN REAL LOGIC ---
         function requestJoinClan(btn) {
             if (btn.classList.contains('btn-requested')) return;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
@@ -791,6 +794,7 @@
                 
                 showToast("Elite Pass Unlocked Successfully!");
                 closeModals();
+                txLoaded = false; // Reset wallet cache
                 openModal('create-clan-modal');
             } catch (error) {
                 showToast("Error processing request.");
@@ -994,14 +998,23 @@
             }
         }
 
-        // Updated for 2-column Layout
-        async function loadTournaments() {
+        // Cache system to prevent glitchy jumps
+        async function loadTournaments(forceReload = false) {
+            if (tournamentsLoaded && !forceReload) return;
+
             const list = document.getElementById('tournament-list');
-            list.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted); grid-column: span 2;"><div class="loader"></div><br><br>Loading Arena...</div>';
+            list.innerHTML = `<div style="grid-column: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: var(--text-muted);">
+                <div class="loader" style="width: 26px; height: 26px; border-width: 3px; border-top-color: var(--primary-red);"></div>
+                <p style="margin-top: 15px; font-size: 12px; font-weight: 500;">Loading Arena...</p>
+            </div>`;
 
             try {
                 const snapshot = await db.collection('tournaments').where('status', '==', 'active').get();
-                if (snapshot.empty) { list.innerHTML = dummyTournamentsHTML; return; }
+                if (snapshot.empty) { 
+                    list.innerHTML = dummyTournamentsHTML; 
+                    tournamentsLoaded = true;
+                    return; 
+                }
 
                 let html = '';
                 snapshot.forEach(doc => {
@@ -1027,7 +1040,11 @@
                     </div>`;
                 });
                 list.innerHTML = html;
-            } catch (error) { list.innerHTML = '<p class="text-red" style="grid-column: span 2; text-align:center;">Arena connection failed.</p>'; }
+                tournamentsLoaded = true;
+            } catch (error) { 
+                list.innerHTML = dummyTournamentsHTML;
+                tournamentsLoaded = true; 
+            }
         }
 
         async function joinTournament(tournamentId, fee, isFull) {
@@ -1062,7 +1079,8 @@
                 });
 
                 showToast("Joined Successfully! Check Matches section.");
-                loadTournaments();
+                txLoaded = false;
+                loadTournaments(true); // Force reload strictly when they make a purchase
             } catch (error) {
                 showToast(typeof error === 'string' ? error : "Error joining match.");
                 btn.innerHTML = 'JOIN NOW'; btn.disabled = false;
@@ -1070,12 +1088,13 @@
         }
 
         async function loadTransactions() {
+            if(txLoaded) return;
             const list = document.getElementById('transaction-list');
-            list.innerHTML = '<div class="loader"></div>';
+            list.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="loader"></div></div>';
             
             try {
                 const snapshot = await db.collection('transactions').where('user_id', '==', currentUser.uid).orderBy('createdAt', 'desc').limit(10).get();
-                if(snapshot.empty) { list.innerHTML = dummyTransactionsHTML; return; }
+                if(snapshot.empty) { list.innerHTML = dummyTransactionsHTML; txLoaded=true; return; }
 
                 let html = '';
                 snapshot.forEach(doc => {
@@ -1090,6 +1109,7 @@
                     html += `<div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon ${colorClass}"><i class="fa-solid ${icon}"></i></div><div><p style="font-size: 13px; font-weight: 600;">${tx.title || tx.type.toUpperCase()}</p><p style="font-size: 10px; color: var(--text-muted);">${date} • ${tx.status || 'SUCCESS'}</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: ${amountColor};">${sign} ₹${formatAmt}</p></div></div>`;
                 });
                 list.innerHTML = html;
+                txLoaded = true;
             } catch(e) { list.innerHTML = ''; }
         }
 
@@ -1125,6 +1145,7 @@
                 document.getElementById('payment-timer-section').style.display = 'none';
                 clearInterval(paymentTimer);
                 
+                txLoaded = false;
                 loadTransactions();
             } catch (error) {
                 showToast("Error processing deposit. Try again.");
@@ -1160,6 +1181,8 @@
                 showToast("Withdrawal requested successfully!");
                 closeModals();
                 document.getElementById('with-amount').value = ''; document.getElementById('with-upi').value = '';
+                
+                txLoaded = false;
                 loadTransactions();
             } catch (error) {
                 showToast("Error processing withdrawal.");
