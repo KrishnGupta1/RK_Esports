@@ -159,20 +159,32 @@
         
         #toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: var(--primary-red); color: white; padding: 10px 20px; border-radius: 6px; z-index: 9999; font-weight: 600; display: none; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; width: max-content; max-width: 90%;}
 
-        /* --- SUPER ENHANCED AI CHAT CSS --- */
-        .ai-chat-box { background: #0b0b0b; height: 420px; border-radius: 12px; border: 1px solid #1f1f1f; padding: 15px; overflow-y: auto; margin-bottom: 12px; font-size: 12px; font-weight: 500; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+        /* --- SUPER ENHANCED AI CHAT CSS WITH TEXTAREA --- */
+        .ai-chat-box { background: #0b0b0b; height: 420px; border-radius: 12px; border: 1px solid #1f1f1f; padding: 15px; overflow-y: auto; margin-bottom: 12px; font-size: 13px; font-weight: 500; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
         .ai-msg { padding: 10px 14px; border-radius: 12px; max-width: 88%; line-height: 1.5; position: relative; word-wrap: break-word; letter-spacing: 0.3px;}
         .ai-msg.user { background: var(--primary-red); color: #ffffff; align-self: flex-end; border-bottom-right-radius: 4px; }
         .ai-msg.bot { background: #1a1a1a; color: #e0e0e0; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #2a2a2a; padding-right: 35px; }
         .ai-copy-btn { position: absolute; top: 8px; right: 8px; color: #666; background: none; border: none; cursor: pointer; font-size: 14px; transition: 0.2s;}
         .ai-copy-btn:hover { color: var(--gold); }
-        .ai-input-wrapper { display: flex; gap: 8px; align-items: stretch;}
-        .ai-input-wrapper input { margin-bottom: 0; flex: 1; padding: 12px 15px; font-size: 12px; border-radius: 10px; background: #161616; border: 1px solid #2a2a2a; color: white;}
-        .ai-input-wrapper input:focus { border-color: var(--primary-red); }
-        .ai-input-wrapper button { width: 48px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        
+        /* Auto-expanding Input Area */
+        .ai-input-wrapper { display: flex; gap: 8px; align-items: flex-end;}
+        .ai-input-wrapper textarea { 
+            margin-bottom: 0; flex: 1; padding: 12px 15px; font-size: 13px; border-radius: 10px; 
+            background: #161616; border: 1px solid #2a2a2a; color: white; 
+            resize: none; overflow-y: auto; min-height: 44px; max-height: 90px; 
+            font-family: inherit; line-height: 1.4; outline: none;
+        }
+        .ai-input-wrapper textarea:focus { border-color: var(--primary-red); }
+        .ai-input-wrapper button { width: 44px; height: 44px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0;}
         .ai-input-wrapper .btn-send { background: var(--primary-red); color: white; }
         .ai-input-wrapper .btn-mic { background: #161616; color: #888; border: 1px solid #2a2a2a; }
         .ai-input-wrapper .btn-mic.active { color: var(--primary-red); border-color: var(--primary-red); background: rgba(234, 43, 43, 0.1); }
+
+        /* AI Suggestion Chips */
+        .ai-suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .ai-suggestion-chip { background: #222; border: 1px solid #333; color: var(--text-muted); padding: 8px 12px; border-radius: 15px; font-size: 11px; cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 600;}
+        .ai-suggestion-chip:active { background: var(--primary-red); color: white; border-color: var(--primary-red); }
 
         .btn-requested { background: transparent; border: 1px solid var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
     </style>
@@ -554,16 +566,20 @@
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 18px;"><i class="fa-solid fa-robot text-red"></i> RK AI Strategist</h2>
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <i class="fa-solid fa-trash-can" style="font-size: 18px; color: var(--text-muted); cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='var(--primary-red)'" onmouseout="this.style.color='var(--text-muted)'" onclick="clearAIChat()" title="Clear Chat"></i>
+                    <!-- Trash / Clear Chat Icon -->
+                    <i class="fa-solid fa-trash-can" style="font-size: 18px; color: var(--text-muted); cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='var(--primary-red)'" onmouseout="this.style.color='var(--text-muted)'" onclick="clearAIChat(false)" title="Clear Chat"></i>
                     <i class="fa-solid fa-xmark" style="font-size: 22px; cursor: pointer;" onclick="closeModals()"></i>
                 </div>
             </div>
+            
             <div class="ai-chat-box" id="ai-chat-box">
                 <!-- Initialized dynamically based on user name -->
             </div>
+            
+            <!-- AUTO-EXPANDING TEXTAREA & CONTINUOUS MIC -->
             <div class="ai-input-wrapper">
                 <button class="btn-mic" id="ai-mic-btn" onclick="toggleAIMic()"><i class="fa-solid fa-microphone"></i></button>
-                <input type="text" id="ai-input" placeholder="Type or tap mic to speak..." onkeypress="if(event.key === 'Enter') askGroqAI()">
+                <textarea id="ai-input" rows="1" placeholder="Type or tap mic to speak..." oninput="autoResizeInput()" onkeypress="handleEnter(event)"></textarea>
                 <button class="btn-send" onclick="askGroqAI()"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
@@ -749,7 +765,6 @@
             }, 1000);
         }
 
-        // ================= COPY TEXT FUNCTION =================
         function copyText(elementId) {
             const text = document.getElementById(elementId).innerText;
             if(text === "Waiting...") { showToast("Details not provided by admin yet!"); return; }
@@ -841,8 +856,11 @@
             }
         }
         
+        // ============ CLEAN AI CHAT ON CLOSE ============
         function closeModals() { 
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); 
+            
+            // Payment logic reset
             clearInterval(paymentTimer);
             document.getElementById('payment-timer-section').style.display = 'none';
             document.getElementById('btn-pay-now').style.display = 'flex';
@@ -853,10 +871,11 @@
             document.getElementById('with-amount').value = '';
             document.getElementById('with-upi').value = '';
 
-            // Force stop mic if running when modal closes
+            // Stop mic and clear chat when closing AI modal
             if(isListening && recognition) {
                 recognition.stop();
             }
+            clearAIChat(true); 
         }
         
         function requestJoinClan(btn) {
@@ -926,7 +945,20 @@
             btn.innerHTML = 'CREATE MY CLAN'; btn.disabled = false;
         }
 
-        // ================= FAST & CLEAN AI CHAT WITH CONTINUOUS MIC =================
+        // ================= FULLY REBUILT AI CHAT =================
+        function autoResizeInput() {
+            const el = document.getElementById('ai-input');
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+
+        function handleEnter(e) {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askGroqAI();
+            }
+        }
+
         function initAIChat() {
             const name = userData && userData.name ? userData.name.toUpperCase() : 'LEGEND';
             const chatBox = document.getElementById('ai-chat-box');
@@ -937,19 +969,38 @@
                     <span class="msg-content" id="${initMsgId}">Hello ${name}! I am your RK AI Strategist. Ask me for tactical drills, loadout advice, or strategies for your next match!</span>
                     <button class="ai-copy-btn" onclick="copySpecificText('${initMsgId}')"><i class="fa-regular fa-copy"></i></button>
                 </div>
+                <div class="ai-suggestions" id="ai-suggestions">
+                    <button class="ai-suggestion-chip" onclick="sendSuggestion('Best loadout for Clash Squad?')">Best loadout for Clash Squad?</button>
+                    <button class="ai-suggestion-chip" onclick="sendSuggestion('How to push rank to Grandmaster?')">How to push rank to Grandmaster?</button>
+                    <button class="ai-suggestion-chip" onclick="sendSuggestion('Tips for 1v4 clutch?')">Tips for 1v4 clutch?</button>
+                </div>
             `;
             aiHistory =[
                 { role: "system", content: `You are the RK_ESPORTS AI Strategist. The user's name is ${name}. Give short, smart, and hype tactical advice for esports games like BGMI or Free Fire. Talk like a pro gamer.` }
             ];
+
+            // Reset input box completely
+            const inputField = document.getElementById('ai-input');
+            if(inputField) {
+                inputField.value = '';
+                inputField.style.height = 'auto';
+            }
         }
 
-        function clearAIChat() {
+        function clearAIChat(silent = false) {
             initAIChat();
-            showToast("Chat Cleared Successfully!");
+            if(!silent) showToast("Chat Cleared!");
+        }
+
+        function sendSuggestion(text) {
+            document.getElementById('ai-input').value = text;
+            autoResizeInput();
+            askGroqAI();
         }
 
         let recognition = null;
         let isListening = false;
+        let baseTextForMic = "";
 
         function toggleAIMic() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -961,7 +1012,7 @@
             const micBtn = document.getElementById('ai-mic-btn');
             const inputField = document.getElementById('ai-input');
 
-            // If already listening, stop it
+            // If already listening, stop it manually
             if (isListening) {
                 if(recognition) recognition.stop();
                 isListening = false;
@@ -972,11 +1023,11 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.continuous = true; // KEEP LISTENING
-            recognition.interimResults = true; // SHOW TEXT WHILE SPEAKING
-            recognition.lang = 'en-IN'; // Works great for Indian English/Hindi mix
+            recognition.continuous = true; 
+            recognition.interimResults = true; 
+            recognition.lang = 'en-IN'; 
 
-            let existingText = inputField.value;
+            baseTextForMic = inputField.value;
 
             recognition.onstart = () => {
                 isListening = true;
@@ -987,24 +1038,27 @@
 
             recognition.onresult = (event) => {
                 let interim_transcript = '';
-                let current_final = '';
+                let final_transcript = '';
 
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        current_final += event.results[i][0].transcript;
+                        final_transcript += event.results[i][0].transcript + ' ';
                     } else {
                         interim_transcript += event.results[i][0].transcript;
                     }
                 }
                 
-                existingText += current_final;
-                inputField.value = existingText + interim_transcript;
+                // Add securely without doubling
+                if(final_transcript !== '') {
+                    baseTextForMic += final_transcript;
+                }
+                
+                inputField.value = baseTextForMic + interim_transcript;
+                autoResizeInput();
             };
 
             recognition.onerror = (event) => {
-                if(event.error === 'not-allowed') {
-                    showToast("Mic permission denied.");
-                }
+                if(event.error === 'not-allowed') showToast("Mic permission denied.");
             };
 
             recognition.onend = () => {
@@ -1026,9 +1080,16 @@
                 recognition.stop();
             }
 
+            // Hide suggestions if they exist
+            const suggBox = document.getElementById('ai-suggestions');
+            if(suggBox) suggBox.style.display = 'none';
+
             const chatBox = document.getElementById('ai-chat-box');
             chatBox.innerHTML += `<div class="ai-msg user"><span class="msg-content">${message}</span></div>`;
+            
             inputField.value = '';
+            inputField.style.height = 'auto'; // Reset box size
+            baseTextForMic = ""; // Reset mic base text
             
             aiHistory.push({ role: "user", content: message });
             
@@ -1037,7 +1098,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             
             try {
-                // Using latest reliable and fast model
+                // Switched to most accurate & fast model
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
@@ -1060,7 +1121,6 @@
                 
                 document.getElementById(loaderId).remove();
                 
-                // Format reply properly for HTML and exact copying
                 const formattedReply = reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
                 const msgId = 'msg-' + Date.now();
                 
