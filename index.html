@@ -391,11 +391,22 @@
                     <i class="fa-solid fa-money-bill-wave text-gold" style="font-size: 14px;"></i>
                 </div>
                 <h1 class="esports-font" style="font-size: 34px;">₹<span id="wallet-main-balance">0.00</span></h1>
-                <p style="font-size: 10px; opacity: 0.8; margin-bottom: 20px;">Total Withdrawable Balance</p>
-                <div style="display: flex; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px;">
-                    <div style="flex: 1;"><p style="font-size: 9px; font-weight: 700; opacity: 0.7;">UNUTILIZED</p><p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-unutilized">0.00</span></p></div>
-                    <div style="flex: 1;"><p style="font-size: 9px; font-weight: 700; opacity: 0.7;">WINNINGS</p><p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-winnings">0.00</span></p></div>
-                    <button style="background: black; color: white; border: none; padding: 6px 12px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer;" onclick="showToast('Your wallet is fully verified.')">Details</button>
+                <p style="font-size: 10px; opacity: 0.8; margin-bottom: 20px;">Current Total Balance</p>
+                
+                <!-- UPDATED 3-COLUMN STATS: ADDED, WINNINGS, WITHDRAWN -->
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 12px;">
+                    <div style="flex: 1; text-align: left;">
+                        <p style="font-size: 9px; font-weight: 700; opacity: 0.7;">TOTAL ADDED</p>
+                        <p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-added">0.00</span></p>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <p style="font-size: 9px; font-weight: 700; opacity: 0.7;">TOTAL WON</p>
+                        <p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-winnings">0.00</span></p>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        <p style="font-size: 9px; font-weight: 700; opacity: 0.7;">WITHDRAWN</p>
+                        <p style="font-size: 14px; font-weight: 700;">₹<span id="wallet-withdrawn">0.00</span></p>
+                    </div>
                 </div>
             </div>
 
@@ -574,7 +585,6 @@
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
 
-            <!-- UPDATED: Timer Section with Cancel Icon -->
             <div id="payment-timer-section" style="display: none; position: relative; text-align: center; margin-bottom: 15px; background: #222; padding: 12px; border-radius: 8px; border: 1px solid var(--primary-red);">
                 <!-- New Cancel Icon -->
                 <i class="fa-solid fa-circle-xmark" style="position: absolute; top: 10px; right: 10px; color: var(--text-muted); cursor: pointer; font-size: 16px;" onclick="cancelPaymentTimer()"></i>
@@ -648,7 +658,6 @@
         let userData = null;
         
         let tournamentsLoaded = false;
-        let txLoaded = false;
 
         const GROQ_API_KEY = "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";
 
@@ -698,24 +707,10 @@
                     <button class="t-btn" onclick="joinDemo(this, 'ELITE SCRIMS V8', '₹100', '₹5000', '8:00 PM', '8/16', '20:00')">JOIN NOW</button>
                 </div>
             </div>
+        `;
 
-            <div class="t-card">
-                <div class="t-image">
-                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
-                    <img src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=500" alt="Game">
-                </div>
-                <div class="t-details">
-                    <div class="t-title">LONE WOLF SOLO</div>
-                    <div class="t-stats-grid">
-                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">₹20</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹500</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">9:30 PM</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">12/20</span></div>
-                    </div>
-                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 60%;"></div></div>
-                    <button class="t-btn" onclick="joinDemo(this, 'LONE WOLF SOLO', '₹20', '₹500', '9:30 PM', '12/20', '21:30')">JOIN NOW</button>
-                </div>
-            </div>
+        const dummyTransactionsHTML = `
+            <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 20px;">No Transactions Yet</div>
         `;
 
         function showToast(msg) {
@@ -726,16 +721,9 @@
         }
 
         function joinDemo(btn, title, entry, prize, time, slots, matchTimeRaw) {
-            if(!userData) { 
-                showToast("Please login first."); 
-                return; 
-            }
-            
+            if(!userData) { showToast("Please login first."); return; }
             let fee = parseInt(entry.replace(/[^0-9]/g, '')) || 0;
-            if(userData.wallet_balance < fee) { 
-                showToast("Insufficient Balance! Please deposit funds in Wallet."); 
-                return; 
-            }
+            if(userData.wallet_balance < fee) { showToast("Insufficient Balance! Please deposit funds in Wallet."); return; }
 
             btn.innerHTML = '<div class="loader" style="width: 12px; height: 12px; border-width: 2px;"></div>';
             btn.disabled = true;
@@ -752,10 +740,7 @@
 
         function copyText(elementId) {
             const text = document.getElementById(elementId).innerText;
-            if(text === "Waiting...") {
-                showToast("Details not provided by admin yet!");
-                return;
-            }
+            if(text === "Waiting...") { showToast("Details not provided by admin yet!"); return; }
             navigator.clipboard.writeText(text);
             showToast("Copied to clipboard!");
         }
@@ -779,7 +764,6 @@
                     const[hours, minutes] = matchTimeRaw.split(':');
                     const matchDate = new Date();
                     matchDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-                    
                     const diff = matchDate - now;
                     
                     if(diff > 0) {
@@ -806,9 +790,7 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         let index = Array.from(slides).indexOf(entry.target);
-                        dots.forEach((dot, i) => {
-                            dot.style.background = i === index ? 'var(--primary-red)' : '#333';
-                        });
+                        dots.forEach((dot, i) => { dot.style.background = i === index ? 'var(--primary-red)' : '#333'; });
                     }
                 });
             }, { root: sliderContainer, threshold: 0.6 });
@@ -823,9 +805,6 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             const navItem = document.getElementById('nav-' + tabId);
             if(navItem) navItem.classList.add('active');
-
-            if(tabId === 'tournaments') loadTournaments();
-            if(tabId === 'wallet') loadTransactions();
             window.scrollTo(0, 0);
         }
 
@@ -839,20 +818,15 @@
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         
-        // UPDATED: Full reset of forms only happens when closing the modal from main X button
         function closeModals() { 
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); 
-            
-            // Reset Deposit Modal State entirely (Timer + Inputs)
             clearInterval(paymentTimer);
             document.getElementById('payment-timer-section').style.display = 'none';
-            document.getElementById('btn-pay-now').style.display = 'flex'; // Restore PAY button
+            document.getElementById('btn-pay-now').style.display = 'flex';
             document.getElementById('dep-amount').value = '';
             document.getElementById('dep-utr').value = '';
             document.getElementById('dep-file').value = '';
-            updateQR(); // reset QR back to standard
-
-            // Reset Withdraw Modal Inputs
+            updateQR(); 
             document.getElementById('with-amount').value = '';
             document.getElementById('with-upi').value = '';
         }
@@ -902,7 +876,7 @@
                 await db.collection('users').doc(currentUser.uid).update({ wallet_balance: firebase.firestore.FieldValue.increment(-500), elite_pass: true });
                 await db.collection('transactions').add({ user_id: currentUser.uid, amount: 500, type: 'game_entry', title: 'Elite Pass Unlock', status: 'SUCCESS', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                 showToast("Elite Pass Unlocked Successfully!");
-                closeModals(); txLoaded = false; openModal('create-clan-modal');
+                closeModals(); openModal('create-clan-modal');
             } catch (error) { showToast("Error processing request."); }
             btn.innerHTML = 'UNLOCK ELITE PASS'; btn.disabled = false;
         }
@@ -973,12 +947,11 @@
 
         let paymentTimer;
 
-        // UPDATED: Cancel Timer (stops timer and shows Pay button again without clearing data)
         function cancelPaymentTimer() {
             clearInterval(paymentTimer);
             document.getElementById('payment-timer-section').style.display = 'none';
             document.getElementById('timer-text').innerText = "05:00";
-            document.getElementById('btn-pay-now').style.display = 'flex'; // Restore the pay button
+            document.getElementById('btn-pay-now').style.display = 'flex';
         }
 
         function payNow() {
@@ -987,7 +960,6 @@
             if(amt > 1000) { showToast("Maximum deposit is ₹1000"); return; }
             window.location.href = `upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&am=${amt}&cu=INR`;
             
-            // Hide Pay button, show Timer section
             document.getElementById('btn-pay-now').style.display = 'none';
             document.getElementById('payment-timer-section').style.display = 'block';
             
@@ -1024,14 +996,22 @@
 
         function logout() { auth.signOut().then(() => showToast("Logged out successfully")); }
 
+        let txUnsubscribe = null; // New global to manage listener
+
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('login-screen').classList.remove('active');
                 document.getElementById('main-app').style.display = 'block';
-                switchTab('home'); await syncUserToFirestore(user);
+                switchTab('home'); 
+                await syncUserToFirestore(user);
+
+                // BACKGROUND LOAD DATA (Pre-fetching so tabs instantly show data!)
+                loadTournaments();
+                loadTransactions();
             } else {
                 currentUser = null; userData = null;
+                if(txUnsubscribe) { txUnsubscribe(); txUnsubscribe = null; }
                 document.getElementById('main-app').style.display = 'none';
                 document.getElementById('login-screen').classList.add('active');
             }
@@ -1054,7 +1034,6 @@
             document.getElementById('home-username').textContent = `Welcome, ${userData.name.split(' ')[0]}!`;
             document.getElementById('home-balance').textContent = formatBal;
             document.getElementById('wallet-main-balance').textContent = formatBal;
-            document.getElementById('wallet-unutilized').textContent = formatBal; 
             document.getElementById('withdraw-max-val').textContent = formatBal;
             document.getElementById('profile-name').textContent = userData.name;
             document.getElementById('profile-uid').textContent = userData.uid.substring(0,8).toUpperCase();
@@ -1074,13 +1053,7 @@
 
         async function loadTournaments(forceReload = false) {
             if (tournamentsLoaded && !forceReload) return;
-
             const list = document.getElementById('tournament-list');
-            list.innerHTML = `<div style="grid-column: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: var(--text-muted);">
-                <div class="loader" style="width: 26px; height: 26px; border-width: 3px; border-top-color: var(--primary-red);"></div>
-                <p style="margin-top: 15px; font-size: 12px; font-weight: 500;">Loading Arena...</p>
-            </div>`;
-
             try {
                 const snapshot = await db.collection('tournaments').where('status', '==', 'active').get();
                 if (snapshot.empty) { 
@@ -1094,7 +1067,6 @@
                     const t = doc.data();
                     const isFull = t.joined_count >= t.total_slots;
                     const formattedTime = format12Hour(t.match_time);
-                    
                     const entryText = t.entry_fee === 0 ? '<span class="text-red">FREE</span>' : '₹'+t.entry_fee;
                     
                     html += `<div class="t-card">
@@ -1157,8 +1129,6 @@
                 });
 
                 showToast("Joined Successfully!");
-                txLoaded = false;
-                
                 btn.innerHTML = 'VIEW DETAILS';
                 btn.style.background = 'var(--gold)';
                 btn.style.color = 'black';
@@ -1171,29 +1141,63 @@
             }
         }
 
-        async function loadTransactions() {
-            if(txLoaded) return;
+        // ================= FAST REALTIME LOAD TRANSACTIONS & STATS =================
+        function loadTransactions() {
+            if(txUnsubscribe) return; // Agar pehle se listening ho to dubara nahi chalana
+
             const list = document.getElementById('transaction-list');
             list.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="loader"></div></div>';
             
-            try {
-                const snapshot = await db.collection('transactions').where('user_id', '==', currentUser.uid).orderBy('createdAt', 'desc').limit(10).get();
-                if(snapshot.empty) { list.innerHTML = dummyTransactionsHTML; txLoaded=true; return; }
+            txUnsubscribe = db.collection('transactions').where('user_id', '==', currentUser.uid).orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+                if(snapshot.empty) { 
+                    list.innerHTML = dummyTransactionsHTML; 
+                    document.getElementById('wallet-added').textContent = '0.00';
+                    document.getElementById('wallet-winnings').textContent = '0.00';
+                    document.getElementById('wallet-withdrawn').textContent = '0.00';
+                    return; 
+                }
 
                 let html = '';
+                let totalAdded = 0;
+                let totalWinnings = 0;
+                let totalWithdrawn = 0;
+                let count = 0;
+
                 snapshot.forEach(doc => {
                     const tx = doc.data();
-                    let icon = 'fa-gamepad'; let colorClass = 'game'; let sign = '-'; let amountColor = 'white';
-                    if(tx.type === 'deposit') { icon = 'fa-plus'; colorClass = 'deposit'; sign = '+'; amountColor = '#4caf50'; }
-                    if(tx.type === 'withdraw') { icon = 'fa-building-columns'; colorClass = 'withdraw'; sign = '-'; amountColor = 'white'; }
-                    if(tx.type === 'winning') { icon = 'fa-trophy'; colorClass = 'deposit'; sign = '+'; amountColor = 'var(--gold)'; }
-                    const date = tx.createdAt ? tx.createdAt.toDate().toLocaleDateString() : 'Just now';
-                    const formatAmt = parseFloat(tx.amount).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                    
+                    // Calculating Stats logically
+                    if (tx.status !== 'FAILED' && tx.status !== 'REJECTED') {
+                        if (tx.type === 'deposit') totalAdded += parseFloat(tx.amount || 0);
+                        if (tx.type === 'winning') totalWinnings += parseFloat(tx.amount || 0);
+                        if (tx.type === 'withdraw') totalWithdrawn += parseFloat(tx.amount || 0);
+                    }
 
-                    html += `<div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon ${colorClass}"><i class="fa-solid ${icon}"></i></div><div><p style="font-size: 13px; font-weight: 600;">${tx.title || tx.type.toUpperCase()}</p><p style="font-size: 10px; color: var(--text-muted);">${date} • ${tx.status || 'SUCCESS'}</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: ${amountColor};">${sign} ₹${formatAmt}</p></div></div>`;
+                    // Render only top 15 in the UI list to avoid heavy scrolling
+                    if(count < 15) {
+                        let icon = 'fa-gamepad'; let colorClass = 'game'; let sign = '-'; let amountColor = 'white';
+                        if(tx.type === 'deposit') { icon = 'fa-plus'; colorClass = 'deposit'; sign = '+'; amountColor = '#4caf50'; }
+                        if(tx.type === 'withdraw') { icon = 'fa-building-columns'; colorClass = 'withdraw'; sign = '-'; amountColor = 'white'; }
+                        if(tx.type === 'winning') { icon = 'fa-trophy'; colorClass = 'deposit'; sign = '+'; amountColor = 'var(--gold)'; }
+                        
+                        const date = tx.createdAt ? tx.createdAt.toDate().toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) : 'Just now';
+                        const formatAmt = parseFloat(tx.amount || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+                        html += `<div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon ${colorClass}"><i class="fa-solid ${icon}"></i></div><div><p style="font-size: 13px; font-weight: 600;">${tx.title || tx.type.toUpperCase()}</p><p style="font-size: 10px; color: var(--text-muted);">${date} • ${tx.status || 'SUCCESS'}</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: ${amountColor};">${sign} ₹${formatAmt}</p></div></div>`;
+                        count++;
+                    }
                 });
-                list.innerHTML = html; txLoaded = true;
-            } catch(e) { list.innerHTML = ''; }
+
+                list.innerHTML = html; 
+                
+                // Update 3-Column Gold Card Stats precisely
+                document.getElementById('wallet-added').textContent = totalAdded.toLocaleString('en-IN', {minimumFractionDigits: 2});
+                document.getElementById('wallet-winnings').textContent = totalWinnings.toLocaleString('en-IN', {minimumFractionDigits: 2});
+                document.getElementById('wallet-withdrawn').textContent = totalWithdrawn.toLocaleString('en-IN', {minimumFractionDigits: 2});
+                
+            }, error => { 
+                list.innerHTML = dummyTransactionsHTML; 
+            });
         }
 
         async function submitDeposit() {
@@ -1221,7 +1225,6 @@
                 
                 showToast("Deposit request sent to admin successfully!");
                 closeModals();
-                txLoaded = false; loadTransactions();
             } catch (error) {
                 showToast("Upload failed: Check your Firebase Storage rules!");
             } finally { btn.innerHTML = 'SUBMIT DETAILS'; btn.disabled = false; }
@@ -1257,7 +1260,6 @@
                 await batch.commit();
                 showToast("Withdrawal request sent to admin successfully!");
                 closeModals();
-                txLoaded = false; loadTransactions();
             } catch (error) { showToast("Error processing withdrawal."); } 
             finally { btn.innerHTML = 'Request Withdrawal'; btn.disabled = false; }
         }
