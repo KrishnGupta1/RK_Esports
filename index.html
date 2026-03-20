@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
 
     <!-- PRELOAD DIRECT IMAGE LINK -->
     <link rel="preload" as="image" href="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png">
@@ -217,7 +218,7 @@
     <!-- MAIN APP WRAPPER -->
     <div id="main-app" style="display: none;">
         
-        <!-- ================= TOP BAR (RESTORED TO ORIGINAL) ================= -->
+        <!-- ================= TOP BAR ================= -->
         <div class="top-bar">
             <div class="flex-row" style="gap: 12px;">
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
@@ -234,14 +235,13 @@
                 
                 <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
                 <div class="flex-between">
-                    <!-- Adjusted size and id to dynamically format with commas -->
                     <h1 class="esports-font" style="font-size: 32px; font-weight: 700;">₹<span id="home-balance">0.00</span></h1>
                     <button class="btn btn-outline" style="width: auto; padding: 8px 16px; background: black; border: none; font-size: 11px;" onclick="switchTab('wallet')">+ Add Money</button>
                 </div>
                 <i class="fa-solid fa-medal" style="position: absolute; top: 15px; right: 15px; font-size: 26px; opacity: 0.8;"></i>
             </div>
 
-            <!-- BUG-FREE BANNER SLIDER -->
+            <!-- BANNER SLIDER -->
             <div class="slider-container" id="banner-slider">
                 <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');">
                     <div class="banner-content">
@@ -315,7 +315,7 @@
             
         </div>
 
-        <!-- ================= CLANS SCREEN (REAL LOGIC UI) ================= -->
+        <!-- ================= CLANS SCREEN ================= -->
         <div id="clans-screen" class="screen">
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-users text-red"></i> CLANS</h2>
@@ -328,7 +328,7 @@
                 
                 <div style="display: flex; gap: 10px; justify-content: center;" id="clan-action-buttons">
                     <button class="btn btn-red" style="width: auto; padding: 8px 15px;" onclick="openClanCreation()"><i class="fa-solid fa-plus"></i> CREATE</button>
-                    <button class="btn btn-outline" style="background: black; width: auto; padding: 8px 15px; border:none;" onclick="showToast('Refreshing Clan List...')"><i class="fa-solid fa-arrows-rotate"></i> REFRESH</button>
+                    <button class="btn btn-outline" style="background: black; width: auto; padding: 8px 15px; border:none;" onclick="refreshClans(this)"><i class="fa-solid fa-arrows-rotate"></i> REFRESH</button>
                 </div>
             </div>
 
@@ -767,6 +767,28 @@
             }, 800);
         }
 
+        function refreshClans(btn) {
+            const originalHTML = '<i class="fa-solid fa-arrows-rotate"></i> REFRESH';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                
+                // Reset all JOIN buttons
+                const clanList = document.querySelectorAll('#clans-screen .tx-list .btn-requested');
+                clanList.forEach(b => {
+                    b.classList.remove('btn-requested');
+                    b.classList.add('btn-red');
+                    b.disabled = false;
+                    b.innerHTML = 'JOIN';
+                });
+                
+                showToast("Clan List Refreshed!");
+            }, 1000);
+        }
+
         function openClanCreation() {
             if(userData && userData.elite_pass) {
                 openModal('create-clan-modal');
@@ -895,6 +917,12 @@
 
         function updateQR() {
             let amt = document.getElementById('dep-amount').value;
+            if (amt > 1000) {
+                document.getElementById('dep-amount').value = 1000;
+                amt = 1000;
+                showToast("Maximum deposit limit is ₹1000");
+            }
+            
             const base = "upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&cu=INR";
             const finalUpi = amt ? `${base}&am=${amt}` : base;
             document.getElementById('upi-qr').src = `https://quickchart.io/qr?text=${encodeURIComponent(finalUpi)}&size=250`;
@@ -906,10 +934,8 @@
             if(!amt || amt < 10) { showToast("Minimum deposit is ₹10"); return; }
             if(amt > 1000) { showToast("Maximum deposit is ₹1000"); return; }
             
-            // Open UPI intent
             window.location.href = `upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&am=${amt}&cu=INR`;
             
-            // Start timer ONLY after clicking the button
             document.getElementById('payment-timer-section').style.display = 'block';
             let timeLeft = 300; 
             clearInterval(paymentTimer);
@@ -1133,19 +1159,13 @@
 
             try {
                 const file = fileInput.files[0];
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', 'rk_upload');
-                formData.append('cloud_name', 'dymlr54h');
-
-                const res = await fetch('https://api.cloudinary.com/v1_1/dymlr54h/image/upload', { method: 'POST', body: formData });
-                const data = await res.json();
+                const storageRef = firebase.storage().ref();
+                const fileRef = storageRef.child(`deposits/${currentUser.uid}_${Date.now()}_${file.name}`);
                 
-                if(!res.ok || !data.secure_url) {
-                    throw new Error(data.error ? data.error.message : "Cloudinary Upload Failed!");
-                }
+                const snapshot = await fileRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
 
-                await db.collection('deposits').add({ user_id: currentUser.uid, amount: Number(amount), utr: utr, screenshot_url: data.secure_url, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                await db.collection('deposits').add({ user_id: currentUser.uid, amount: Number(amount), utr: utr, screenshot_url: downloadURL, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                 
                 showToast("Deposit request sent to admin successfully!");
                 closeModals();
@@ -1156,8 +1176,8 @@
                 txLoaded = false;
                 loadTransactions();
             } catch (error) {
-                console.error("Cloudinary/Deposit Error: ", error);
-                showToast("Error: " + error.message);
+                console.error("Storage/Deposit Error: ", error);
+                showToast("Upload failed: Check your Firebase Storage rules!");
             } finally {
                 btn.innerHTML = 'SUBMIT DETAILS';
                 btn.disabled = false;
@@ -1177,7 +1197,6 @@
             btn.disabled = true;
 
             try {
-                // Fix: Check daily limit from Firebase (Max 500/day)
                 const startOfDay = new Date();
                 startOfDay.setHours(0,0,0,0);
                 
@@ -1195,7 +1214,6 @@
                     return;
                 }
 
-                // If within limit, send request to admin
                 const batch = db.batch();
                 const userRef = db.collection('users').doc(currentUser.uid);
                 batch.update(userRef, { wallet_balance: firebase.firestore.FieldValue.increment(-amount) });
