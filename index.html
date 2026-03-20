@@ -574,7 +574,11 @@
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
 
-            <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 15px; background: #222; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-red);">
+            <!-- UPDATED: Timer Section with Cancel Icon -->
+            <div id="payment-timer-section" style="display: none; position: relative; text-align: center; margin-bottom: 15px; background: #222; padding: 12px; border-radius: 8px; border: 1px solid var(--primary-red);">
+                <!-- New Cancel Icon -->
+                <i class="fa-solid fa-circle-xmark" style="position: absolute; top: 10px; right: 10px; color: var(--text-muted); cursor: pointer; font-size: 16px;" onclick="cancelPaymentTimer()"></i>
+                
                 <p style="color: white; font-size: 12px;">Complete payment in</p>
                 <p style="color: var(--gold); font-size: 20px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
                 <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Upload UTR & Screenshot below after payment.</p>
@@ -658,7 +662,6 @@
             return hours + ':' + minutes + ' ' + ampm;
         }
 
-        // Updated Dummy Data with working simulated join button for logged-in users
         const dummyTournamentsHTML = `
             <div class="t-card">
                 <div class="t-image">
@@ -674,7 +677,6 @@
                         <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">40/48</span></div>
                     </div>
                     <div class="t-progress-bg"><div class="t-progress-fill" style="width: 83%;"></div></div>
-                    <!-- Already Joined Demo Button to test inside view -->
                     <button class="t-btn" style="background: var(--gold); color: black;" onclick="openMatchDetails('GRAND MASTERS CUP', '₹50', '₹2000', '6:00 PM', '40/48', '18:00')">VIEW DETAILS</button>
                 </div>
             </div>
@@ -723,7 +725,6 @@
             setTimeout(() => t.style.display = 'none', 3500);
         }
 
-        // Fix for Dummy Tournament Join Button
         function joinDemo(btn, title, entry, prize, time, slots, matchTimeRaw) {
             if(!userData) { 
                 showToast("Please login first."); 
@@ -749,7 +750,6 @@
             }, 1000);
         }
 
-        // Copy Text Function for Room ID & Password
         function copyText(elementId) {
             const text = document.getElementById(elementId).innerText;
             if(text === "Waiting...") {
@@ -760,7 +760,6 @@
             showToast("Copied to clipboard!");
         }
 
-        // Handle Match Details Modal & Inside Countdown
         let matchDetailsInterval = null;
         function openMatchDetails(title, entry, prize, time, slots, matchTimeRaw, roomId = "Waiting...", roomPass = "Waiting...") {
             document.getElementById('md-title').innerText = title;
@@ -798,7 +797,6 @@
             }
         }
 
-        // Slider Logic
         document.addEventListener("DOMContentLoaded", () => {
             const sliderContainer = document.getElementById('banner-slider');
             const slides = sliderContainer.querySelectorAll('.home-banner');
@@ -840,7 +838,24 @@
         }
 
         function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+        
+        // UPDATED: Full reset of forms only happens when closing the modal from main X button
+        function closeModals() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); 
+            
+            // Reset Deposit Modal State entirely (Timer + Inputs)
+            clearInterval(paymentTimer);
+            document.getElementById('payment-timer-section').style.display = 'none';
+            document.getElementById('btn-pay-now').style.display = 'flex'; // Restore PAY button
+            document.getElementById('dep-amount').value = '';
+            document.getElementById('dep-utr').value = '';
+            document.getElementById('dep-file').value = '';
+            updateQR(); // reset QR back to standard
+
+            // Reset Withdraw Modal Inputs
+            document.getElementById('with-amount').value = '';
+            document.getElementById('with-upi').value = '';
+        }
         
         function requestJoinClan(btn) {
             if (btn.classList.contains('btn-requested')) return;
@@ -957,18 +972,36 @@
         }
 
         let paymentTimer;
+
+        // UPDATED: Cancel Timer (stops timer and shows Pay button again without clearing data)
+        function cancelPaymentTimer() {
+            clearInterval(paymentTimer);
+            document.getElementById('payment-timer-section').style.display = 'none';
+            document.getElementById('timer-text').innerText = "05:00";
+            document.getElementById('btn-pay-now').style.display = 'flex'; // Restore the pay button
+        }
+
         function payNow() {
             const amt = document.getElementById('dep-amount').value;
             if(!amt || amt < 10) { showToast("Minimum deposit is ₹10"); return; }
             if(amt > 1000) { showToast("Maximum deposit is ₹1000"); return; }
             window.location.href = `upi://pay?pa=guptakrishn258@oksbi&pn=RK_ESPORTS&am=${amt}&cu=INR`;
+            
+            // Hide Pay button, show Timer section
+            document.getElementById('btn-pay-now').style.display = 'none';
             document.getElementById('payment-timer-section').style.display = 'block';
-            let timeLeft = 300; clearInterval(paymentTimer);
+            
+            let timeLeft = 300; 
+            clearInterval(paymentTimer);
             paymentTimer = setInterval(() => {
                 timeLeft--;
                 let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
                 document.getElementById('timer-text').innerText = `0${m}:${s < 10 ? '0'+s : s}`;
-                if(timeLeft <= 0) { clearInterval(paymentTimer); document.getElementById('timer-text').innerText = "00:00"; showToast("Time limit reached!"); }
+                if(timeLeft <= 0) { 
+                    clearInterval(paymentTimer); 
+                    document.getElementById('timer-text').innerText = "00:00"; 
+                    showToast("Time limit reached!"); 
+                }
             }, 1000);
         }
 
@@ -1188,8 +1221,6 @@
                 
                 showToast("Deposit request sent to admin successfully!");
                 closeModals();
-                document.getElementById('dep-amount').value = ''; document.getElementById('dep-utr').value = ''; fileInput.value = '';
-                document.getElementById('payment-timer-section').style.display = 'none'; clearInterval(paymentTimer);
                 txLoaded = false; loadTransactions();
             } catch (error) {
                 showToast("Upload failed: Check your Firebase Storage rules!");
@@ -1225,7 +1256,7 @@
                 
                 await batch.commit();
                 showToast("Withdrawal request sent to admin successfully!");
-                closeModals(); document.getElementById('with-amount').value = ''; document.getElementById('with-upi').value = '';
+                closeModals();
                 txLoaded = false; loadTransactions();
             } catch (error) { showToast("Error processing withdrawal."); } 
             finally { btn.innerHTML = 'Request Withdrawal'; btn.disabled = false; }
