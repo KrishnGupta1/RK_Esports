@@ -326,9 +326,10 @@
                 <h3 class="esports-font" style="font-size: 18px; margin-bottom: 5px;" id="my-clan-title">Form Your Squad</h3>
                 <p style="font-size: 10px; opacity: 0.8; margin-bottom: 12px; color: black;" id="my-clan-desc">Dominate the leaderboards and join scrims together.</p>
                 
+                <!-- FIX APPLIED: width: 120px applied to prevent jumping when REFRESH changes to a spinner -->
                 <div style="display: flex; gap: 10px; justify-content: center;" id="clan-action-buttons">
-                    <button class="btn btn-red" style="width: auto; padding: 8px 15px;" onclick="openClanCreation()"><i class="fa-solid fa-plus"></i> CREATE</button>
-                    <button class="btn btn-outline" style="background: black; width: auto; padding: 8px 15px; border:none;" onclick="refreshClans(this)"><i class="fa-solid fa-arrows-rotate"></i> REFRESH</button>
+                    <button class="btn btn-red" style="width: 120px; padding: 8px 15px;" onclick="openClanCreation()"><i class="fa-solid fa-plus"></i> CREATE</button>
+                    <button class="btn btn-outline" style="background: black; width: 120px; padding: 8px 15px; border:none;" onclick="refreshClans(this)"><i class="fa-solid fa-arrows-rotate"></i> REFRESH</button>
                 </div>
             </div>
 
@@ -517,7 +518,7 @@
         </div>
     </div>
 
-    <!-- Deposit Modal (Limits & Dynamic QR Fix) -->
+    <!-- Deposit Modal -->
     <div class="modal-overlay" id="deposit-modal">
         <div class="modal-content">
             <div class="flex-between mb-15">
@@ -538,20 +539,17 @@
                 </div>
             </div>
 
-            <!-- Limit applied: max 1000 via oninput JS -->
             <input type="number" id="dep-amount" placeholder="Enter Amount (Max ₹1000)" max="1000" oninput="if(this.value > 1000) { this.value = 1000; showToast('Max deposit limit is ₹1000'); } updateQR();" required style="font-size: 14px; font-weight: bold; text-align: center;">
             <button type="button" class="btn btn-red mb-15" id="btn-pay-now" onclick="payNow()">
                 <i class="fa-solid fa-mobile-screen"></i> PAY VIA UPI APP
             </button>
 
-            <!-- Timer hidden initially -->
             <div id="payment-timer-section" style="display: none; text-align: center; margin-bottom: 15px; background: #222; padding: 8px; border-radius: 8px; border: 1px solid var(--primary-red);">
                 <p style="color: white; font-size: 12px;">Complete payment in</p>
                 <p style="color: var(--gold); font-size: 20px; font-weight: bold; font-family: 'Oswald', sans-serif;" id="timer-text">05:00</p>
                 <p style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Upload UTR & Screenshot below after payment.</p>
             </div>
             
-            <!-- Strict 12 digit UTR input -->
             <input type="text" id="dep-utr" placeholder="12-Digit UTR Number" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);" maxlength="12" required>
             <label style="display: block; margin-bottom: 8px; font-size: 11px; color: var(--gold);">Upload Screenshot</label>
             <input type="file" id="dep-file" accept="image/*" style="padding: 8px; background: #222;" required>
@@ -565,9 +563,7 @@
         <div class="modal-content">
             <div class="flex-between mb-15"><h2 class="esports-font" style="font-size: 20px;">Withdraw</h2><i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i></div>
             <p class="text-muted" style="font-size: 12px; margin-bottom: 15px;">Available to withdraw: ₹<span id="withdraw-max-val">0</span></p>
-            <!-- Limit applied: max 500 via oninput JS -->
             <input type="number" id="with-amount" placeholder="Amount (Max ₹500/day)" max="500" oninput="if(this.value > 500) { this.value = 500; showToast('Max limit is ₹500'); }" required>
-            <!-- Limit applied: UPI ID length -->
             <input type="text" id="with-upi" placeholder="Your UPI ID" maxlength="50" oninput="this.value = this.value.replace(/\\s/g, '');" required>
             <button type="button" class="btn btn-red mt-15" id="btn-submit-withdraw" onclick="submitWithdraw()">Request Withdrawal</button>
         </div>
@@ -617,7 +613,6 @@
         let currentUser = null;
         let userData = null;
         
-        // Cache variables
         let tournamentsLoaded = false;
         let txLoaded = false;
 
@@ -776,7 +771,6 @@
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
                 
-                // Reset all JOIN buttons
                 const clanList = document.querySelectorAll('#clans-screen .tx-list .btn-requested');
                 clanList.forEach(b => {
                     b.classList.remove('btn-requested');
@@ -1013,7 +1007,7 @@
             document.getElementById('wallet-unutilized').textContent = formatBal; 
             document.getElementById('withdraw-max-val').textContent = formatBal;
             document.getElementById('profile-name').textContent = userData.name;
-            document.getElementById('profile-uid').textContent = userData.uid.substring(0,8).toUpperCase();
+            document.getElementById('profile-uid').userData.uid.substring(0,8).toUpperCase();
 
             if (userData.elite_pass) {
                 document.getElementById('home-elite-status').innerHTML = 'ELITE MEMBER';
