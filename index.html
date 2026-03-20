@@ -246,7 +246,7 @@
         <!-- ================= HOME SCREEN ================= -->
         <div id="home-screen" class="screen">
             <div class="gold-card">
-                <p style="font-size: 10px; font-weight: 700; opacity: 0.8; letter-spacing: 1px; margin-bottom: 4px;" id="home-elite-status">ELITE MEMBER</p>
+                <p style="font-size: 10px; font-weight: 700; opacity: 0.8; letter-spacing: 1px; margin-bottom: 4px;" id="home-elite-status">MEMBER</p>
                 <h2 class="esports-font" style="font-size: 22px; margin-bottom: 15px;" id="home-username">Welcome, Legend!</h2>
                 
                 <p style="font-size: 9px; opacity: 0.7;">CURRENT BALANCE</p>
@@ -257,32 +257,18 @@
                 <i class="fa-solid fa-medal" style="position: absolute; top: 15px; right: 15px; font-size: 26px; opacity: 0.8;"></i>
             </div>
 
-            <!-- BANNER SLIDER -->
+            <!-- BANNER SLIDER (Generic Placeholder) -->
             <div class="slider-container" id="banner-slider">
-                <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop');">
-                    <div class="banner-content">
-                        <span class="badge-red">MEGA EVENT</span>
-                        <h2 class="esports-font mt-10" style="font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 8px;">Pro League Season 12</h2>
-                    </div>
-                </div>
-                <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop');">
-                    <div class="banner-content">
-                        <span class="badge-red">NEW SCRIMS</span>
-                        <h2 class="esports-font mt-10" style="font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 8px;">Clash Squad Ranked</h2>
-                    </div>
-                </div>
-                <div class="home-banner" style="background-image: url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop');">
-                    <div class="banner-content">
-                        <span class="badge-red">GIVEAWAY</span>
-                        <h2 class="esports-font mt-10" style="font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 8px;">Win 5000 Diamonds</h2>
+                <div class="home-banner" style="background: #111; display: flex; align-items: center; justify-content: center; border: 1px dashed #333;">
+                    <div class="banner-content" style="position: static; text-align: center;">
+                        <h2 class="esports-font" style="font-size: 16px; color: var(--gold);">RK ESPORTS ARENA</h2>
+                        <p style="font-size: 10px; color: var(--text-muted); margin-top: 5px;">Stay tuned for upcoming massive tournaments!</p>
                     </div>
                 </div>
             </div>
             
             <div id="slider-dots-container" style="display:flex; justify-content:center; gap: 4px; margin-top: 8px;">
                 <div class="slider-dot" style="width: 6px; height: 6px; background: var(--primary-red); border-radius: 50%; transition: 0.3s;"></div>
-                <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
-                <div class="slider-dot" style="width: 6px; height: 6px; background: #333; border-radius: 50%; transition: 0.3s;"></div>
             </div>
 
             <div class="mt-15">
@@ -311,21 +297,12 @@
                 <div class="flex-between">
                     <h3 class="esports-font" style="font-size: 14px; border-left: 3px solid var(--primary-red); padding-left: 8px;">LIVE NOW</h3>
                     <span style="color: var(--primary-red); font-size: 9px; font-weight: 800; display: flex; align-items: center; letter-spacing: 0.5px;">
-                        <span class="blinking-dot"></span> 1.2K VIEWERS
+                        <span class="blinking-dot" style="display: none;"></span> 0 VIEWERS
                     </span>
                 </div>
-                <div class="live-card">
-                    <div class="live-thumb">
-                        <div class="live-badge">LIVE</div>
-                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" alt="Live Match">
-                    </div>
-                    <div class="live-info">
-                        <div>
-                            <div class="live-title">Grand Finals: RK Invitational</div>
-                            <div class="live-subtitle">FF Championship 2024</div>
-                        </div>
-                        <button class="btn-watch" onclick="window.open('https://youtube.com', '_blank')"><i class="fa-solid fa-circle-play"></i> WATCH NOW</button>
-                    </div>
+                <!-- Empty State for Live matches -->
+                <div class="live-card" style="justify-content: center; min-height: 80px; text-align: center;">
+                    <p style="font-size: 11px; color: var(--text-muted); font-weight: 500;">No Live Streams Currently</p>
                 </div>
             </div>
             
@@ -349,36 +326,12 @@
             </div>
 
             <h3 class="esports-font" style="font-size: 14px; border-left: 3px solid var(--primary-red); padding-left: 8px; margin-bottom: 15px;">TOP RANKED CLANS</h3>
-            <div class="tx-list">
-                <div class="tx-item">
-                    <div class="flex-row" style="gap: 12px;">
-                        <div class="tx-icon game"><i class="fa-solid fa-shield-halved"></i></div>
-                        <div>
-                            <p style="font-size: 13px; font-weight: 600;">Team RK Elite</p>
-                            <p style="font-size: 10px; color: var(--text-muted);">Members: 48/50 • Lvl 10</p>
-                        </div>
-                    </div>
-                    <button class="btn btn-red" style="width: auto; padding: 6px 12px; font-size: 9px;" onclick="requestJoinClan(this)">JOIN</button>
-                </div>
-                <div class="tx-item">
-                    <div class="flex-row" style="gap: 12px;">
-                        <div class="tx-icon withdraw"><i class="fa-solid fa-skull"></i></div>
-                        <div>
-                            <p style="font-size: 13px; font-weight: 600;">Gods of War</p>
-                            <p style="font-size: 10px; color: var(--text-muted);">Members: 45/50 • Lvl 8</p>
-                        </div>
-                    </div>
-                    <button class="btn btn-red" style="width: auto; padding: 6px 12px; font-size: 9px;" onclick="requestJoinClan(this)">JOIN</button>
-                </div>
-                <div class="tx-item">
-                    <div class="flex-row" style="gap: 12px;">
-                        <div class="tx-icon deposit" style="color:var(--gold);"><i class="fa-solid fa-crown"></i></div>
-                        <div>
-                            <p style="font-size: 13px; font-weight: 600;">Legends Never Die</p>
-                            <p style="font-size: 10px; color: var(--text-muted);">Members: 20/50 • Lvl 5</p>
-                        </div>
-                    </div>
-                    <button class="btn btn-red" style="width: auto; padding: 6px 12px; font-size: 9px;" onclick="requestJoinClan(this)">JOIN</button>
+            
+            <!-- Empty State for Clans -->
+            <div class="tx-list" id="clans-list-container">
+                <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0; background: var(--bg-panel); border-radius: 10px; border: 1px dashed #333;">
+                    <i class="fa-solid fa-users-slash" style="font-size: 20px; margin-bottom: 10px; color: #555;"></i><br>
+                    No Ranked Clans Available Yet
                 </div>
             </div>
         </div>
@@ -691,12 +644,8 @@
 
     <!-- APP LOGIC & SCRIPTS -->
     <script>
-        // --- NOTIFICATION SYSTEM LOGIC ---
-        let notifications =[
-            { id: 1, text: "Welcome to RK_ESPORTS! Complete your profile to get started.", time: "Just now" },
-            { id: 2, text: "Pro League Season 12 registrations are open!", time: "1 hr ago" },
-            { id: 3, text: "New Scrims added: Clash Squad Ranked.", time: "3 hrs ago" }
-        ];
+        // --- NOTIFICATION SYSTEM LOGIC (Empty State) ---
+        let notifications =[]; // Fake/Dummy data removed completely
 
         function updateNotificationBadge() {
             const badge = document.getElementById('notif-badge');
@@ -781,46 +730,17 @@
             return hours + ':' + minutes + ' ' + ampm;
         }
 
+        // Empty state HTML for tournaments
         const dummyTournamentsHTML = `
-            <div class="t-card">
-                <div class="t-image">
-                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
-                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" alt="Game">
-                </div>
-                <div class="t-details">
-                    <div class="t-title">GRAND MASTERS CUP</div>
-                    <div class="t-stats-grid">
-                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">₹50</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹2000</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">6:00 PM</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">40/48</span></div>
-                    </div>
-                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 83%;"></div></div>
-                    <button class="t-btn" style="background: var(--gold); color: black;" onclick="openMatchDetails('GRAND MASTERS CUP', '₹50', '₹2000', '6:00 PM', '40/48', '18:00')">VIEW DETAILS</button>
-                </div>
-            </div>
-
-            <div class="t-card">
-                <div class="t-image">
-                    <div class="t-medal-badge"><i class="fa-solid fa-medal"></i></div>
-                    <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=500" alt="Game">
-                </div>
-                <div class="t-details">
-                    <div class="t-title">ELITE SCRIMS V8</div>
-                    <div class="t-stats-grid">
-                        <div class="t-stat-item"><span class="t-stat-label">Entry:</span> <span class="t-stat-val">₹100</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Prize:</span> <span class="t-stat-val gold">₹500</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Time:</span> <span class="t-stat-val">8:00 PM</span></div>
-                        <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">8/16</span></div>
-                    </div>
-                    <div class="t-progress-bg"><div class="t-progress-fill" style="width: 50%;"></div></div>
-                    <button class="t-btn" onclick="joinDemo(this, 'ELITE SCRIMS V8', '₹100', '₹5000', '8:00 PM', '8/16', '20:00')">JOIN NOW</button>
-                </div>
+            <div style="grid-column: span 2; text-align: center; color: var(--text-muted); font-size: 12px; padding: 40px 0; background: var(--bg-panel); border-radius: 12px; border: 1px dashed #333;">
+                <i class="fa-solid fa-trophy" style="font-size: 24px; margin-bottom: 10px; color: #555;"></i><br>
+                No Active Tournaments Found
             </div>
         `;
 
+        // Empty state HTML for transactions
         const dummyTransactionsHTML = `
-            <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 20px;">No Transactions Yet</div>
+            <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0; background: var(--bg-panel); border-radius: 12px; border: 1px dashed #333;">No Transactions Yet</div>
         `;
 
         function showToast(msg) {
@@ -828,24 +748,6 @@
             t.textContent = msg;
             t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 3500);
-        }
-
-        function joinDemo(btn, title, entry, prize, time, slots, matchTimeRaw) {
-            if(!userData) { showToast("Please login first."); return; }
-            let fee = parseInt(entry.replace(/[^0-9]/g, '')) || 0;
-            if(userData.wallet_balance < fee) { showToast("Insufficient Balance! Please deposit funds in Wallet."); return; }
-
-            btn.innerHTML = '<div class="loader" style="width: 12px; height: 12px; border-width: 2px;"></div>';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                showToast("Joined Successfully!");
-                btn.innerHTML = 'VIEW DETAILS';
-                btn.style.background = 'var(--gold)';
-                btn.style.color = 'black';
-                btn.disabled = false;
-                btn.onclick = () => openMatchDetails(title, entry, prize, time, slots, matchTimeRaw, "Waiting...", "Waiting...");
-            }, 1000);
         }
 
         // ================= COPY TEXT FUNCTION =================
@@ -899,7 +801,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            updateNotificationBadge(); // Calling notification initialization
+            updateNotificationBadge(); 
             
             const sliderContainer = document.getElementById('banner-slider');
             const slides = sliderContainer.querySelectorAll('.home-banner');
@@ -942,11 +844,9 @@
             }
         }
         
-        // ============ CLEAN ALL MODALS ON CLOSE ============
         function closeModals() { 
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); 
             
-            // Payment logic reset
             clearInterval(paymentTimer);
             document.getElementById('payment-timer-section').style.display = 'none';
             document.getElementById('btn-pay-now').style.display = 'flex';
@@ -957,24 +857,10 @@
             document.getElementById('with-amount').value = '';
             document.getElementById('with-upi').value = '';
 
-            // Stop mic and clear chat when closing AI modal
             if(isListening && recognition) {
                 recognition.stop();
             }
-            clearAIChat(true); // Completely clear the chat and reset to initial state
-        }
-        
-        function requestJoinClan(btn) {
-            if (btn.classList.contains('btn-requested')) return;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> REQUESTED';
-                btn.classList.remove('btn-red');
-                btn.classList.add('btn-requested');
-                btn.disabled = false;
-                showToast("Join Request Sent Successfully!");
-            }, 800);
+            clearAIChat(true); 
         }
 
         function refreshClans(btn) {
@@ -984,13 +870,6 @@
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
-                const clanList = document.querySelectorAll('#clans-screen .tx-list .btn-requested');
-                clanList.forEach(b => {
-                    b.classList.remove('btn-requested');
-                    b.classList.add('btn-red');
-                    b.disabled = false;
-                    b.innerHTML = 'JOIN';
-                });
                 showToast("Clan List Refreshed!");
             }, 1000);
         }
@@ -1031,11 +910,10 @@
             btn.innerHTML = 'CREATE MY CLAN'; btn.disabled = false;
         }
 
-        // ================= FULLY REBUILT AI CHAT =================
         function autoResizeInput() {
             const el = document.getElementById('ai-input');
-            el.style.height = '44px'; // Reset to min height first to calculate correctly
-            el.style.height = Math.min(el.scrollHeight, 100) + 'px'; // Max expand to 100px (~4 lines)
+            el.style.height = '44px'; 
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px'; 
         }
 
         function initAIChat() {
@@ -1058,7 +936,6 @@
                 { role: "system", content: `You are the RK_ESPORTS AI Strategist. The user's name is ${name}. Give short, smart, and hype tactical advice specifically for Garena Free Fire tournaments and matches. Talk like a pro FF esports gamer.` }
             ];
 
-            // Reset input box completely
             const inputField = document.getElementById('ai-input');
             if(inputField) {
                 inputField.value = '';
@@ -1090,7 +967,6 @@
             const micBtn = document.getElementById('ai-mic-btn');
             const inputField = document.getElementById('ai-input');
 
-            // If already listening, stop it manually
             if (isListening) {
                 if(recognition) recognition.stop();
                 isListening = false;
@@ -1101,8 +977,8 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.continuous = true; // Keep listening
-            recognition.interimResults = false; // Turn off interim to avoid mobile double typing bug
+            recognition.continuous = true; 
+            recognition.interimResults = false; 
             recognition.lang = 'en-IN'; 
 
             recognition.onstart = () => {
@@ -1112,7 +988,6 @@
                 showToast("Listening...");
             };
 
-            // Flawless deduplication approach for voice typing
             recognition.onresult = (event) => {
                 let final_transcript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -1132,7 +1007,6 @@
             };
 
             recognition.onend = () => {
-                // If it ends naturally, reset button
                 if(isListening) {
                     isListening = false;
                     micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
@@ -1148,7 +1022,6 @@
             const message = inputField.value.trim();
             if (!message) return;
             
-            // Stop mic if running when user sends the message
             if (isListening && recognition) {
                 recognition.stop();
                 isListening = false;
@@ -1157,7 +1030,6 @@
                 micBtn.classList.remove('active');
             }
 
-            // Hide suggestions if they exist
             const suggBox = document.getElementById('ai-suggestions');
             if(suggBox) suggBox.style.display = 'none';
 
@@ -1165,7 +1037,7 @@
             chatBox.innerHTML += `<div class="ai-msg user"><span class="msg-content">${message}</span></div>`;
             
             inputField.value = '';
-            inputField.style.height = '44px'; // Reset box size
+            inputField.style.height = '44px';
             
             aiHistory.push({ role: "user", content: message });
             
@@ -1174,7 +1046,6 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             
             try {
-                // Using latest reliable and fast model
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
@@ -1211,7 +1082,7 @@
                 console.error("AI Error: ", err);
                 document.getElementById(loaderId).remove();
                 chatBox.innerHTML += `<div class="ai-msg bot" style="color:var(--primary-red); border-color:var(--primary-red);"><span class="msg-content">System error: Please try again.</span></div>`;
-                aiHistory.pop(); // Remove failed user message from memory
+                aiHistory.pop(); 
             }
         }
 
