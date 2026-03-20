@@ -167,7 +167,6 @@
         .ai-copy-btn { position: absolute; top: 8px; right: 8px; color: #666; background: none; border: none; cursor: pointer; font-size: 14px; transition: 0.2s;}
         .ai-copy-btn:hover { color: var(--gold); }
         
-        /* Auto-expanding Input Area max 4 lines */
         .ai-input-wrapper { display: flex; gap: 8px; align-items: flex-end;}
         .ai-input-wrapper textarea { 
             margin-bottom: 0; flex: 1; padding: 12px 15px; font-size: 13px; border-radius: 10px; 
@@ -181,12 +180,18 @@
         .ai-input-wrapper .btn-mic { background: #161616; color: #888; border: 1px solid #2a2a2a; }
         .ai-input-wrapper .btn-mic.active { color: var(--primary-red); border-color: var(--primary-red); background: rgba(234, 43, 43, 0.1); }
 
-        /* AI Suggestion Chips */
         .ai-suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
         .ai-suggestion-chip { background: #222; border: 1px solid #333; color: var(--text-muted); padding: 8px 12px; border-radius: 15px; font-size: 11px; cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 600;}
         .ai-suggestion-chip:active { background: var(--primary-red); color: white; border-color: var(--primary-red); }
 
         .btn-requested { background: transparent; border: 1px solid var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
+
+        /* --- NOTIFICATION PANEL CSS --- */
+        .notif-item { background: #1a1a1a; padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary-red); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: 0.3s; }
+        .notif-text { font-size: 11px; color: #fff; line-height: 1.4; font-weight: 500; }
+        .notif-time { font-size: 9px; color: var(--text-muted); margin-top: 5px; font-weight: 600; }
+        .notif-close { color: #555; cursor: pointer; font-size: 16px; transition: 0.2s; padding: 2px; }
+        .notif-close:hover { color: var(--primary-red); }
     </style>
 </head>
 <body>
@@ -231,7 +236,11 @@
                 <img src="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png" alt="Logo" class="rk-logo-small">
                 <h2 class="esports-font" style="font-size: 18px;">RK_<span class="text-red">ESPORTS</span></h2>
             </div>
-            <i class="fa-solid fa-bell text-gold" style="font-size: 18px; cursor: pointer;" onclick="showToast('No new notifications')"></i>
+            <!-- Notifications Icon with Badge -->
+            <div style="position: relative; cursor: pointer; display: flex; align-items: center;" onclick="openNotifications()">
+                <i class="fa-solid fa-bell text-gold" style="font-size: 18px;"></i>
+                <span id="notif-badge" style="position: absolute; top: -6px; right: -8px; background: var(--primary-red); color: white; font-size: 9px; font-weight: 800; padding: 2px 4px; border-radius: 10px; display: none; line-height: 1;"></span>
+            </div>
         </div>
 
         <!-- ================= HOME SCREEN ================= -->
@@ -485,7 +494,23 @@
 
     <!-- ================= MODALS ================= -->
 
-    <!-- Match Details Modal (NEW: For Joined Players) -->
+    <!-- Notification Modal -->
+    <div class="modal-overlay" id="notification-modal">
+        <div class="modal-content">
+            <div class="flex-between mb-15">
+                <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-bell text-red"></i> NOTIFICATIONS</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span style="font-size: 10px; color: var(--primary-red); cursor: pointer; font-weight: 800; letter-spacing: 0.5px;" onclick="clearAllNotifications()">CLEAR ALL</span>
+                    <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i>
+                </div>
+            </div>
+            <div id="notification-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 65vh; overflow-y: auto; padding-bottom: 10px;">
+                <!-- Notifications will be injected here via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Details Modal -->
     <div class="modal-overlay" id="match-details-modal">
         <div class="modal-content">
             <div class="flex-between mb-15">
@@ -666,6 +691,64 @@
 
     <!-- APP LOGIC & SCRIPTS -->
     <script>
+        // --- NOTIFICATION SYSTEM LOGIC ---
+        let notifications =[
+            { id: 1, text: "Welcome to RK_ESPORTS! Complete your profile to get started.", time: "Just now" },
+            { id: 2, text: "Pro League Season 12 registrations are open!", time: "1 hr ago" },
+            { id: 3, text: "New Scrims added: Clash Squad Ranked.", time: "3 hrs ago" }
+        ];
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notif-badge');
+            if (notifications.length > 0) {
+                badge.style.display = 'block';
+                badge.innerText = notifications.length > 10 ? '10+' : notifications.length;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function openNotifications() {
+            renderNotifications();
+            openModal('notification-modal');
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notification-list');
+            if (notifications.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0;">No new notifications</div>';
+                return;
+            }
+            
+            let html = '';
+            notifications.forEach(n => {
+                html += `
+                    <div class="notif-item" id="notif-${n.id}">
+                        <div style="flex: 1; padding-right: 10px;">
+                            <div class="notif-text">${n.text}</div>
+                            <div class="notif-time">${n.time}</div>
+                        </div>
+                        <i class="fa-solid fa-xmark notif-close" onclick="deleteNotification(${n.id})"></i>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function deleteNotification(id) {
+            notifications = notifications.filter(n => n.id !== id);
+            renderNotifications();
+            updateNotificationBadge();
+        }
+
+        function clearAllNotifications() {
+            if (notifications.length === 0) return;
+            notifications =[];
+            renderNotifications();
+            updateNotificationBadge();
+            showToast("All notifications cleared!");
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
             authDomain: "rk-esports1.firebaseapp.com",
@@ -816,6 +899,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            updateNotificationBadge(); // Calling notification initialization
+            
             const sliderContainer = document.getElementById('banner-slider');
             const slides = sliderContainer.querySelectorAll('.home-banner');
             const dots = document.querySelectorAll('.slider-dot');
@@ -952,9 +1037,6 @@
             el.style.height = '44px'; // Reset to min height first to calculate correctly
             el.style.height = Math.min(el.scrollHeight, 100) + 'px'; // Max expand to 100px (~4 lines)
         }
-
-        // Remove Enter key send behaviour, so mobile keyboard "Enter" just creates new line
-        // Now sending only happens when clicking the red Send button.
 
         function initAIChat() {
             const name = userData && userData.name ? userData.name.toUpperCase() : 'LEGEND';
