@@ -658,7 +658,7 @@
             return hours + ':' + minutes + ' ' + ampm;
         }
 
-        // Updated Dummy Data (Clean JOIN NOW buttons. One demo is JOINED to test details view)
+        // Updated Dummy Data with working simulated join button for logged-in users
         const dummyTournamentsHTML = `
             <div class="t-card">
                 <div class="t-image">
@@ -693,7 +693,7 @@
                         <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">8/16</span></div>
                     </div>
                     <div class="t-progress-bg"><div class="t-progress-fill" style="width: 50%;"></div></div>
-                    <button class="t-btn" onclick="showToast('Login to Join Match')">JOIN NOW</button>
+                    <button class="t-btn" onclick="joinDemo(this, 'ELITE SCRIMS V8', '₹100', '₹5000', '8:00 PM', '8/16', '20:00')">JOIN NOW</button>
                 </div>
             </div>
 
@@ -711,14 +711,9 @@
                         <div class="t-stat-item"><span class="t-stat-label">Slots:</span> <span class="t-stat-val red">12/20</span></div>
                     </div>
                     <div class="t-progress-bg"><div class="t-progress-fill" style="width: 60%;"></div></div>
-                    <button class="t-btn" onclick="showToast('Login to Join Match')">JOIN NOW</button>
+                    <button class="t-btn" onclick="joinDemo(this, 'LONE WOLF SOLO', '₹20', '₹500', '9:30 PM', '12/20', '21:30')">JOIN NOW</button>
                 </div>
             </div>
-        `;
-
-        const dummyTransactionsHTML = `
-            <div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon deposit"><i class="fa-solid fa-plus"></i></div><div><p style="font-size: 13px; font-weight: 600;">Deposit via UPI</p><p style="font-size: 10px; color: var(--text-muted);">Oct 24, 2023 • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: #4caf50;">+ ₹500.00</p></div></div>
-            <div class="tx-item"><div class="flex-row" style="gap: 12px;"><div class="tx-icon game"><i class="fa-solid fa-gamepad"></i></div><div><p style="font-size: 13px; font-weight: 600;">Entry Fee: BGMI Pro</p><p style="font-size: 10px; color: var(--text-muted);">Oct 23, 2023 • SUCCESS</p></div></div><div style="text-align: right;"><p style="font-size: 14px; font-weight: bold; color: white;">- ₹150.00</p></div></div>
         `;
 
         function showToast(msg) {
@@ -726,6 +721,32 @@
             t.textContent = msg;
             t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 3500);
+        }
+
+        // Fix for Dummy Tournament Join Button
+        function joinDemo(btn, title, entry, prize, time, slots, matchTimeRaw) {
+            if(!userData) { 
+                showToast("Please login first."); 
+                return; 
+            }
+            
+            let fee = parseInt(entry.replace(/[^0-9]/g, '')) || 0;
+            if(userData.wallet_balance < fee) { 
+                showToast("Insufficient Balance! Please deposit funds in Wallet."); 
+                return; 
+            }
+
+            btn.innerHTML = '<div class="loader" style="width: 12px; height: 12px; border-width: 2px;"></div>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                showToast("Joined Successfully!");
+                btn.innerHTML = 'VIEW DETAILS';
+                btn.style.background = 'var(--gold)';
+                btn.style.color = 'black';
+                btn.disabled = false;
+                btn.onclick = () => openMatchDetails(title, entry, prize, time, slots, matchTimeRaw, "Waiting...", "Waiting...");
+            }, 1000);
         }
 
         // Copy Text Function for Room ID & Password
@@ -1018,7 +1039,6 @@
             }
         }
 
-        // Modified Load Tournaments to match clean UI
         async function loadTournaments(forceReload = false) {
             if (tournamentsLoaded && !forceReload) return;
 
@@ -1042,7 +1062,6 @@
                     const isFull = t.joined_count >= t.total_slots;
                     const formattedTime = format12Hour(t.match_time);
                     
-                    // Fixed entry representation
                     const entryText = t.entry_fee === 0 ? '<span class="text-red">FREE</span>' : '₹'+t.entry_fee;
                     
                     html += `<div class="t-card">
@@ -1073,7 +1092,6 @@
             }
         }
 
-        // Updated Join Tournament (Changes button to VIEW DETAILS)
         async function joinTournament(tournamentId, fee, isFull, title, entry, prize, time, slots, matchTimeRaw) {
             if(isFull) return;
             if(userData.wallet_balance < fee) { showToast("Insufficient Balance! Please deposit funds in Wallet."); return; }
@@ -1108,12 +1126,10 @@
                 showToast("Joined Successfully!");
                 txLoaded = false;
                 
-                // Change the button state to VIEW DETAILS immediately
                 btn.innerHTML = 'VIEW DETAILS';
                 btn.style.background = 'var(--gold)';
                 btn.style.color = 'black';
                 btn.disabled = false;
-                // Bind to open modal instead of join
                 btn.onclick = () => openMatchDetails(title, entry, prize, time, slots, matchTimeRaw, "Waiting...", "Waiting...");
 
             } catch (error) {
