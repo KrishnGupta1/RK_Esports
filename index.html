@@ -14,6 +14,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+    <!-- FCM SDK Added -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js"></script>
 
     <!-- PRELOAD DIRECT IMAGE LINK -->
     <link rel="preload" as="image" href="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png">
@@ -188,10 +190,13 @@
 
         /* --- NOTIFICATION PANEL CSS --- */
         .notif-item { background: #1a1a1a; padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary-red); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: 0.3s; }
+        .notif-title { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 4px;}
         .notif-text { font-size: 11px; color: #fff; line-height: 1.4; font-weight: 500; }
         .notif-time { font-size: 9px; color: var(--text-muted); margin-top: 5px; font-weight: 600; }
         .notif-close { color: #555; cursor: pointer; font-size: 16px; transition: 0.2s; padding: 2px; }
         .notif-close:hover { color: var(--primary-red); }
+        .notif-read-btn { background: rgba(234, 43, 43, 0.1); border: 1px solid var(--primary-red); color: var(--primary-red); padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; cursor: pointer; display: inline-block; margin-top: 8px;}
+        .notif-item.read { opacity: 0.6; border-left-color: #444; }
     </style>
 </head>
 <body>
@@ -453,7 +458,7 @@
             <div class="flex-between mb-15">
                 <h2 class="esports-font" style="font-size: 20px;"><i class="fa-solid fa-bell text-red"></i> NOTIFICATIONS</h2>
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <span style="font-size: 10px; color: var(--primary-red); cursor: pointer; font-weight: 800; letter-spacing: 0.5px;" onclick="clearAllNotifications()">CLEAR ALL</span>
+                    <span style="font-size: 10px; color: var(--primary-red); cursor: pointer; font-weight: 800; letter-spacing: 0.5px;" onclick="clearAllNotifications()">MARK ALL READ</span>
                     <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" onclick="closeModals()"></i>
                 </div>
             </div>
@@ -644,60 +649,6 @@
 
     <!-- APP LOGIC & SCRIPTS -->
     <script>
-        // --- NOTIFICATION SYSTEM LOGIC (Empty State) ---
-        let notifications =[]; // Fake/Dummy data removed completely
-
-        function updateNotificationBadge() {
-            const badge = document.getElementById('notif-badge');
-            if (notifications.length > 0) {
-                badge.style.display = 'block';
-                badge.innerText = notifications.length > 10 ? '10+' : notifications.length;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function openNotifications() {
-            renderNotifications();
-            openModal('notification-modal');
-        }
-
-        function renderNotifications() {
-            const list = document.getElementById('notification-list');
-            if (notifications.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0;">No new notifications</div>';
-                return;
-            }
-            
-            let html = '';
-            notifications.forEach(n => {
-                html += `
-                    <div class="notif-item" id="notif-${n.id}">
-                        <div style="flex: 1; padding-right: 10px;">
-                            <div class="notif-text">${n.text}</div>
-                            <div class="notif-time">${n.time}</div>
-                        </div>
-                        <i class="fa-solid fa-xmark notif-close" onclick="deleteNotification(${n.id})"></i>
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
-
-        function deleteNotification(id) {
-            notifications = notifications.filter(n => n.id !== id);
-            renderNotifications();
-            updateNotificationBadge();
-        }
-
-        function clearAllNotifications() {
-            if (notifications.length === 0) return;
-            notifications =[];
-            renderNotifications();
-            updateNotificationBadge();
-            showToast("All notifications cleared!");
-        }
-
         const firebaseConfig = {
             apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
             authDomain: "rk-esports1.firebaseapp.com",
@@ -711,6 +662,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const messaging = firebase.messaging(); // FCM Instance
 
         let currentUser = null;
         let userData = null;
@@ -719,6 +671,157 @@
 
         const GROQ_API_KEY = "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";
         let aiHistory =[];
+
+        // --- ENHANCED IN-APP NOTIFICATION SYSTEM ---
+        let notificationsData =[];
+        let unreadCount = 0;
+        let notifUnsubscribe = null;
+
+        function listenToNotifications() {
+            if(!currentUser) return;
+            // Listening to notifications targeted specifically to user or broadcasted to 'ALL'
+            notifUnsubscribe = db.collection('notifications')
+                .where('target', 'in', [currentUser.uid, 'ALL'])
+                .onSnapshot(snapshot => {
+                    let tempArray =[];
+                    unreadCount = 0;
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        data.id = doc.id;
+                        
+                        // Check if read
+                        let isRead = false;
+                        if (data.target === 'ALL') {
+                            isRead = data.readBy && data.readBy.includes(currentUser.uid);
+                        } else {
+                            isRead = data.read === true;
+                        }
+                        
+                        data.isRead = isRead;
+                        if (!isRead) unreadCount++;
+                        
+                        tempArray.push(data);
+                    });
+
+                    // Sort locally to prevent requiring a complex composite index on Firestore
+                    tempArray.sort((a, b) => {
+                        let tA = a.createdAt ? a.createdAt.toMillis() : 0;
+                        let tB = b.createdAt ? b.createdAt.toMillis() : 0;
+                        return tB - tA;
+                    });
+
+                    notificationsData = tempArray;
+                    updateNotificationBadge();
+                    
+                    if (document.getElementById('notification-modal').classList.contains('active')) {
+                        renderNotifications();
+                    }
+                }, error => console.error("Notification Error:", error));
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notif-badge');
+            if (unreadCount > 0) {
+                badge.style.display = 'block';
+                badge.innerText = unreadCount > 10 ? '10+' : unreadCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function openNotifications() {
+            renderNotifications();
+            openModal('notification-modal');
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notification-list');
+            if (notificationsData.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0;">No new notifications</div>';
+                return;
+            }
+            
+            let html = '';
+            notificationsData.forEach(n => {
+                const timeStr = n.createdAt ? n.createdAt.toDate().toLocaleString('en-IN', {day:'numeric', month:'short', hour:'numeric', minute:'numeric'}) : 'Just now';
+                const readClass = n.isRead ? 'read' : '';
+                
+                const actionButton = n.isRead ? '' 
+                    : `<button class="notif-read-btn" onclick="markAsRead('${n.id}', '${n.target}')"><i class="fa-solid fa-check-double"></i> MARK READ</button>`;
+                
+                // Keep individual delete for personal notifications
+                const deleteButton = n.target === 'ALL' ? '' : `<i class="fa-solid fa-xmark notif-close" onclick="deleteNotification('${n.id}')"></i>`;
+
+                html += `
+                    <div class="notif-item ${readClass}" id="notif-${n.id}">
+                        <div style="flex: 1; padding-right: 10px;">
+                            <div class="notif-title">${n.title || 'System Alert'}</div>
+                            <div class="notif-text">${n.message || n.text}</div>
+                            <div class="notif-time">${timeStr}</div>
+                            ${actionButton}
+                        </div>
+                        ${deleteButton}
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        async function markAsRead(notifId, target) {
+            try {
+                if (target === 'ALL') {
+                    await db.collection('notifications').doc(notifId).update({
+                        readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+                    });
+                } else {
+                    await db.collection('notifications').doc(notifId).update({ read: true });
+                }
+            } catch (e) { console.error("Mark read error", e); }
+        }
+
+        async function deleteNotification(id) {
+            try {
+                await db.collection('notifications').doc(id).delete();
+                showToast("Notification removed");
+            } catch(e) { console.error("Delete error", e); }
+        }
+
+        function clearAllNotifications() {
+            if (notificationsData.length === 0) return;
+            notificationsData.forEach(n => {
+                if (!n.isRead) markAsRead(n.id, n.target);
+            });
+            showToast("All marked as read!");
+        }
+
+        // --- FCM PUSH NOTIFICATIONS HANDLING ---
+        async function requestPushPermission() {
+            if (!('Notification' in window)) return;
+            
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const token = await messaging.getToken(); // Automatically picks up config SenderId
+                    if (token) {
+                        await db.collection('users').doc(currentUser.uid).update({ 
+                            fcmToken: token,
+                            fcmTokenUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+            } catch (error) {
+                console.warn("FCM Permission denied or error", error);
+            }
+        }
+
+        messaging.onMessage((payload) => {
+            const title = payload.notification.title || "RK Esports";
+            const body = payload.notification.body || "You have a new alert!";
+            showToast(`🔔 ${title}: ${body}`);
+            // Firestore real-time listener will auto-update the badge and panel natively!
+        });
+
 
         function format12Hour(time24) {
             if (!time24 || !time24.includes(':')) return time24;
@@ -1164,12 +1267,18 @@
                 document.getElementById('main-app').style.display = 'block';
                 switchTab('home'); 
                 await syncUserToFirestore(user);
-
+                
+                // Initialize features post-login
+                listenToNotifications();
+                requestPushPermission();
                 loadTournaments();
                 loadTransactions();
             } else {
                 currentUser = null; userData = null;
                 if(txUnsubscribe) { txUnsubscribe(); txUnsubscribe = null; }
+                if(notifUnsubscribe) { notifUnsubscribe(); notifUnsubscribe = null; }
+                notificationsData =[]; unreadCount = 0;
+                
                 document.getElementById('main-app').style.display = 'none';
                 document.getElementById('login-screen').classList.add('active');
             }
