@@ -14,6 +14,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+    <!-- ADDED: Firebase Messaging SDK for Push Notifications -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js"></script>
 
     <!-- PRELOAD DIRECT IMAGE LINK -->
     <link rel="preload" as="image" href="https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png">
@@ -186,12 +188,21 @@
 
         .btn-requested { background: transparent; border: 1px solid var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
 
-        /* --- NOTIFICATION PANEL CSS --- */
-        .notif-item { background: #1a1a1a; padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary-red); display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: 0.3s; }
-        .notif-text { font-size: 11px; color: #fff; line-height: 1.4; font-weight: 500; }
-        .notif-time { font-size: 9px; color: var(--text-muted); margin-top: 5px; font-weight: 600; }
-        .notif-close { color: #555; cursor: pointer; font-size: 16px; transition: 0.2s; padding: 2px; }
-        .notif-close:hover { color: var(--primary-red); }
+        /* --- NOTIFICATION PANEL CSS ADDITIONS --- */
+        .notif-item { background: #1a1a1a; padding: 15px; border-radius: 12px; border-left: 3px solid var(--primary-red); display: flex; flex-direction: column; gap: 8px; transition: 0.3s; margin-bottom: 10px; border-right: 1px solid #2a2a2a; border-top: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .notif-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .notif-title { font-size: 13px; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+        .notif-text { font-size: 11px; color: #e0e0e0; line-height: 1.4; font-weight: 500; }
+        .notif-time { font-size: 9px; color: var(--text-muted); margin-top: 5px; font-weight: 600; display: block; }
+        
+        /* Cloudinary Media Adjustments */
+        .notif-media { width: 100%; border-radius: 8px; margin-top: 8px; object-fit: cover; max-height: 180px; border: 1px solid #333; }
+        .notif-video-wrapper { position: relative; width: 100%; margin-top: 8px; }
+        .notif-video-wrapper video { width: 100%; border-radius: 8px; max-height: 180px; background: #000; border: 1px solid #333; outline: none; }
+        
+        /* Animated Outline Button */
+        .btn-outline-animated { border: 1px solid var(--primary-red); color: var(--primary-red); background: transparent; padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; width: fit-content; margin-top: 5px; }
+        .btn-outline-animated:hover, .btn-outline-animated:active { background: var(--primary-red); color: white; transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -447,7 +458,7 @@
 
     <!-- ================= MODALS ================= -->
 
-    <!-- Notification Modal -->
+    <!-- Notification Modal (UPDATED FOR NEW SYSTEM) -->
     <div class="modal-overlay" id="notification-modal">
         <div class="modal-content">
             <div class="flex-between mb-15">
@@ -458,7 +469,7 @@
                 </div>
             </div>
             <div id="notification-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 65vh; overflow-y: auto; padding-bottom: 10px;">
-                <!-- Notifications will be injected here via JS -->
+                <!-- Notifications will be dynamically injected here via Real-time JS -->
             </div>
         </div>
     </div>
@@ -644,60 +655,7 @@
 
     <!-- APP LOGIC & SCRIPTS -->
     <script>
-        // --- NOTIFICATION SYSTEM LOGIC (Empty State) ---
-        let notifications =[]; // Fake/Dummy data removed completely
-
-        function updateNotificationBadge() {
-            const badge = document.getElementById('notif-badge');
-            if (notifications.length > 0) {
-                badge.style.display = 'block';
-                badge.innerText = notifications.length > 10 ? '10+' : notifications.length;
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function openNotifications() {
-            renderNotifications();
-            openModal('notification-modal');
-        }
-
-        function renderNotifications() {
-            const list = document.getElementById('notification-list');
-            if (notifications.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0;">No new notifications</div>';
-                return;
-            }
-            
-            let html = '';
-            notifications.forEach(n => {
-                html += `
-                    <div class="notif-item" id="notif-${n.id}">
-                        <div style="flex: 1; padding-right: 10px;">
-                            <div class="notif-text">${n.text}</div>
-                            <div class="notif-time">${n.time}</div>
-                        </div>
-                        <i class="fa-solid fa-xmark notif-close" onclick="deleteNotification(${n.id})"></i>
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
-
-        function deleteNotification(id) {
-            notifications = notifications.filter(n => n.id !== id);
-            renderNotifications();
-            updateNotificationBadge();
-        }
-
-        function clearAllNotifications() {
-            if (notifications.length === 0) return;
-            notifications =[];
-            renderNotifications();
-            updateNotificationBadge();
-            showToast("All notifications cleared!");
-        }
-
+        // ================= FIREBASE CONFIG =================
         const firebaseConfig = {
             apiKey: "AIzaSyBH1JWQVCLfFY2BEzdCUgwALvf59S3HEEo",
             authDomain: "rk-esports1.firebaseapp.com",
@@ -711,18 +669,197 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const messaging = firebase.messaging(); // Add Messaging Init
 
         let currentUser = null;
         let userData = null;
-        
         let tournamentsLoaded = false;
-
         const GROQ_API_KEY = "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";
         let aiHistory =[];
 
+        // --- NEW ENHANCED NOTIFICATION SYSTEM LOGIC ---
+        let realNotifications =[];
+        let notifUnsubscribe = null;
+
+        function getCloudinaryThumbnail(url) {
+            if (!url) return '';
+            // Swaps video extension (.mp4, .webm, .mov) with .jpg for Cloudinary to generate thumbnail
+            return url.replace(/\.(mp4|webm|mov)$/i, '.jpg');
+        }
+
+        async function setupFCMAndServiceWorker() {
+            try {
+                // Dynamically injecting Service Worker without needing an extra file
+                const swCode = `
+                    importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
+                    importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
+                    firebase.initializeApp(${JSON.stringify(firebaseConfig)});
+                    const messaging = firebase.messaging();
+                    
+                    messaging.onBackgroundMessage(function(payload) {
+                        const notificationTitle = payload.notification?.title || payload.data?.title || 'RK_ESPORTS';
+                        const isVideo = payload.data?.mediaType === 'video';
+                        const mediaImage = isVideo && payload.data?.mediaUrl ? payload.data.mediaUrl.replace(/\\.(mp4|webm|mov)$/i, '.jpg') : payload.data?.mediaUrl;
+                        
+                        const notificationOptions = {
+                            body: payload.notification?.body || payload.data?.message,
+                            icon: 'https://i.ibb.co/wN4j3NkT/file-000000009fa8720b8e01552277d678b3.png',
+                            image: mediaImage || null
+                        };
+                        return self.registration.showNotification(notificationTitle, notificationOptions);
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                // Register injected SW
+                const registration = await navigator.serviceWorker.register(swUrl);
+                
+                // Request Push Permission
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // Generate FCM Token using dynamic SW
+                    const token = await messaging.getToken({ serviceWorkerRegistration: registration });
+                    if (token && currentUser) {
+                        await db.collection('users').doc(currentUser.uid).update({ fcmToken: token });
+                    }
+                }
+
+                // Handle foreground messages
+                messaging.onMessage((payload) => {
+                    const title = payload.notification?.title || payload.data?.title || "New Message";
+                    showToast("🔔 " + title);
+                    // The Firestore onSnapshot listener will auto-update the badge/list without refresh!
+                });
+
+            } catch (err) {
+                console.log("FCM Setup Error: ", err);
+            }
+        }
+
+        function listenToNotifications() {
+            if(notifUnsubscribe) notifUnsubscribe();
+            
+            notifUnsubscribe = db.collection('notifications')
+                .orderBy('timestamp', 'desc')
+                .onSnapshot(snapshot => {
+                    if (!userData) return;
+                    const clearedIds = userData.cleared_notifications || [];
+                    realNotifications =[];
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        // Support delivery system: Target all, or specific user UID
+                        const isTargeted = data.target === 'all' || (Array.isArray(data.target) && data.target.includes(currentUser.uid));
+                        
+                        if (isTargeted && !clearedIds.includes(doc.id)) {
+                            realNotifications.push({ id: doc.id, ...data });
+                        }
+                    });
+                    
+                    updateNotificationBadge();
+                    if(document.getElementById('notification-modal').classList.contains('active')) {
+                        renderNotifications();
+                    }
+                });
+        }
+
+        function buildNotifMediaHTML(notif) {
+            if (!notif.mediaUrl) return '';
+            
+            if (notif.mediaType === 'video') {
+                return `
+                <div class="notif-video-wrapper">
+                    <video controls poster="${getCloudinaryThumbnail(notif.mediaUrl)}">
+                        <source src="${notif.mediaUrl}" type="video/mp4">
+                    </video>
+                </div>`;
+            } else if (notif.mediaType === 'image') {
+                return `<img src="${notif.mediaUrl}" alt="Attachment" class="notif-media">`;
+            }
+            return '';
+        }
+
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notif-badge');
+            if (realNotifications.length > 0) {
+                badge.style.display = 'block';
+                badge.innerText = realNotifications.length > 9 ? '9+' : realNotifications.length;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function openNotifications() {
+            renderNotifications();
+            openModal('notification-modal');
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notification-list');
+            if (realNotifications.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0;">No new notifications</div>';
+                return;
+            }
+            
+            let html = '';
+            realNotifications.forEach(n => {
+                const date = n.timestamp ? n.timestamp.toDate().toLocaleString('en-IN', { hour: 'numeric', minute: 'numeric', day: 'numeric', month: 'short' }) : 'Just now';
+                
+                html += `
+                    <div class="notif-item" id="notif-${n.id}">
+                        <div class="notif-header">
+                            <div class="notif-title">${n.title || 'RK_ESPORTS'}</div>
+                        </div>
+                        <div class="notif-text">${n.message || n.text || ''}</div>
+                        ${buildNotifMediaHTML(n)}
+                        <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-top: 4px;">
+                            <span class="notif-time">${date}</span>
+                            <button class="btn-outline-animated" onclick="deleteNotification('${n.id}')">
+                                <i class="fa-solid fa-check-double"></i> Mark Read
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        async function deleteNotification(id) {
+            if(!currentUser) return;
+            // Optimistic frontend clear
+            realNotifications = realNotifications.filter(n => n.id !== id);
+            renderNotifications();
+            updateNotificationBadge();
+            
+            // Background update to user's doc
+            try {
+                await db.collection('users').doc(currentUser.uid).update({
+                    cleared_notifications: firebase.firestore.FieldValue.arrayUnion(id)
+                });
+            } catch(e) { console.log("Error marking read", e); }
+        }
+
+        async function clearAllNotifications() {
+            if(!currentUser || realNotifications.length === 0) return;
+            const idsToClear = realNotifications.map(n => n.id);
+            
+            realNotifications =[];
+            renderNotifications();
+            updateNotificationBadge();
+            
+            try {
+                await db.collection('users').doc(currentUser.uid).update({
+                    cleared_notifications: firebase.firestore.FieldValue.arrayUnion(...idsToClear)
+                });
+                showToast("All notifications cleared!");
+            } catch(e) { console.log("Error clearing all", e); }
+        }
+
+        // ================= GENERAL UI LOGIC =================
         function format12Hour(time24) {
             if (!time24 || !time24.includes(':')) return time24;
-            let [hours, minutes] = time24.split(':');
+            let[hours, minutes] = time24.split(':');
             hours = parseInt(hours, 10);
             let ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
@@ -730,7 +867,6 @@
             return hours + ':' + minutes + ' ' + ampm;
         }
 
-        // Empty state HTML for tournaments
         const dummyTournamentsHTML = `
             <div style="grid-column: span 2; text-align: center; color: var(--text-muted); font-size: 12px; padding: 40px 0; background: var(--bg-panel); border-radius: 12px; border: 1px dashed #333;">
                 <i class="fa-solid fa-trophy" style="font-size: 24px; margin-bottom: 10px; color: #555;"></i><br>
@@ -738,7 +874,6 @@
             </div>
         `;
 
-        // Empty state HTML for transactions
         const dummyTransactionsHTML = `
             <div style="text-align: center; color: var(--text-muted); font-size: 11px; padding: 30px 0; background: var(--bg-panel); border-radius: 12px; border: 1px dashed #333;">No Transactions Yet</div>
         `;
@@ -750,7 +885,6 @@
             setTimeout(() => t.style.display = 'none', 3500);
         }
 
-        // ================= COPY TEXT FUNCTION =================
         function copyText(elementId) {
             const text = document.getElementById(elementId).innerText;
             if(text === "Waiting...") { showToast("Details not provided by admin yet!"); return; }
@@ -801,8 +935,6 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            updateNotificationBadge(); 
-            
             const sliderContainer = document.getElementById('banner-slider');
             const slides = sliderContainer.querySelectorAll('.home-banner');
             const dots = document.querySelectorAll('.slider-dot');
@@ -1165,11 +1297,15 @@
                 switchTab('home'); 
                 await syncUserToFirestore(user);
 
+                // Setup Messaging & Notifications once logged in
+                setupFCMAndServiceWorker();
+
                 loadTournaments();
                 loadTransactions();
             } else {
                 currentUser = null; userData = null;
                 if(txUnsubscribe) { txUnsubscribe(); txUnsubscribe = null; }
+                if(notifUnsubscribe) { notifUnsubscribe(); notifUnsubscribe = null; }
                 document.getElementById('main-app').style.display = 'none';
                 document.getElementById('login-screen').classList.add('active');
             }
@@ -1178,9 +1314,21 @@
         async function syncUserToFirestore(user) {
             const userRef = db.collection('users').doc(user.uid);
             userRef.onSnapshot((doc) => {
-                if (doc.exists) { userData = doc.data(); updateUIWithUserData(); }
+                if (doc.exists) { 
+                    userData = doc.data(); 
+                    updateUIWithUserData(); 
+                    listenToNotifications(); // Re-trigger listener to apply latest cleared_notifications
+                }
                 else {
-                    const newUserData = { uid: user.uid, name: user.displayName || 'Player', email: user.email, wallet_balance: 0, elite_pass: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+                    const newUserData = { 
+                        uid: user.uid, 
+                        name: user.displayName || 'Player', 
+                        email: user.email, 
+                        wallet_balance: 0, 
+                        elite_pass: false, 
+                        cleared_notifications:[], 
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    };
                     userRef.set(newUserData);
                 }
             });
